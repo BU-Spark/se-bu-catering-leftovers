@@ -1,113 +1,107 @@
+"use client";
+
+import Head from 'next/head';
 import Image from "next/image";
+import Navbar from '../components/Navbar';
+import styled, { createGlobalStyle } from 'styled-components';
+import styles from '../styles/Home.module.css';
+import FAQList from '../components/faq.js';
+
+const GlobalStyle = createGlobalStyle`
+  body{
+    margin: 0;
+    padding: 0;
+  }
+`;
+
+const SectionContainer = styled.section`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  text-align: center;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+`;
+
+const HeroContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 80vh;  
+  overflow: hidden; 
+`;
+
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+      <div>
+        <GlobalStyle/>
+        <Navbar/>
+        <div className={styles.container}>
+          <Head>
+            <title>Reduce Wasted Food</title>
+          </Head>
+
+          <main className={styles.main}>
+            <section className={styles.hero}>
+              <HeroContainer>
+                <Image
+                    src="/landing-page.png"
+                    alt="Students holding food"
+                    layout="fill"
+                    objectFit="cover"
+                    objectPosition="center"
+                />
+              </HeroContainer>
+              <h1 className={styles.title}>Reduce Wasted Food</h1>
+              <button className={styles.loginButton}>Login</button>
+            </section>
+
+            <SectionContainer>
+            <section className={styles.howItWorks}>
+              <h2>How it Works</h2>
+              <section className={styles.steps}>
+                <button className={styles.step}>
+                  <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45}/>
+                  Sign up
+                </button>
+                <button className={styles.step}>
+                  <Image src="terms-conditions.svg" alt="Paper and Pencil Icon" width={45} height={45}/>
+                  Agree on Terms
+                </button>
+              </section>
+              <section className={styles.steps}>
+                <button className={styles.step}>
+                  <Image src="notification.svg" alt="Bell icon" width={45} height={45}/>
+                  Get notified
+                </button>
+                <button className={styles.step}>
+                  <Image src="pickup-food.svg" alt="Hamburger Icon" width={45} height={45}/>
+                  Pickup food
+                </button>
+              </section>
+            </section>
+            </SectionContainer>
+
+            <ButtonContainer>
+            <section className={styles.signup}>
+              <button className={styles.signupButton}>Student Sign Up</button>
+              <button className={styles.signupButton}>Administration Sign Up</button>
+            </section>
+            </ButtonContainer>
+
+            <section className={styles.faq}>
+              <h2>FAQ</h2>
+              <FAQList />
+            </section>
+          </main>
         </div>
       </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
   );
 }
