@@ -15,8 +15,8 @@ interface Event extends FormData {
 // TODO: Refresh events
 // Display saved images
 // Edit button for admins?
-// Filtering events
-// Sorting events
+// Filtering by location (grouping)
+// Sorting events 
 // What info to remove?
 // ALL Design based on figma
 
