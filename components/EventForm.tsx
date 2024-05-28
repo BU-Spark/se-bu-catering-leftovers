@@ -36,6 +36,7 @@ export interface FormData {
 // How to choose location? (free text, dropdown, Google API)
 // Validate input (are there any inputs we don't want to allow? Character limits, only letters, etc.)
 // Buttons: Preview create functionality, publish redirect
+// Add dropdown to allow admin to select Campus Area
 // ALL Design: Make it look like figma
 
 
@@ -48,8 +49,8 @@ const EventForm: React.FC = () => {
         location: '',
         notes: '',
         duration: '',
-        foodArrived: new Timestamp(0,0),
-        foodAvailable: new Timestamp(0,0),
+        foodArrived: Timestamp.fromDate(new Date()),
+        foodAvailable: Timestamp.fromDate(new Date()),
         foods: [],
         status: 'closed'
     });
