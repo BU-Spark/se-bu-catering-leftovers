@@ -18,13 +18,8 @@
 
 body {
   font-family: 'Whitney', sans-serif;
+  background-color: white;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
 }
 
 @layer utilities {

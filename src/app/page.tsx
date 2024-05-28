@@ -5,6 +5,7 @@ import Image from "next/image";
 import Navbar from '../components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
 import styles from '../styles/Home.module.css';
+import FAQList from '../components/faq.js';
 
 const GlobalStyle = createGlobalStyle`
   body{
@@ -67,21 +68,21 @@ export default function Home() {
               <h2>How it Works</h2>
               <section className={styles.steps}>
                 <button className={styles.step}>
-                  <Image src="/signup-icon.svg" alt="Pencil Icon" width={24} height={24}/>
+                  <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45}/>
                   Sign up
                 </button>
                 <button className={styles.step}>
-                  <Image src="terms-conditions.svg" alt="Paper and Pencil Icon" width={24} height={24}/>
+                  <Image src="terms-conditions.svg" alt="Paper and Pencil Icon" width={45} height={45}/>
                   Agree on Terms
                 </button>
               </section>
               <section className={styles.steps}>
                 <button className={styles.step}>
-                  <Image src="notification.svg" alt="Bell icon" width={24} height={24}/>
+                  <Image src="notification.svg" alt="Bell icon" width={45} height={45}/>
                   Get notified
                 </button>
                 <button className={styles.step}>
-                  <Image src="pickup-food.svg" alt="Hamburger Icon" width={24} height={24}/>
+                  <Image src="pickup-food.svg" alt="Hamburger Icon" width={45} height={45}/>
                   Pickup food
                 </button>
               </section>
@@ -97,6 +98,7 @@ export default function Home() {
 
             <section className={styles.faq}>
               <h2>FAQ</h2>
+              <FAQList />
             </section>
           </main>
         </div>
