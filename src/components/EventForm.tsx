@@ -5,7 +5,7 @@ import { Button, TextField, Typography, Container, Grid, Paper, IconButton } fro
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { TimePicker } from '@mui/x-date-pickers';
-import {firestore} from '../firebaseConfig';
+import {firestore} from '../../firebaseConfig';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import AddIcon from '@mui/icons-material/Add';

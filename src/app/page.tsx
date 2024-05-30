@@ -6,9 +6,11 @@ import Navbar from '../components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
 import styles from '../styles/Home.module.css';
 import FAQList from '../components/faq.js';
+import { signInWithRedirect } from "firebase/auth";
+import { auth, provider } from '../../firebaseConfig';
 
 const GlobalStyle = createGlobalStyle`
-  body{
+  body {
     margin: 0;
     padding: 0;
   }
@@ -33,10 +35,18 @@ const ButtonContainer = styled.div`
 const HeroContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 80vh;  
-  overflow: hidden; 
+  height: 80vh;
+  overflow: hidden;
 `;
 
+const handleSignIn = async (userType: string) => {
+  try {
+    console.log("Redirecting for authentication:", userType); // Ensure this logs in the console
+    await signInWithRedirect(auth, provider);
+  } catch (error) {
+    console.error("Failed to redirect for authentication:", error);
+  }
+}
 
 export default function Home() {
   return (
@@ -54,46 +64,46 @@ export default function Home() {
                 <Image
                     src="/landing-page.png"
                     alt="Students holding food"
-                    layout="fill"
-                    objectFit="cover"
-                    objectPosition="center"
+                    fill
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    priority
                 />
               </HeroContainer>
               <h1 className={styles.title}>Reduce Wasted Food</h1>
-              <button className={styles.loginButton}>Login</button>
+              <button className={styles.loginButton} onClick={() => handleSignIn('Existing User')}>Login</button>
             </section>
 
             <SectionContainer>
-            <section className={styles.howItWorks}>
-              <h2>How it Works</h2>
-              <section className={styles.steps}>
-                <button className={styles.step}>
-                  <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45}/>
-                  Sign up
-                </button>
-                <button className={styles.step}>
-                  <Image src="terms-conditions.svg" alt="Paper and Pencil Icon" width={45} height={45}/>
-                  Agree on Terms
-                </button>
+              <section className={styles.howItWorks}>
+                <h2>How it Works</h2>
+                <section className={styles.steps}>
+                  <button className={styles.step}>
+                    <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45}/>
+                    Sign up
+                  </button>
+                  <button className={styles.step}>
+                    <Image src="terms-conditions.svg" alt="Paper and Pencil Icon" width={45} height={45}/>
+                    Agree on Terms
+                  </button>
+                </section>
+                <section className={styles.steps}>
+                  <button className={styles.step}>
+                    <Image src="notification.svg" alt="Bell icon" width={45} height={45}/>
+                    Get notified
+                  </button>
+                  <button className={styles.step}>
+                    <Image src="pickup-food.svg" alt="Hamburger Icon" width={45} height={45}/>
+                    Pickup food
+                  </button>
+                </section>
               </section>
-              <section className={styles.steps}>
-                <button className={styles.step}>
-                  <Image src="notification.svg" alt="Bell icon" width={45} height={45}/>
-                  Get notified
-                </button>
-                <button className={styles.step}>
-                  <Image src="pickup-food.svg" alt="Hamburger Icon" width={45} height={45}/>
-                  Pickup food
-                </button>
-              </section>
-            </section>
             </SectionContainer>
 
             <ButtonContainer>
-            <section className={styles.signup}>
-              <button className={styles.signupButton}>Student Sign Up</button>
-              <button className={styles.signupButton}>Administration Sign Up</button>
-            </section>
+              <section className={styles.signup}>
+                <button className={styles.signupButton} onClick={() => handleSignIn('Student')}>Student Sign Up</button>
+                <button className={styles.signupButton} onClick={() => handleSignIn('Administrator')}>Administration Sign Up</button>
+              </section>
             </ButtonContainer>
 
             <section className={styles.faq}>

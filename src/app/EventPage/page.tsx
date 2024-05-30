@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { collection, getDocs, Timestamp } from 'firebase/firestore';
 import { firestore as db } from '../../../firebaseConfig'
 import { Container, Grid, Paper, Typography } from '@mui/material';
-import {FormData} from '../../../components/EventForm';
+import {FormData} from '../../components/EventForm';
 
 // Define the event interface
 interface Event extends FormData {
