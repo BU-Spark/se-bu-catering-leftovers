@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button, TextField, Typography, Container, Grid, Paper, IconButton, Box, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Button, TextField, Typography, Container, Grid, Paper, IconButton } from '@mui/material';
 import {firestore} from '../../firebaseConfig';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { addDoc, updateDoc, arrayUnion, collection, doc, Timestamp } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Navbar from '../components/Navbar';
@@ -33,16 +33,18 @@ export interface FormData {
 
 // TODO: 
 // Add image upload
-// Time Limit for Duration
-// Choose location Google API)
+// Choose location Google API
 // Buttons: Preview create functionality, publish redirect
-// Add dropdown to allow admin to select Campus Area
+// Add dropdown to allow admin to select Campus Area?
+// Verify which units to add
 // Navigate Back
 // Only Admin can use this
 
 
 // This component is the intake form where admins can create new events
 const EventForm: React.FC = () => {
+    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+
     // Create empty event
     const [formData, setFormData] = useState<FormData>({
         host: '',
@@ -59,7 +61,8 @@ const EventForm: React.FC = () => {
         images: []
     });
 
-    const [foodItems, setFoodItems] = useState([{ id: uuidv4(), quantity: '', item: '' },{ id: uuidv4(), quantity: '', item: '' },{ id: uuidv4(), quantity: '', item: '' }]);
+    // Create 3 empty food items
+    const [foodItems, setFoodItems] = useState([{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }]);
 
     const [images, setImages] = useState([]);
 
@@ -76,11 +79,18 @@ const EventForm: React.FC = () => {
         const db = firestore;
         try {
             // add event to database
-            await addDoc(collection(db, 'Events'), {
+            const eventRef = await addDoc(collection(db, 'Events'), {
                 ...formData,
                 status: status,
-                foods: foodItems.filter(({ quantity, item }) => quantity && item).map(({ quantity, item }) => ({ quantity, item })), // Filter empty food items and delete id
+                foods: foodItems.filter(({ quantity, unit, item }) => quantity && unit && item).map(({ quantity, unit, item }) => ({ quantity, unit, item })), // Filter empty food items and delete id 
             });
+            // add id to event
+            await updateDoc(eventRef, { id: eventRef.id });
+
+            // add event id to user
+            const userRef = doc(db, 'Users', userid);
+            await updateDoc(userRef, { events: arrayUnion(eventRef.id) });
+
             alert('Event published successfully');
         } catch (error) {
             console.error('Error publishing event: ', error);
@@ -139,7 +149,7 @@ const EventForm: React.FC = () => {
                         <FoodSelection foodItems={foodItems} setFoodItems={setFoodItems}/>
                     </Grid>
                 </Grid>
-                <DateTimeSelection setFormData={setFormData}/>
+                <DateTimeSelection setFormData={setFormData} formData={formData}/>
                 <Grid item xs={12} marginBottom={2}>
                     <StyledTextField
                         fullWidth

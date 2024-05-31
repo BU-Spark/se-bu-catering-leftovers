@@ -90,7 +90,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   }
 
   return (
-    <Grid item xs={12} sm={6} style={{ padding: '1em' }} justifyContent="center">
+    <Grid item xs={12} sm={6} style={{ padding: '0.5em', paddingTop: "0" }} justifyContent="space-between">
       <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px" }}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>

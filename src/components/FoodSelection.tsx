@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Typography, Grid, IconButton, Divider, TextField } from '@mui/material';
+import { Typography, Grid, IconButton, Divider, TextField, Select, MenuItem, FormControl } from '@mui/material';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import styled from '@mui/material/styles/styled';
@@ -10,6 +10,7 @@ import { props } from "../components/styling";
 export interface FoodItem {
     id: string;
     quantity: string;
+    unit: string;
     item: string;
 }
 
@@ -19,7 +20,9 @@ interface FoodSelectionProps {
 }
 
 export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFoodItems }) => {
-    
+    // Define the unit options from client
+    const unitOptions = ['Trays', 'Pieces', 'Portions', 'Packs', 'Dozens', 'Cups', 'Bowls'];
+
     // Handle food item changes
     const handleFoodItemChange = (id: string, field: string, value: string) => {
         setFoodItems((prevItems) =>
@@ -29,7 +32,7 @@ export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFood
 
     // Add a food item
     const addFoodItem = () => {
-        setFoodItems([...foodItems, { id: uuidv4(), quantity: '', item: '' }]);
+        setFoodItems([...foodItems, { id: uuidv4(), quantity: '', item: '', unit: ''}]);
     };
     
     // Remove a food item
@@ -50,15 +53,15 @@ export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFood
             <Grid marginBottom={2} paddingLeft={2} >
                 <Grid container alignItems="center">
                     <Grid item sx={{ width: '15px' }}></Grid>
-                    <Grid item marginLeft={1} sx={{ width: '40px' }} textAlign="center">
+                    <Grid item marginLeft={2} sx={{ width: '40px' }} textAlign="left">
                         <Typography variant="body2">Qty.</Typography>
                     </Grid>
-                    <Grid item marginLeft={1} sx={{ width: '40px' }} textAlign="center">
+                    <Grid item marginLeft={1} sx={{ width: '80px' }} textAlign="left">
                         <Typography variant="body2">Unit</Typography>
                     </Grid>
                     <Grid container marginLeft={1} xs justifyContent="space-between" alignItems={"center"}>
                         <Grid item>
-                            <Typography marginLeft={1} variant="body2">Food</Typography>
+                            <Typography variant="body2">Food</Typography>
                         </Grid>
                         <Grid item paddingRight={0.5}>
                             <IconButton onClick={addFoodItem}>
@@ -85,12 +88,20 @@ export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFood
                             onChange={(e) => handleFoodItemChange(item.id, 'quantity', e.target.value)}
                         />
                     </Grid>
-                    <Grid item marginLeft={1} sx={{ maxWidth: '40px' }}>
-                        <StyledTextField
-                            size="small"
-                            value={item.quantity}
-                            onChange={(e) => handleFoodItemChange(item.id, 'quantity', e.target.value)}
-                        />
+                    <Grid item marginLeft={1} sx={{ width: '90px' }}>
+                        <FormControl fullWidth size="small" sx={{...props}}>
+                            <Select
+                                value={item.unit}
+                                onChange={(e) => handleFoodItemChange(item.id, 'unit', e.target.value)}
+                                displayEmpty
+                            >
+                                {unitOptions.map((unit) => (
+                                    <MenuItem key={unit} value={unit}>
+                                        <Typography paddingTop={"1.5px"} fontSize={"0.8em"} textAlign="left">{unit}</Typography>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Grid>
                     <Grid item marginLeft={1} xs>
                         <StyledTextField

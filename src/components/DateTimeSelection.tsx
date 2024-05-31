@@ -7,22 +7,33 @@ import { props } from './styling';
 import { FormData } from './EventForm';
 
 interface DateTimeSelectionProps {
+    formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
 }
 
-export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormData }) => {
-    const [foodArrived, setFoodArrived] = useState<Date>(new Date());
+export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormData, formData }) => {
+    const today = new Date();    
+    const minimumDate = new Date(today.getTime() - 3.5 * 60 * 60 * 1000); // Allow to create event up to 3 hours before current time
+    const defaultDuration = 30;
+
+    const [foodArrived, setFoodArrived] = useState<Date>(today);
     const [foodAvailable, setFoodAvailable] = useState<Date>(foodArrived);
+    const [duration, setDuration] = useState<Date>(new Date(0, 0, 0, 0, defaultDuration, 0));
     
     const maxTime = 4; // Maximum time in hours for food to be consumed after arrival
-    const availabilityLimit = new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000);
+    const [availabilityLimit, setLimit] = useState<Date>(new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000 - defaultDuration * 60 * 1000));
 
     useEffect(() => {
-        availabilityLimit.setHours(foodArrived.getHours() + maxTime);
+        const newLimit = new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000 - (duration.getMinutes() + 1)*60*1000);
+        setLimit(newLimit);
+
         if (foodAvailable < foodArrived){
             setFoodAvailable(foodArrived);
         }
-
+        else if (foodAvailable > newLimit){
+            console.log(formData.duration);
+            setFoodAvailable(newLimit);
+        }
       }, [foodArrived, foodAvailable]);
 
     // Save arrival date changes
@@ -49,8 +60,12 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
         }
     };
 
+    // Compute dynamic maxTime for the duration based on foodAvailable and foodArrived
+    const dynamicMaxTime = new Date(0, 0, 0, maxTime - (foodAvailable.getTime() - foodArrived.getTime()) / (60 * 60 * 1000), 0, 0);
+
     // Save duration time change in minutes
     const handleTimeChange = (time: any) => {
+        setDuration(time);
         setFormData((prevData) => ({
             ...prevData,
             duration: time.getHours() * 60 + time.getMinutes()
@@ -64,8 +79,9 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                     <DateTimePicker
                         label="Food First Arrived"
                         value={foodArrived}
-                        minDateTime={new Date()}
+                        minDateTime={minimumDate}
                         onChange={handleArrivalChange}
+                        ampm={false}
                         slotProps={{ textField: { fullWidth: true } }}
                         sx={{...props}}
                     />
@@ -79,9 +95,10 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                         minDateTime={foodArrived}
                         maxDateTime={availabilityLimit}
                         onChange={handleDeliveryChange}
+                        ampm={false}
                         slotProps = {{textField: {
                             fullWidth: true, 
-                            helperText: "For safety, food can't be given after 4 hours of arrival"}
+                            helperText: "For safety, food can't be given after 4 hours of arrival"}    
                         }}
                         sx={{...props}}
                     />
@@ -92,9 +109,10 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                     <TimePicker
                         label="Availability duration"
                         onChange={handleTimeChange}
+                        value={duration}
                         format="HH:mm"
-                        defaultValue= {new Date(0,0,0,0,30,0)}
-                        maxTime={ new Date(0,0,0,4,0)}
+                        defaultValue= {new Date(0, 0, 0, 0, defaultDuration, 0)}
+                        maxTime={dynamicMaxTime}
                         ampm={false}
                         sx={{...props}}
                         slotProps={{
