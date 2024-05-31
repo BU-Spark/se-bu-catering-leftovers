@@ -7,7 +7,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import styles from '../styles/Home.module.css';
 import FAQList from '../components/faq.js';
 
-const GlobalStyle = createGlobalStyle`
+export const GlobalStyle = createGlobalStyle`
   body{
     margin: 0;
     padding: 0;
