@@ -111,7 +111,6 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                         onChange={handleTimeChange}
                         value={duration}
                         format="HH:mm"
-                        defaultValue= {new Date(0, 0, 0, 0, defaultDuration, 0)}
                         maxTime={dynamicMaxTime}
                         ampm={false}
                         sx={{...props}}

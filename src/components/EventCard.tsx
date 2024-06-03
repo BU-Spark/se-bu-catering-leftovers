@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { Typography, Paper, Grid, Button } from '@mui/material';
+import { Typography, Paper, Grid } from '@mui/material';
 import {Event} from "../app/EventPage/page"
-import {firestore as db} from '../../firebaseConfig';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 interface EventCardProps {
@@ -57,13 +56,6 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
     minute: '2-digit',
     hour12: false
   });
-
-  // Format the countdown time
-  const formatDuration = (duration: string): string => {
-    const hours = Math.floor(parseInt(duration) / 60);
-    const minutes = (parseInt(duration) % 60).toString().padStart(2, '0');
-    return `${hours.toString().padStart(2, '0')}:${minutes}`;
-  };
 
   const [imageUrl, setImageUrl] = useState<string>();
 
@@ -129,24 +121,3 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
 };
 
 export default EventCard;
-
-
-{/* <Grid xs>
-<Paper elevation={3} style={{ padding: '1em', background:"#FFF6EE" }}>
-    {imageUrl && <img src={imageUrl} alt="Firestore Image" />}
-    <Typography variant="h6">{event.name}</Typography>
-    <Grid container spacing={2} alignItems="center">
-        <Grid item maxWidth="30%">
-            <Typography variant="body2">Location: {event.location}</Typography>
-        </Grid>
-        <Grid item maxWidth="40%">
-            <Typography variant="body2">{`${foodAvailableDate}, ${foodAvailableTime} - ${endTimeFormatted}`}</Typography>
-        </Grid>
-        <Grid item maxWidth="30%">
-            <Typography variant="body2" fontWeight="bold" onClick={handleClick}>{"Learn More >"} </Typography>
-        </Grid>
-    </Grid>
-    <Typography variant="body2">{remainingTime}</Typography>
-</Paper>
-</Grid>
-); */}

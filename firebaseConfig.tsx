@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -23,10 +24,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const storage = getStorage(app);
+
 
 provider.setCustomParameters({
   hd: 'bu.edu'
 });
 const firestore = getFirestore(app);
 
-export { firestore, auth, provider, app };
+export { firestore, auth, provider, app, storage };
