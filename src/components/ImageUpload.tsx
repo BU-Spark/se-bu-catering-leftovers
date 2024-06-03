@@ -50,7 +50,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
                 borderColor="#ab0101" 
                 borderRadius="12px"
                 textAlign="center"
-                xs
+                xs={uploadedImages.length > 0 ? 5.5 : 12}
                 sm
                 
             >   
@@ -67,8 +67,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
                     </label>
                         <Typography variant="body1">Upload Photo</Typography>
                         {image && (
-                            <Button variant="outlined" color="secondary" size="small" sx={{fontSize:{xs: "0.55em", sm: "0.7em"}}} onClick={uploadImage}>
-                                {"Upload " + image.name} 
+                            <Button variant="outlined" color="secondary" size="small" onClick={uploadImage}>
+                                <Typography sx={{fontSize:{xs:"0.7em", sm: "0.9em"},  maxWidth:{xs:"90px", sm: "200px"},  whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{"Upload " + image.name} </Typography>
                             </Button>
                         )}
             
@@ -78,7 +78,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
                     paddingLeft={1}
                     textAlign="center"
                     position="relative"
-                    xs={7}
+                    xs
                     sm={5}
                     height="160px"
                 >   
