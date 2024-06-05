@@ -186,7 +186,7 @@ const TermsConditionsPage: React.FC = () => {
                 },
                 {
                     question: "Allergen Policy",
-                    answer: "Details about the allergen policy..."
+                    answer: "By opting to receive free food, I acknowledge the possibility of encountering food items to which I may be allergic. I understand this risk and agree to this term, along with waiving any liability related to food allergies or health issues that may arise from consuming the provided food."
                 },
             ]
         }
