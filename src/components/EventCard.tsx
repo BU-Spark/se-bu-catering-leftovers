@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Typography, Paper, Grid } from '@mui/material';
-import {Event} from "../app/EventPage/page"
+import {Event} from "@/pages/EventPage/page"
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 interface EventCardProps {

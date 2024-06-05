@@ -7,7 +7,6 @@ import { FaCaretDown } from 'react-icons/fa';
 const FAQContainer = styled.div`
     margin: 20px;
     padding: 10px;
-    border-bottom: 1px solid #ccc;
 `;
 
 const Question = styled.div`
@@ -19,7 +18,7 @@ const Question = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-radius: 25px;
+    border-radius: 5px;
     gap: 20px;
     margin-bottom: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);;

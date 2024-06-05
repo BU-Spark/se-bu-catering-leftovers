@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, getDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { firestore as db } from '../../../firebaseConfig'
 import { Container, Grid, Typography } from '@mui/material';
-import {FormData} from '../../components/EventForm';
+import {FormData} from '@/components/EventForm';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../components/styling";
+import { theme } from "@/components/styling";
 import FilterComponent from '../../components/FilterComponent';
 
 // Define the event interface

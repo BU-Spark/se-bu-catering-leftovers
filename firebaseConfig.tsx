@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -21,15 +21,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
 const provider = new GoogleAuthProvider();
-const storage = getStorage(app);
+const storage = getStorage(firebaseApp);
 
+const firestore = getFirestore(firebaseApp);
 
-provider.setCustomParameters({
-  hd: 'bu.edu'
-});
-const firestore = getFirestore(app);
-
-export { firestore, auth, provider, app, storage };
+export { firestore, auth, provider, firebaseApp, storage };
