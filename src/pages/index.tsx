@@ -1,3 +1,4 @@
+// index.tsx
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -89,7 +90,7 @@ const Home = () => {
           const storedUserRole = localStorage.getItem('userRole');
           console.log("User role from localStorage:", storedUserRole);
 
-          const userDocRef = doc(firestore, 'users', user.uid);
+          const userDocRef = doc(firestore, 'Users', user.uid);
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
@@ -122,7 +123,7 @@ const Home = () => {
   return (
       <div>
         <GlobalStyle />
-        <Navbar />
+        <Navbar userRole={userRole} />  {/* Pass userRole as a prop */}
         <div className={styles.container}>
           <Head>
             <title>Reduce Wasted Food</title>

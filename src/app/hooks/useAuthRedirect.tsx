@@ -16,7 +16,7 @@ const useAuthRedirect = () => {
                 const userRole = localStorage.getItem('userRole');
                 if (userRole) {
                     // Save user role to Firestore
-                    await setDoc(doc(firestore, 'users', user.uid), {
+                    await setDoc(doc(firestore, 'Users', user.uid), {
                         uid: user.uid,
                         email: user.email,
                         role: userRole

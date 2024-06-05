@@ -153,7 +153,7 @@ const TermsConditionsPage: React.FC = () => {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
-                const userDocRef = doc(firestore, 'users', user.uid);
+                const userDocRef = doc(firestore, 'Users', user.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (!userDoc.exists()) {
@@ -201,7 +201,7 @@ const TermsConditionsPage: React.FC = () => {
             const user = auth.currentUser;
             if (user) {
                 try {
-                    const userDocRef = doc(firestore, 'users', user.uid);
+                    const userDocRef = doc(firestore, 'Users', user.uid);
                     await updateDoc(userDocRef, {
                         agreedToTerms: true
                     });

@@ -74,7 +74,7 @@ const StudentAccountPage = () => {
         const fetchUserData = async () => {
             const user = auth.currentUser;
             if (user) {
-                const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+                const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
                 if (userDoc.exists()) {
                     setUserData(userDoc.data() as UserData);
                 }

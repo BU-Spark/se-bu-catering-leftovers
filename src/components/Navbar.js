@@ -92,9 +92,9 @@ const MenuItem = styled.a`
     }
 `;
 
-const Navbar = () => {
+const Navbar = ({ userRole }) => {
     const [showMenu, setShowMenu] = useState(false);
-    const [role, setRole] = useState(null);
+    const [role, setRole] = useState(userRole);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -105,7 +105,7 @@ const Navbar = () => {
         const fetchUserRole = async () => {
             const user = auth.currentUser;
             if (user) {
-                const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+                const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
                 if (userDoc.exists()) {
                     console.log('User role:', userDoc.data().role);
                     setRole(userDoc.data().role);
@@ -145,29 +145,29 @@ const Navbar = () => {
                     <MenuItem as='a'>Home</MenuItem>
                 </Link>
                 {role && (
-                    <Link href={role === 'admin' ? "/admin/account" : "/student/account"} passHref>
+                    <Link href={role === 'Administrator' ? "/admin/account" : "/student/account"} passHref>
                         <MenuItem as="a">My Account</MenuItem>
                     </Link>
                 )}
-                <Link href="/termsconditions" passHref>
-                    <MenuItem as='a'>Terms and Conditions</MenuItem>
-                </Link>
-                <Link href="/faq" passHref>
-                    <MenuItem as='a'>FAQ</MenuItem>
-                </Link>
-                <Link href="/logout" passHref>
-                    <MenuItem as='a'>Logout</MenuItem>
-                </Link>
-                {role === 'admin' && (
+                {role === 'Administrator' && (
                     <Link href="/admin" passHref>
                         <MenuItem as='a'>Admin Dashboard</MenuItem>
                     </Link>
                 )}
-                {role === 'student' && (
+                {role === 'Student' && (
                     <Link href="/student" passHref>
                         <MenuItem as='a'>Student Dashboard</MenuItem>
                     </Link>
                 )}
+                <Link href="/faq" passHref>
+                    <MenuItem as='a'>FAQ</MenuItem>
+                </Link>
+                <Link href="/termsconditions" passHref>
+                    <MenuItem as='a'>Terms and Conditions</MenuItem>
+                </Link>
+                <Link href="/logout" passHref>
+                    <MenuItem as='a'>Logout</MenuItem>
+                </Link>
             </MenuItems>
         </Nav>
     );
