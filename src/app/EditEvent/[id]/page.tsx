@@ -1,34 +1,40 @@
 "use client";
 
-import React, { useState } from 'react';
-import EventForm from '../../components/EventForm';
-import Navbar from '../../components/Navbar';
+import React, { useEffect, useState } from 'react';
+import EventForm from '../../../components/EventForm';
+import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../functions/styling";
+import { theme } from "../../functions/styling";
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
-import { Event } from '../functions/types';
-import { firestore as db} from '../../../firebaseConfig';
+import { Event } from '../../functions/types';
+import { firestore as db} from '../../../../firebaseConfig';
 import { useRouter, notFound } from 'next/navigation';
 
-async function fetchEvent(id: string) {
-  const docRef = doc(db, 'Events', id);
-  const docSnap = await getDoc(docRef);
-
-  console.log("id: ", id);
-  if (!docSnap.exists()) {
-    notFound();
-  }
-
-  return docSnap.data();
-}
 
 // This page is the intake form where admins can create new events
 const EditEventFormPage = async ({ params }: { params: { id: string } }) => {
-  const event = await fetchEvent(params.id) as Event;
-
+  const eventUID = params.id;
+  const [event, setEvent] = useState<Event>();
   const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
   const router = useRouter();
 
+  useEffect(() => {
+    async function fetchEvent(id: string) {
+      const docRef = doc(db, 'Events', id);
+      const docSnap = await getDoc(docRef);
+      
+      console.log("id: ", id);
+      if (!docSnap.exists()) {
+        notFound();
+      }
+      const loadedEvent = docSnap.data() as Event;
+
+      setEvent(loadedEvent);
+    }
+    fetchEvent(eventUID);
+
+  }, [event]);
+  
   const onPublish = async (event: Event) => {
     try {
         const eventRef = doc(db, 'Events', event.id);
@@ -48,7 +54,9 @@ const EditEventFormPage = async ({ params }: { params: { id: string } }) => {
     <div>
       <Navbar/>
       <ThemeProvider theme={theme}>
-        <EventForm event={event} onPublish={onPublish}/>
+        {event &&
+                <EventForm event={event} onPublish={onPublish}/>
+        }
       </ThemeProvider>
     </div>
   );

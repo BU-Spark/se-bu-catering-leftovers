@@ -10,7 +10,7 @@ import { theme } from "../functions/styling";
 const EventPreviewPage = () => {
 
   return (
-    <div>
+    <div style={{background: "#FFF6EE"}}>
       <Navbar/>
       <ThemeProvider theme={theme}>
         <EventPreview />

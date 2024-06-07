@@ -36,3 +36,14 @@ export interface User {
   type: string;
   uid: string;
 }
+
+// Define the review interface
+export interface Review {
+  comment: string;
+  date: Timestamp;
+  event: string;
+  images: string[];
+  rating: number;
+  reviewer: string;
+  id: string;
+}
