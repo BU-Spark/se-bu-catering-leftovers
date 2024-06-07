@@ -25,6 +25,8 @@
     "react": "^18.3.1",
     "react-dom": "^18",
     "react-icons": "^5.2.1",
+    "react-swipeable-views": "^0.14.0",
+    "react-swipeable-views-utils": "^0.14.0",
     "styled-components": "^6.1.11",
     "uuid": "^9.0.1"
   },
@@ -32,6 +34,8 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-swipeable-views": "^0.13.5",
+    "@types/react-swipeable-views-utils": "^0.13.7",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "postcss": "^8",

@@ -4,24 +4,18 @@ import { Typography, Grid, IconButton, Divider, TextField, Select, MenuItem, For
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import styled from '@mui/material/styles/styled';
-import { props } from "../components/styling";
-
-// Interface for each of the foods available
-export interface FoodItem {
-    id: string;
-    quantity: string;
-    unit: string;
-    item: string;
-}
+import { props } from "../app/functions/styling";
+import { FoodItem } from '../app/functions/types';
 
 interface FoodSelectionProps {
     foodItems: FoodItem[];
     setFoodItems: React.Dispatch<React.SetStateAction<FoodItem[]>>;
 }
 
+// Component to select food items on the Event form
 export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFoodItems }) => {
     // Define the unit options from client
-    const unitOptions = ['Trays', 'Pieces', 'Portions', 'Packs', 'Dozens', 'Cups', 'Bowls'];
+    const unitOptions = ['Trays', 'Pieces', 'Portions', 'Dozens', 'Cups', 'Bowls'];
 
     // Handle food item changes
     const handleFoodItemChange = (id: string, field: string, value: string) => {
@@ -49,7 +43,7 @@ export const FoodSelection: React.FC<FoodSelectionProps> = ({ foodItems, setFood
             borderColor="#ab0101" 
             borderRadius="12px"
         >   
-            <Typography paddingLeft={2} variant="h6" color="secondary">Select Food Items</Typography>
+            <Typography paddingLeft={2} fontSize="1.2rem" color="secondary">Select Food Items</Typography>
             <Grid marginBottom={2} paddingLeft={2} >
                 <Grid container alignItems="center">
                     <Grid item sx={{ width: '15px' }}></Grid>

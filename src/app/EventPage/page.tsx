@@ -3,38 +3,35 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, getDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { firestore as db } from '../../../firebaseConfig'
-import { Container, Grid, Typography } from '@mui/material';
-import {FormData} from '../../components/EventForm';
+import { Button, Container, Grid, Typography } from '@mui/material';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../components/styling";
+import { theme } from "../functions/styling";
 import FilterComponent from '../../components/FilterComponent';
+import { Event, User } from "../functions/types";
+import { set } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
-// Define the event interface
-export interface Event extends FormData {
-    id: string;
-}
-
-// Define the user interface
-export interface User {
-  email: string;
-  events: string[];
-  foodPref: string[];
-  locPref: string[];
-  name: string;
-  timePref: string[];
-  type: string;
-  uid: string;
-}
+// TODO:
+// Button to navigate into event form
+// Remove get user function
 
 // Page to display all events
 const EventsPage = () => {
     const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-    
+    const [user, setUser] = useState<User>();
+    // const router = useRouter();
+
     // Retrieve available events from database
     const [events, setEvents] = useState<Event[]>([]);
     useEffect(() => {
+        const fetchUser = async () => {
+            setUser(await getUser(userid));
+        }
+        
+        fetchUser();
+
         const fetchEvents = async () => {
             setEvents(await getEvents());
         };
@@ -42,7 +39,7 @@ const EventsPage = () => {
         const unsubscribe = onSnapshot(collection(db, 'Events'), (snapshot) => {
             fetchEvents();
         });
-    
+        
         return () => unsubscribe(); // Cleanup listener on unmount
     }, []);
 
@@ -72,14 +69,14 @@ const EventsPage = () => {
     
     // Filter events based on user preferences
     const handleFilterSelect = async (filter: string) => {
-      if (filter === "All") {
-        setEvents(await getEvents());
-        return;
-      } 
       const newEvents = await getEvents();
-      const user = await getUser(userid);
+      if (filter === "All") {
+        setEvents(newEvents);
+        return;
+      } else {
+        
       setEvents(newEvents.filter((event) => event.campusArea === filter));
-
+      }
   };
 
   return (
@@ -89,7 +86,16 @@ const EventsPage = () => {
     <Container maxWidth="md" style={{paddingTop: "7em", background: "#FFF"}}>
       <Grid container alignItems="center" style={{paddingLeft: "0.5em"}}>
         <Grid item xs>
-          <Typography variant="h4" fontSize="1em" fontWeight="600">
+          {/* {user && user.type === "admin" && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={routeToEventForm}
+            >
+              Create Event
+            </Button>
+          )} */}
+          <Typography variant="h4">
             Current Events
           </Typography>
         </Grid> 

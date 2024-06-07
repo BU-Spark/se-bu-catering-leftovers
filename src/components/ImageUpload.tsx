@@ -14,7 +14,7 @@ interface ImageUploadProps {
 export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage}) => {
     const [image, setImage] = useState<File | null>(null);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-    const fileInput = useRef(null);
+    const fileInput = useRef<HTMLInputElement | null>(null);
 
     const uploadImage = () => {
         if (image == null) return;
@@ -46,7 +46,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
             <Grid
                 padding={2} 
                 border={1} 
-                marginRight={1}
                 borderColor="#ab0101" 
                 borderRadius="12px"
                 textAlign="center"
@@ -61,11 +60,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
                         ref={fileInput}
                         onChange={handleImageChange}/>
                     <label htmlFor="contained-button-file">
-                        <IconButton onClick={() => fileInput.current.click()}>
+                        <IconButton onClick={() => fileInput.current?.click()}>
                             <FileUploadOutlinedIcon style={{fontSize:"60px"}} color="primary"/>
                         </IconButton>
                     </label>
-                        <Typography variant="body1">Upload Photo</Typography>
+                        <Typography variant="body2">Upload Photo</Typography>
                         {image && (
                             <Button variant="outlined" color="secondary" size="small" onClick={uploadImage}>
                                 <Typography sx={{fontSize:{xs:"0.7em", sm: "0.9em"},  maxWidth:{xs:"90px", sm: "200px"},  whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{"Upload " + image.name} </Typography>
@@ -76,6 +75,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
             {uploadedImages.length > 0 && (
                 <Grid
                     paddingLeft={1}
+                    marginLeft={1}
                     textAlign="center"
                     position="relative"
                     xs
@@ -102,15 +102,3 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
         </Grid>
     );
 };
-
-
-
-{/* <div>
-<input 
-    type="file" 
-    onChange={(event) => {
-        setImage(event.target.files ? event.target.files[0] : null)
-        }}/>
-<button onClick={uploadImage}>Upload Image</button>
-</div> */}
-

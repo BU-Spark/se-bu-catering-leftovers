@@ -20,17 +20,19 @@ export const theme = createTheme({
         fontSize: '1rem',
       },
       h4: {
-        fontWeight: 400,
+        fontWeight: 600,
+        fontSize: '1.1rem',
       },
       // Define other typography variants as needed
       h6: {
-        fontWeight: 400,
+        fontWeight: 600,
+        fontSize: '0.9rem',
       },
       body1: {
-        fontSize: '0.875rem',
+        fontSize: '0.9rem',
       },
       body2: {
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
       },
     },
   });
