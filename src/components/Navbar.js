@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
 
 const Nav = styled.nav`
     display: flex;
@@ -31,11 +33,7 @@ const LogoImage = styled.img`
     width: auto;
 `;
 
-const MenuIcon = styled.img`
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-`;
+
 
 const MenuItems = styled.div`
     background-color: #fff;
@@ -73,7 +71,9 @@ const Navbar = () => {
             <Logo>
                 <LogoImage src="/bu-logo.png" alt="Boston University Logo" />
             </Logo>
-            <MenuIcon src="hamburger-icon.png" alt="Menu" onClick={toggleMenu} />
+            <IconButton onClick={toggleMenu}>
+                <MenuIcon fontSize="large" sx={{color:"#ab0101"}}/>
+            </IconButton>
             <MenuItems show={showMenu}>
                 <MenuItem href="/">Home</MenuItem>
                 <MenuItem href="/account">My Account</MenuItem>

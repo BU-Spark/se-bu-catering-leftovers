@@ -3,6 +3,7 @@ import { Typography, Paper, Grid } from '@mui/material';
 import { Event } from "../app/functions/types"
 import { formatEventTimes, calculateRemainingTime } from '../app/functions/timeUtil';
 import { getImageUrl } from '../app/functions/imageUtils';
+import { useRouter } from 'next/navigation';
 
 interface EventCardProps {
     event: Event;
@@ -12,6 +13,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const { foodAvailableDate, foodAvailableTime, endTimeFormatted } = formatEventTimes(event);
   const [imageUrl, setImageUrl] = useState<string>();
   const [remainingTime, setRemainingTime] = useState<string>("00:00:00");
+  const router = useRouter();
 
   // Set up interval to update remaining time of events
   useEffect(() => {
@@ -32,7 +34,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   }, []);
 
   const handleClick = () => {
-    console.log("I was clicked");
+    router.push(`/EventPreview/${event.id}`)
   }
 
   return (
@@ -40,7 +42,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px" }}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>
-            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: 'auto', borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
+            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: '160px', objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
               <Typography
                 variant="body1"
                 style={{ position: 'absolute', top: 20, right: 0, backgroundColor: "#195626", color: '#FFF',

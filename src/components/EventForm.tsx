@@ -10,15 +10,12 @@ import { Event } from '../app/functions/types';
 import { useRouter } from 'next/navigation';
 
 // TODO: 
-// Navigate Back
 // Only Admin can use this
-// Buttons: Preview, publish redirect
-// How to navigate into the form
 // Choose location API
 
 interface EventFormProps {
     event: Event;
-    onPublish: (event: Event) => Promise<void>;
+    onPublish: (event: Event) => Promise<string>;
 }
 
 // This component is the intake form where admins can create and modify new events
@@ -47,9 +44,14 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
     const isValid = () => {
         const requiredFields: (keyof Event)[] = ['host', 'name', 'location', 'campusArea']; // Add other required fields if necessary
-        const isFormValid = requiredFields.every(field  => formData[field] !== '');
-        
-        return isFormValid;
+        const missingFields = requiredFields.filter(field => formData[field] === '');
+
+        if (missingFields.length > 0) {
+            alert(`The following fields are missing: ${missingFields.join(', ')}`);
+            return false;
+        } else {
+            return true;
+        }
     }
 
     // Save and publish event on website
@@ -60,9 +62,15 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
             const updatedEvent = { ...formData, status: status, images: images, foods: validFood};
 
-            await onPublish(updatedEvent);
+            const eventUID = await onPublish(updatedEvent);
+
+            if (status === 'open') {
+                router.push('/EventPage');
+            }
+            return eventUID;
         } else {
             alert('Please fill out all required fields before publishing the event');
+            return "";
         }
 
     };
@@ -73,6 +81,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
     const removeImage = (url: string) => {
         setImages(images.filter((image) => image !== url));
+    };
+
+    const previewEvent = async () => {
+        const eventID = await publishEvent('saved');
+        if (eventID !== "") {
+            router.push(`/EventPreview/${eventID}`);
+        }
     };
 
     return (
@@ -161,12 +176,12 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                         </Button>
                     </Grid>
                     <Grid item width="30%">
-                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary">
+                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => previewEvent()}>
                         <Typography variant="button">Preview</Typography>
                         </Button>
                     </Grid>
                     <Grid item width="30%">
-                        <Button variant="contained" style={{borderRadius: "20px", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => publishEvent('open')}>
+                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => publishEvent('open')}>
                             <Typography variant="button">Publish</Typography>
                         </Button>
                     </Grid>

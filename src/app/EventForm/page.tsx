@@ -32,6 +32,7 @@ const EventFormPage = () => {
   });
 
   const onPublish = async (event: Event) => {
+    let eventID;
         try {
             // add event to database
             const eventRef = await addDoc(collection(db, 'Events'), event);
@@ -41,18 +42,20 @@ const EventFormPage = () => {
             // add event id to user
             const userRef = doc(db, 'Users', userid);
             await updateDoc(userRef, { events: arrayUnion(eventRef.id) });
-
+            eventID = eventRef.id;
             alert('Event published successfully');
+            return eventID;
         } catch (error) {
             console.error('Error publishing event: ', error);
             alert('Failed to publish event');
+            return "";
           }
   }
 
   return (
     <div>
-      <Navbar/>
       <ThemeProvider theme={theme}>
+      <Navbar/>
         <EventForm event={newEvent} onPublish={onPublish}/>
       </ThemeProvider>
     </div>

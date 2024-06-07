@@ -10,18 +10,16 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "../functions/styling";
 import FilterComponent from '../../components/FilterComponent';
 import { Event, User } from "../functions/types";
-import { set } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
 // TODO:
-// Button to navigate into event form
 // Remove get user function
 
 // Page to display all events
 const EventsPage = () => {
     const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
     const [user, setUser] = useState<User>();
-    // const router = useRouter();
+    const router = useRouter();
 
     // Retrieve available events from database
     const [events, setEvents] = useState<Event[]>([]);
@@ -79,28 +77,38 @@ const EventsPage = () => {
       }
   };
 
+  // Route to event form
+  const routeToEventForm = () => {
+    router.push("/EventForm");
+  };
+
   return (
   <div style={{background: "#FFF"}}>
-    <Navbar/>
     <ThemeProvider theme={theme}>
+    <Navbar/>
     <Container maxWidth="md" style={{paddingTop: "7em", background: "#FFF"}}>
       <Grid container alignItems="center" style={{paddingLeft: "0.5em"}}>
-        <Grid item xs>
-          {/* {user && user.type === "admin" && (
+        <Grid item xs justifyContent={"center"} display= "column">
+          <Grid container xs justifyContent="center">
+          {user && user.type === "Admin" && (
             <Button
-              variant="contained"
+              variant="outlined"
               color="primary"
               onClick={routeToEventForm}
+              style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}}
+              sx={{width: {xs:"50%", sm: "30%"}}} 
+              size="medium"
             >
-              Create Event
+                  <Typography variant="button">New Leftovers</Typography>
             </Button>
-          )} */}
-          <Typography variant="h4">
-            Current Events
-          </Typography>
-        </Grid> 
-        <Grid item>
-          <FilterComponent onSelectFilter={handleFilterSelect} />
+          )}
+          </Grid>
+          <Grid container xs justifyContent="space-between" alignItems="center">
+            <Typography variant="h4">
+              Current Events
+            </Typography>
+            <FilterComponent onSelectFilter={handleFilterSelect} />
+          </Grid>
         </Grid>
       </Grid>
       <Grid container xs={12}>

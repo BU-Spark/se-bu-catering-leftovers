@@ -8,18 +8,16 @@ import { theme } from "../../functions/styling";
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
 import { Event } from '../../functions/types';
 import { firestore as db} from '../../../../firebaseConfig';
-import { useRouter, notFound } from 'next/navigation';
-
+import { notFound } from 'next/navigation';
 
 // This page is the intake form where admins can create new events
-const EditEventFormPage = async ({ params }: { params: { id: string } }) => {
+const EditEventFormPage = ({ params }: { params: { id: string } }) => {
   const eventUID = params.id;
   const [event, setEvent] = useState<Event>();
   const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-  const router = useRouter();
 
   useEffect(() => {
-    async function fetchEvent(id: string) {
+    const fetchEvent = async (id: string) =>  {
       const docRef = doc(db, 'Events', id);
       const docSnap = await getDoc(docRef);
       
@@ -33,7 +31,7 @@ const EditEventFormPage = async ({ params }: { params: { id: string } }) => {
     }
     fetchEvent(eventUID);
 
-  }, [event]);
+  }, []);
   
   const onPublish = async (event: Event) => {
     try {
@@ -44,18 +42,20 @@ const EditEventFormPage = async ({ params }: { params: { id: string } }) => {
         await updateDoc(eventRef, updatePayload);
 
         alert('Event updated successfully');
+        return event.id;
     } catch (error) {
         console.error('Error updating event: ', error);
         alert('Failed to update event');
+        return "";
       }
     }
 
   return (
     <div>
-      <Navbar/>
       <ThemeProvider theme={theme}>
+      <Navbar/>
         {event &&
-                <EventForm event={event} onPublish={onPublish}/>
+          <EventForm event={event} onPublish={onPublish}/>
         }
       </ThemeProvider>
     </div>

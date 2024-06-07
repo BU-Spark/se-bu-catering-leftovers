@@ -11,9 +11,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import { formatEventDateTime, formatEndTime } from '../app/functions/timeUtil';
 import { useRouter } from 'next/navigation';
 
+interface EventPreviewProps {
+    eventId: string;
+}
 
-const EventPreview: React.FC = () => {
-    const eventId = "XeyE3GplA5Lqoymjxgcg";    // Placeholder for event ID
+// This component where users can see all the information on an event
+const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
     const [event, setEvent] = useState<Event | null>(null);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [remainingTime, setRemainingTime] = useState<string>("00:00:00");
@@ -116,9 +119,11 @@ const EventPreview: React.FC = () => {
                     </Grid>
                     <Grid xs justifyContent="flex-end">
                         { event.status === "saved" ? (
+                            <Grid container justifyContent={"center"}>
                                 <Button variant="outlined" color="primary" style={{borderRadius: "20px",  borderWidth:"3px", borderColor: "#ab0101", textTransform: "none", width:"200px" }} size="large">
                                     <Typography variant="button">Publish</Typography>
                                 </Button>
+                            </Grid>
                         ) : (
                             <Grid container justifyContent={"center"}>
                                 <Grid direction="column" textAlign={"center"}>
