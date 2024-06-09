@@ -4,8 +4,8 @@ import { Typography, Grid, IconButton, Divider, TextField, Select, MenuItem, For
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import RemoveCircleRoundedIcon from '@mui/icons-material/RemoveCircleRounded';
 import styled from '@mui/material/styles/styled';
-import { props } from "../app/functions/styling";
-import { FoodItem } from '../app/functions/types';
+import { props } from "../functions/styling";
+import { FoodItem } from '../functions/types';
 
 interface FoodSelectionProps {
     foodItems: FoodItem[];

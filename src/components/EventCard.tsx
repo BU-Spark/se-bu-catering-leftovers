@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { Typography, Paper, Grid } from '@mui/material';
-import { Event } from "../app/functions/types"
-import { formatEventTimes, calculateRemainingTime } from '../app/functions/timeUtil';
-import { getImageUrl } from '../app/functions/imageUtils';
+import { Event } from "../functions/types"
+import { formatEventTimes, calculateRemainingTime } from '../functions/timeUtil';
+import { getImageUrl } from '../functions/imageUtils';
 import { useRouter } from 'next/navigation';
+import { onEnd } from '../functions/eventUtils';
 
 interface EventCardProps {
     event: Event;
@@ -18,10 +19,21 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   // Set up interval to update remaining time of events
   useEffect(() => {
     const interval = setInterval(() => {
-          setRemainingTime(calculateRemainingTime(event));
+          const remainingTime = calculateRemainingTime(event);
+          setRemainingTime(remainingTime);
+          checkAvailability(remainingTime);
     }, 1000); // Update every second
+    
+    const checkAvailability = async (remainingTime: string) => {
+      if (remainingTime === "00:00:00") {
+        await onEnd(event);
+      }
+    };
+
     return () => clearInterval(interval);
+    
   }, [event]);
+
 
   useEffect(() => {
     // Fetch image URL from Firestore

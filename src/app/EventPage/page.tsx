@@ -7,13 +7,16 @@ import { Button, Container, Grid, Typography } from '@mui/material';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../functions/styling";
+import { theme } from "../../functions/styling";
 import FilterComponent from '../../components/FilterComponent';
-import { Event, User } from "../functions/types";
+import { Event, User } from "../../functions/types";
 import { useRouter } from 'next/navigation';
 
 // TODO:
 // Remove get user function
+// Bigger location on eventCard
+// Only Admin can use this
+// Remaining time only after event starts
 
 // Page to display all events
 const EventsPage = () => {

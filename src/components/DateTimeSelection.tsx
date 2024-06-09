@@ -3,8 +3,8 @@ import { LocalizationProvider, DateTimePicker, TimePicker } from '@mui/x-date-pi
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Grid } from '@mui/material';
 import { Timestamp } from 'firebase/firestore';
-import { props } from '../app/functions/styling';
-import { Event } from '../app/functions/types';
+import { props } from '../functions/styling';
+import { Event } from '../functions/types';
 
 interface DateTimeSelectionProps {
     formData: Event;

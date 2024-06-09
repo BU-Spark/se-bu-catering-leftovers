@@ -1,20 +1,35 @@
-import React, { useState, useRef } from 'react';
-import { storage } from '../../firebaseConfig';
+import React, { useState, useRef, useEffect } from 'react';
+import { storage, firestore } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { v4 as uuidv4} from 'uuid';
 import { Button, Typography, Grid, IconButton } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
+import { Event } from '../functions/types';
+import { getImageUrls } from '../functions/imageUtils';
+import { arrayRemove, doc, collection, updateDoc } from 'firebase/firestore';
 
 interface ImageUploadProps {
     setImageUrl: (url: string) => void;
     removeImage: (url: string) => void;
+    event: Event;
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage}) => {
+export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage, event}) => {
     const [image, setImage] = useState<File | null>(null);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const fileInput = useRef<HTMLInputElement | null>(null);
+
+    useEffect (() => {
+        const fetchImages = async (imagePaths: string[]) => {
+            const urls = await getImageUrls(imagePaths);
+            setUploadedImages(urls);
+        };
+        if (event.images) {
+            fetchImages(event.images);
+        }
+
+    }, []);
 
     const uploadImage = () => {
         if (image == null) return;
@@ -37,6 +52,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
         const storageRef = ref(storage, url);
 
         await deleteObject(storageRef);
+
+        // const eventRef = doc(firestore, `Events`, event.id as string);
+        // await updateDoc(eventRef, {images: arrayRemove(url)});
 
         setUploadedImages((prev) => prev.filter((img) => img !== url));
         removeImage(url);

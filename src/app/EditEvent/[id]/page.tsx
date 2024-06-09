@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react';
 import EventForm from '../../../components/EventForm';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../functions/styling";
-import { updateDoc, doc, getDoc } from 'firebase/firestore';
-import { Event } from '../../functions/types';
+import { theme } from "../../../functions/styling";
+import { doc, getDoc } from 'firebase/firestore';
+import { Event } from '../../../functions/types';
 import { firestore as db} from '../../../../firebaseConfig';
 import { notFound } from 'next/navigation';
+import { onUpdate } from '../../../functions/eventUtils';
 
 // This page is the intake form where admins can create new events
 const EditEventFormPage = ({ params }: { params: { id: string } }) => {
@@ -32,30 +33,13 @@ const EditEventFormPage = ({ params }: { params: { id: string } }) => {
     fetchEvent(eventUID);
 
   }, []);
-  
-  const onPublish = async (event: Event) => {
-    try {
-        const eventRef = doc(db, 'Events', event.id);
-        // add event to database
-        const updatePayload: { [key: string]: any } = { ...event };
-
-        await updateDoc(eventRef, updatePayload);
-
-        alert('Event updated successfully');
-        return event.id;
-    } catch (error) {
-        console.error('Error updating event: ', error);
-        alert('Failed to update event');
-        return "";
-      }
-    }
 
   return (
     <div>
       <ThemeProvider theme={theme}>
       <Navbar/>
         {event &&
-          <EventForm event={event} onPublish={onPublish}/>
+          <EventForm event={event} onPublish={onUpdate}/>
         }
       </ThemeProvider>
     </div>

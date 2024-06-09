@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Paper, Grid, Typography } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Rating from '@mui/material/Rating';
-import { Review } from '../app/functions/types';
-import { getImageUrls } from '../app/functions/imageUtils';
+import { Review } from '../functions/types';
+import { getImageUrls } from '../functions/imageUtils';
 import { formatDistanceToNow } from 'date-fns';
 import { styled } from 'styled-components';
 
@@ -36,10 +36,10 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
     }, [review.images]);
 
     return (
-        <Paper elevation={3} style={{ padding: '1em', marginBottom: '1em' }}>
+        <Paper elevation={3} style={{ padding: '1em', marginBottom: '1em'}}>
             <Grid container paddingTop="10px">
                 <Grid container alignItems="center" marginBottom="0.5em">
-                    <AccountCircleIcon sx={{fontSize:"30px", color: "#eb8dbd"}}/>
+                    <AccountCircleIcon sx={{fontSize:"35px", color: "#eb8dbd"}}/>
                     <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.reviewer}</Typography>
                 </Grid>
                 <Grid container direction="column">

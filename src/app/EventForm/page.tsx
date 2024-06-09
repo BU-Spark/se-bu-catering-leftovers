@@ -4,11 +4,27 @@ import React, { useState } from 'react';
 import EventForm from '../../components/EventForm';
 import Navbar from '../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../functions/styling";
-import { addDoc, updateDoc, arrayUnion, collection, doc, Timestamp } from 'firebase/firestore';
-import { Event } from '../functions/types';
-import { firestore as db} from '../../../firebaseConfig';
+import { theme } from "../../functions/styling";
+import { Timestamp } from 'firebase/firestore';
+import { Event } from '../../functions/types';
 import { v4 as uuidv4 } from 'uuid';
+import { onPublish } from '../../functions/eventUtils';
+
+// TODO:
+// Bigger location on eventCard
+// Only Admin can use this
+// Bug: When go back from preview, event dissapears
+// Delete old images
+// Delete images on user when deleted on form
+// Delete old events
+// Ask if would like to save before leaving?
+// Bug: campus area not updating on first time
+// Save logic: If open, stays open?
+
+// Client questions:
+// Save redirects?
+// Keep alerts?
+// Default view if there are no events or reviews?
 
 // This page is the intake form where admins can create new events
 const EventFormPage = () => {
@@ -30,27 +46,6 @@ const EventFormPage = () => {
       images: [],
       id: ""
   });
-
-  const onPublish = async (event: Event) => {
-    let eventID;
-        try {
-            // add event to database
-            const eventRef = await addDoc(collection(db, 'Events'), event);
-            // add id to event
-            await updateDoc(eventRef, { id: eventRef.id });
-
-            // add event id to user
-            const userRef = doc(db, 'Users', userid);
-            await updateDoc(userRef, { events: arrayUnion(eventRef.id) });
-            eventID = eventRef.id;
-            alert('Event published successfully');
-            return eventID;
-        } catch (error) {
-            console.error('Error publishing event: ', error);
-            alert('Failed to publish event');
-            return "";
-          }
-  }
 
   return (
     <div>

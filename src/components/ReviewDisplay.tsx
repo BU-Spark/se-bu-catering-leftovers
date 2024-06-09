@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography } from '@mui/material';
+import { Container, Typography, Grid } from '@mui/material';
 import { collection, query, onSnapshot, getDocs, orderBy } from 'firebase/firestore';
 import { firestore } from '../../firebaseConfig';
-import { Review } from '../app/functions/types';
+import { Review } from '../functions/types';
 import { ReviewCard } from "./ReviewCard";
+import { useRouter } from 'next/navigation';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface ReviewsDisplayProps {
   eventId: string;
@@ -11,6 +14,7 @@ interface ReviewsDisplayProps {
 
 const ReviewsDisplay: React.FC<ReviewsDisplayProps> = ({ eventId }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(firestore, `Reviews/${eventId}/Reviews`), (snapshot) => {
@@ -30,11 +34,14 @@ const ReviewsDisplay: React.FC<ReviewsDisplayProps> = ({ eventId }) => {
   };
 
   return (
-    <Container maxWidth="md" style={{ padding: '1em', paddingTop: "7.5em"}}>
-      <Typography variant="h4" marginBottom="0.7rem">Event Reviews</Typography>
-      {reviews.map((review) => (
-        <ReviewCard review={review}/>
-      ))}
+    <Container maxWidth="md" style={{ paddingTop: "7em"}}>
+        <IconButton onClick={()=> router.back()} style={{paddingLeft: "0em"}}>
+            <ArrowBackIcon color="secondary" />
+        </IconButton>
+        <Typography variant="h4" marginBottom="0.7rem">Event Reviews</Typography>
+        {reviews.map((review) => (
+          <ReviewCard review={review}/>
+        ))}
     </Container>
   );
 };

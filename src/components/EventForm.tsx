@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Button, TextField, Typography, Container, Grid, Paper, IconButton, FormControl, InputLabel, Select, SelectChangeEvent, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { styled } from "@mui/material/styles";
-import { props } from "../app/functions/styling";
+import { props } from "../functions/styling";
 import { FoodSelection } from '../components/FoodSelection';
 import { DateTimeSelection } from '../components/DateTimeSelection';
 import { ImageUpload } from '../components/ImageUpload';
-import { Event } from '../app/functions/types';
+import { Event } from '../functions/types';
 import { useRouter } from 'next/navigation';
 
 // TODO: 
@@ -15,11 +15,12 @@ import { useRouter } from 'next/navigation';
 
 interface EventFormProps {
     event: Event;
-    onPublish: (event: Event) => Promise<string>;
+    onPublish: (event: Event, userId: string) => Promise<string>;
 }
 
 // This component is the intake form where admins can create and modify new events
 const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
+    const userId = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
     const [formData, setFormData] = useState<Event>(event);
     const [campusArea, setCampusArea] = useState<string>(event.campusArea);
     const [foodItems, setFoodItems] = useState(event.foods);
@@ -58,11 +59,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const publishEvent = async (status: string) => {
         // Check if all required fields are filled out
         if (isValid()) {
-            const validFood = foodItems.filter(({ quantity, unit, item }) => quantity && unit && item) // Filter empty food items
+            const updatedEvent = updateEvent(status);
 
-            const updatedEvent = { ...formData, status: status, images: images, foods: validFood};
-
-            const eventUID = await onPublish(updatedEvent);
+            const eventUID = await onPublish(updatedEvent, userId);
 
             if (status === 'open') {
                 router.push('/EventPage');
@@ -73,6 +72,12 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
             return "";
         }
 
+    };
+
+    const updateEvent = (status: string) => {
+        const validFood = foodItems.filter(({ quantity, unit, item }) => quantity && unit && item) // Filter empty food items
+        const updatedEvent = { ...formData, status: status, images: images, foods: validFood};
+        return updatedEvent;
     };
 
     const setImageUrl = (url: string) => {
@@ -108,7 +113,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 </Grid>
                 <Grid container rowSpacing={2}>
                     <Grid item xs={12}>
-                        <ImageUpload setImageUrl={setImageUrl} removeImage={removeImage}/>
+                        <ImageUpload setImageUrl={setImageUrl} removeImage={removeImage} event={formData}/>
                     </Grid>
                     <Grid item xs={12}>
                         <StyledTextField
