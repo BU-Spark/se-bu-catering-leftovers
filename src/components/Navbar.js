@@ -5,6 +5,8 @@ import styled from 'styled-components';
 import Link from 'next/link';
 import { auth, firestore } from '../../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
 
 const Nav = styled.nav`
     display: flex;
@@ -52,19 +54,6 @@ const LogoImage = styled.img`
     }
 `;
 
-const MenuIcon = styled.img`
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-
-    @media (max-width: 768px) {
-        width: 5%;
-    }
-
-    @media (max-width: 480px) {
-        width: 5%;
-    }
-`;
 
 const MenuItems = styled.div`
     background-color: #fff;
@@ -139,7 +128,9 @@ const Navbar = ({ userRole }) => {
             <Logo>
                 <LogoImage src="/bu-logo.png" alt="Boston University Logo" />
             </Logo>
-            <MenuIcon src="/hamburger-icon.png" alt="Menu" onClick={toggleMenu} />
+            <IconButton onClick={toggleMenu}>
+                <MenuIcon fontSize="large" sx={{color:"#ab0101"}}/>
+            </IconButton>
             <MenuItems show={showMenu}>
                 <Link href="/" passHref>
                     <MenuItem as='a'>Home</MenuItem>

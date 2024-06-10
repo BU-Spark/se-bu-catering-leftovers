@@ -3,38 +3,45 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, getDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { firestore as db } from '../../../firebaseConfig'
+<<<<<<< HEAD:src/pages/EventPage/page.tsx
 import { Container, Grid, Typography } from '@mui/material';
 import {FormData} from '@/components/EventForm';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "@/components/styling";
+=======
+import { Button, Container, Grid, Typography } from '@mui/material';
+import Navbar from '../../components/Navbar';
+import EventCard from "../../components/EventCard"
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from "../../functions/styling";
+>>>>>>> edit_events:src/app/EventPage/page.tsx
 import FilterComponent from '../../components/FilterComponent';
+import { Event, User } from "../../functions/types";
+import { useRouter } from 'next/navigation';
 
-// Define the event interface
-export interface Event extends FormData {
-    id: string;
-}
-
-// Define the user interface
-export interface User {
-  email: string;
-  events: string[];
-  foodPref: string[];
-  locPref: string[];
-  name: string;
-  timePref: string[];
-  type: string;
-  uid: string;
-}
+// TODO:
+// Remove get user function
+// Bigger location on eventCard
+// Only Admin can use this
+// Remaining time only after event starts
 
 // Page to display all events
 const EventsPage = () => {
     const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-    
+    const [user, setUser] = useState<User>();
+    const router = useRouter();
+
     // Retrieve available events from database
     const [events, setEvents] = useState<Event[]>([]);
     useEffect(() => {
+        const fetchUser = async () => {
+            setUser(await getUser(userid));
+        }
+        
+        fetchUser();
+
         const fetchEvents = async () => {
             setEvents(await getEvents());
         };
@@ -42,7 +49,7 @@ const EventsPage = () => {
         const unsubscribe = onSnapshot(collection(db, 'Events'), (snapshot) => {
             fetchEvents();
         });
-    
+        
         return () => unsubscribe(); // Cleanup listener on unmount
     }, []);
 
@@ -72,29 +79,48 @@ const EventsPage = () => {
     
     // Filter events based on user preferences
     const handleFilterSelect = async (filter: string) => {
-      if (filter === "All") {
-        setEvents(await getEvents());
-        return;
-      } 
       const newEvents = await getEvents();
-      const user = await getUser(userid);
+      if (filter === "All") {
+        setEvents(newEvents);
+        return;
+      } else {
+        
       setEvents(newEvents.filter((event) => event.campusArea === filter));
+      }
+  };
 
+  // Route to event form
+  const routeToEventForm = () => {
+    router.push("/EventForm");
   };
 
   return (
   <div style={{background: "#FFF"}}>
-    <Navbar/>
     <ThemeProvider theme={theme}>
+    <Navbar/>
     <Container maxWidth="md" style={{paddingTop: "7em", background: "#FFF"}}>
       <Grid container alignItems="center" style={{paddingLeft: "0.5em"}}>
-        <Grid item xs>
-          <Typography variant="h4" fontSize="1em" fontWeight="600">
-            Current Events
-          </Typography>
-        </Grid> 
-        <Grid item>
-          <FilterComponent onSelectFilter={handleFilterSelect} />
+        <Grid item xs justifyContent={"center"} display= "column">
+          <Grid container xs justifyContent="center">
+          {user && user.type === "Admin" && (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={routeToEventForm}
+              style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}}
+              sx={{width: {xs:"50%", sm: "30%"}}} 
+              size="medium"
+            >
+                  <Typography variant="button">New Leftovers</Typography>
+            </Button>
+          )}
+          </Grid>
+          <Grid container xs justifyContent="space-between" alignItems="center">
+            <Typography variant="h4">
+              Current Events
+            </Typography>
+            <FilterComponent onSelectFilter={handleFilterSelect} />
+          </Grid>
         </Grid>
       </Grid>
       <Grid container xs={12}>

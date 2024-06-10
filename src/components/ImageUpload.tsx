@@ -1,20 +1,35 @@
-import React, { useState, useRef } from 'react';
-import { storage } from '../../firebaseConfig';
+import React, { useState, useRef, useEffect } from 'react';
+import { storage, firestore } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { v4 as uuidv4} from 'uuid';
 import { Button, Typography, Grid, IconButton } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
+import { Event } from '../functions/types';
+import { getImageUrls } from '../functions/imageUtils';
+import { arrayRemove, doc, collection, updateDoc } from 'firebase/firestore';
 
 interface ImageUploadProps {
     setImageUrl: (url: string) => void;
     removeImage: (url: string) => void;
+    event: Event;
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage}) => {
+export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage, event}) => {
     const [image, setImage] = useState<File | null>(null);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-    const fileInput = useRef(null);
+    const fileInput = useRef<HTMLInputElement | null>(null);
+
+    useEffect (() => {
+        const fetchImages = async (imagePaths: string[]) => {
+            const urls = await getImageUrls(imagePaths);
+            setUploadedImages(urls);
+        };
+        if (event.images) {
+            fetchImages(event.images);
+        }
+
+    }, []);
 
     const uploadImage = () => {
         if (image == null) return;
@@ -38,6 +53,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
 
         await deleteObject(storageRef);
 
+        // const eventRef = doc(firestore, `Events`, event.id as string);
+        // await updateDoc(eventRef, {images: arrayRemove(url)});
+
         setUploadedImages((prev) => prev.filter((img) => img !== url));
         removeImage(url);
     };
@@ -46,7 +64,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
             <Grid
                 padding={2} 
                 border={1} 
-                marginRight={1}
                 borderColor="#ab0101" 
                 borderRadius="12px"
                 textAlign="center"
@@ -61,11 +78,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
                         ref={fileInput}
                         onChange={handleImageChange}/>
                     <label htmlFor="contained-button-file">
-                        <IconButton onClick={() => fileInput.current.click()}>
+                        <IconButton onClick={() => fileInput.current?.click()}>
                             <FileUploadOutlinedIcon style={{fontSize:"60px"}} color="primary"/>
                         </IconButton>
                     </label>
-                        <Typography variant="body1">Upload Photo</Typography>
+                        <Typography variant="body2">Upload Photo</Typography>
                         {image && (
                             <Button variant="outlined" color="secondary" size="small" onClick={uploadImage}>
                                 <Typography sx={{fontSize:{xs:"0.7em", sm: "0.9em"},  maxWidth:{xs:"90px", sm: "200px"},  whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{"Upload " + image.name} </Typography>
@@ -76,6 +93,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
             {uploadedImages.length > 0 && (
                 <Grid
                     paddingLeft={1}
+                    marginLeft={1}
                     textAlign="center"
                     position="relative"
                     xs
@@ -102,15 +120,3 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
         </Grid>
     );
 };
-
-
-
-{/* <div>
-<input 
-    type="file" 
-    onChange={(event) => {
-        setImage(event.target.files ? event.target.files[0] : null)
-        }}/>
-<button onClick={uploadImage}>Upload Image</button>
-</div> */}
-

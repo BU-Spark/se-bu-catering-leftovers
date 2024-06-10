@@ -1,80 +1,31 @@
-"use client";
-
 import React, { useState } from 'react';
 import { Button, TextField, Typography, Container, Grid, Paper, IconButton, FormControl, InputLabel, Select, SelectChangeEvent, MenuItem } from '@mui/material';
-import {firestore} from '../../firebaseConfig';
-import { addDoc, updateDoc, arrayUnion, collection, doc, Timestamp } from 'firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import Navbar from '../components/Navbar';
-
 import { styled } from "@mui/material/styles";
-
-import { ThemeProvider } from '@mui/material/styles';
-import { props, theme } from "../components/styling";
-import { FoodItem, FoodSelection } from '../components/FoodSelection';
+import { props } from "../functions/styling";
+import { FoodSelection } from '../components/FoodSelection';
 import { DateTimeSelection } from '../components/DateTimeSelection';
 import { ImageUpload } from '../components/ImageUpload';
-
-// Define the event interface
-export interface FormData {
-    host: string;
-    name: string;
-    googleLocation: string;
-    location: string;
-    campusArea: string;
-    notes: string;
-    duration: string;
-    foodArrived: Timestamp;
-    foodAvailable: Timestamp;
-    foods: FoodItem[];
-    status: string;
-    images: string[];
-}
+import { Event } from '../functions/types';
+import { useRouter } from 'next/navigation';
 
 // TODO: 
-// Navigate Back
 // Only Admin can use this
-// Buttons: Preview, publish redirect
-// How to navigate into the form
-// Choose location Google API
-// Verify which units to add
-// Default Image?
-// Max number of images?
-// Another way to display images?
-// 
+// Choose location API
 
-// Reviews only for admin or everyone can see them
-// Anonymous reviews?
+interface EventFormProps {
+    event: Event;
+    onPublish: (event: Event, userId: string) => Promise<string>;
+}
 
-// Modulate Eventcard: time and image functions
-
-
-// This component is the intake form where admins can create new events
-const EventForm: React.FC = () => {
-    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-
-    // Create empty event
-    const [formData, setFormData] = useState<FormData>({
-        host: '',
-        name: '',
-        googleLocation: '',
-        location: '',
-        campusArea: '',
-        notes: '',
-        duration: '30',
-        foodArrived: Timestamp.fromDate(new Date()),
-        foodAvailable: Timestamp.fromDate(new Date()),
-        foods: [],
-        status: 'closed',
-        images: []
-    });
-    const [campusArea, setCampusArea] = useState<string>("");
-
-    // Create 3 empty food items
-    const [foodItems, setFoodItems] = useState([{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }]);
-
-    const [images, setImages] = useState<string[]>([]);
+// This component is the intake form where admins can create and modify new events
+const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
+    const userId = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+    const [formData, setFormData] = useState<Event>(event);
+    const [campusArea, setCampusArea] = useState<string>(event.campusArea);
+    const [foodItems, setFoodItems] = useState(event.foods);
+    const [images, setImages] = useState<string[]>(event.images);
+    const router = useRouter();
 
     // Save changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,40 +43,41 @@ const EventForm: React.FC = () => {
         });
     };
 
+    const isValid = () => {
+        const requiredFields: (keyof Event)[] = ['host', 'name', 'location', 'campusArea']; // Add other required fields if necessary
+        const missingFields = requiredFields.filter(field => formData[field] === '');
+
+        if (missingFields.length > 0) {
+            alert(`The following fields are missing: ${missingFields.join(', ')}`);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     // Save and publish event on website
     const publishEvent = async (status: string) => {
-        const requiredFields = ['host', 'name', 'location', 'campusArea']; // Add other required fields if necessary
-
         // Check if all required fields are filled out
-        const isFormValid = requiredFields.every(field => formData[field] !== '');
+        if (isValid()) {
+            const updatedEvent = updateEvent(status);
 
-        if (!isFormValid) {
+            const eventUID = await onPublish(updatedEvent, userId);
+
+            if (status === 'open') {
+                router.push('/EventPage');
+            }
+            return eventUID;
+        } else {
             alert('Please fill out all required fields before publishing the event');
-            return;
+            return "";
         }
 
-        const db = firestore;
-        try {
-            // add event to database
-            const eventRef = await addDoc(collection(db, 'Events'), {
-                ...formData,
-                status: status,
-                images: images,
-                foods: foodItems.filter(({ quantity, unit, item }) => quantity && unit && item).map(({ quantity, unit, item }) => ({ quantity, unit, item })), // Filter empty food items and delete id 
-            });
-            // add id to event
-            await updateDoc(eventRef, { id: eventRef.id });
+    };
 
-            // add event id to user
-            const userRef = doc(db, 'Users', userid);
-            await updateDoc(userRef, { events: arrayUnion(eventRef.id) });
-
-            alert('Event published successfully');
-        } catch (error) {
-            console.error('Error publishing event: ', error);
-            alert('Failed to publish event');
-          }
-        console.log(formData);
+    const updateEvent = (status: string) => {
+        const validFood = foodItems.filter(({ quantity, unit, item }) => quantity && unit && item) // Filter empty food items
+        const updatedEvent = { ...formData, status: status, images: images, foods: validFood};
+        return updatedEvent;
     };
 
     const setImageUrl = (url: string) => {
@@ -136,27 +88,32 @@ const EventForm: React.FC = () => {
         setImages(images.filter((image) => image !== url));
     };
 
+    const previewEvent = async () => {
+        const eventID = await publishEvent('saved');
+        if (eventID !== "") {
+            router.push(`/EventPreview/${eventID}`);
+        }
+    };
+
     return (
         <div style={{background: "#FFF6EE"}}>
-            <ThemeProvider theme={theme}>
-            <Navbar/>
             <Container maxWidth="sm" style={{padding: "1em", paddingTop: "7em", background: "#FFF6EE"}}>
             <Paper elevation={3} style={{ padding: '1em' }}>
                 <Grid container xs={12}>
                     <Grid item maxWidth={"40px"}>
-                        <IconButton >
+                        <IconButton onClick={() => router.back()}>
                             <ArrowBackIcon color="secondary"/>
                         </IconButton>
                     </Grid>
                     <Grid item textAlign={"center"} paddingRight={"40px" }xs>
-                        <Typography variant="h4" color="secondary" gutterBottom>
+                        <Typography fontSize="1.8rem" color="secondary" gutterBottom>
                             Create Event
                         </Typography>
                     </Grid>
                 </Grid>
                 <Grid container rowSpacing={2}>
                     <Grid item xs={12}>
-                        <ImageUpload setImageUrl={setImageUrl} removeImage={removeImage}/>
+                        <ImageUpload setImageUrl={setImageUrl} removeImage={removeImage} event={formData}/>
                     </Grid>
                     <Grid item xs={12}>
                         <StyledTextField
@@ -224,19 +181,18 @@ const EventForm: React.FC = () => {
                         </Button>
                     </Grid>
                     <Grid item width="30%">
-                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary">
+                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => previewEvent()}>
                         <Typography variant="button">Preview</Typography>
                         </Button>
                     </Grid>
                     <Grid item width="30%">
-                        <Button variant="contained" style={{borderRadius: "20px", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => publishEvent('open')}>
+                        <Button variant="outlined" style={{borderRadius: "20px", borderWidth:"3px", borderColor: "#ab0101", textTransform: "none"}} size="large" fullWidth color="primary" onClick={() => publishEvent('open')}>
                             <Typography variant="button">Publish</Typography>
                         </Button>
                     </Grid>
                 </Grid>
             </Paper>
             </Container>
-            </ThemeProvider>
         </div>
     );
 };

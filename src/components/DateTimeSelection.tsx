@@ -3,12 +3,12 @@ import { LocalizationProvider, DateTimePicker, TimePicker } from '@mui/x-date-pi
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Grid } from '@mui/material';
 import { Timestamp } from 'firebase/firestore';
-import { props } from './styling';
-import { FormData } from './EventForm';
+import { props } from '../functions/styling';
+import { Event } from '../functions/types';
 
 interface DateTimeSelectionProps {
-    formData: FormData;
-    setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+    formData: Event;
+    setFormData: React.Dispatch<React.SetStateAction<Event>>;
 }
 
 export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormData, formData }) => {
