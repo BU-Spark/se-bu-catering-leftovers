@@ -3,20 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, getDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { firestore as db } from '../../../firebaseConfig'
-<<<<<<< HEAD:src/pages/EventPage/page.tsx
-import { Container, Grid, Typography } from '@mui/material';
-import {FormData} from '@/components/EventForm';
-import Navbar from '../../components/Navbar';
-import EventCard from "../../components/EventCard"
-import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "@/components/styling";
-=======
 import { Button, Container, Grid, Typography } from '@mui/material';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "../../functions/styling";
->>>>>>> edit_events:src/app/EventPage/page.tsx
 import FilterComponent from '../../components/FilterComponent';
 import { Event, User } from "../../functions/types";
 import { useRouter } from 'next/navigation';
