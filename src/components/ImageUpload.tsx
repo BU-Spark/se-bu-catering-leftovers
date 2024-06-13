@@ -5,17 +5,17 @@ import { v4 as uuidv4} from 'uuid';
 import { Button, Typography, Grid, IconButton } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
-import { Event } from '../functions/types';
+import { Event, Review } from '../functions/types';
 import { getImageUrls } from '../functions/imageUtils';
-import { arrayRemove, doc, collection, updateDoc } from 'firebase/firestore';
 
 interface ImageUploadProps {
     setImageUrl: (url: string) => void;
     removeImage: (url: string) => void;
-    event: Event;
+    event?: Event;
+    review?: Review;
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage, event}) => {
+export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImage, event, review}) => {
     const [image, setImage] = useState<File | null>(null);
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const fileInput = useRef<HTMLInputElement | null>(null);
@@ -25,15 +25,27 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
             const urls = await getImageUrls(imagePaths);
             setUploadedImages(urls);
         };
-        if (event.images) {
-            fetchImages(event.images);
+        if (event) {
+            if (event.images) {
+                fetchImages(event.images);
+            }
+        } else if (review) {
+            if (review.images) {
+                fetchImages(review.images);
+            }
         }
 
     }, []);
 
     const uploadImage = () => {
+        if (uploadedImages.length >= 3) {
+            alert('You can upload up to 3 images.');
+            return;
+        }
+        
         if (image == null) return;
-        const storageRef = ref(storage, `images/${image.name + uuidv4()}`);
+        const directory = event ? `events/images/${image.name + uuidv4()}` : `reviews/images/${image.name + uuidv4()}`;
+        const storageRef = ref(storage, directory);
 
         uploadBytes(storageRef, image).then(() => {
             console.log('Upload is done!');
@@ -44,10 +56,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
         })
     };
     
+    // Check if image is uploaded
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setImage(event.target.files ? event.target.files[0] : null);
     };
 
+    // TODO: Has bug
+    // Delete image from storage
     const handleDeleteImage = async (url: string) => {
         const storageRef = ref(storage, url);
 
@@ -59,6 +74,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
         setUploadedImages((prev) => prev.filter((img) => img !== url));
         removeImage(url);
     };
+    
     return (
         <Grid container>
             <Grid

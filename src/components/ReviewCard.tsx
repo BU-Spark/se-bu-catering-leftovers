@@ -39,13 +39,15 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
         <Paper elevation={3} style={{ padding: '1em', marginBottom: '1em'}}>
             <Grid container paddingTop="10px">
                 <Grid container alignItems="center" marginBottom="0.5em">
-                    <AccountCircleIcon sx={{fontSize:"35px", color: "#eb8dbd"}}/>
-                    <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.reviewer}</Typography>
+                    <AccountCircleIcon sx={{fontSize:"40px", color: "#eb8dbd"}}/>
+                    <Grid item direction="column">
+                        <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.shareContact? review.name : "Anonymous"}</Typography>
+                        <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.shareContact? "Email: " + review.email : ""}</Typography>
+                    </Grid>
                 </Grid>
                 <Grid container direction="column">
                     <Grid container alignItems="center" marginBottom="8px">
-                        <StyledRating value={review.rating} precision={0.5} size="small" readOnly/>
-                        <Typography variant="body2" fontSize="0.8rem" color="textSecondary" marginLeft="5px">
+                        <Typography variant="body2" fontSize="0.8rem" color="textSecondary">
                             {formatDistanceToNow(review.date.toDate(), { addSuffix: true })}
                         </Typography>
                     </Grid>

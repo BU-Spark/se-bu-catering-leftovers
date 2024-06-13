@@ -187,6 +187,15 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                             </Grid>
                         )
                     )}
+                     {user && !user.events.includes(eventId) && !user.reviews.includes(eventId) && (
+                        <Grid container justifyContent={"center"}>
+                            <Button variant="outlined" color="primary" size="large"
+                                style={{borderRadius: "20px",  borderWidth:"3px", borderColor: "#ab0101", textTransform: "none", width:"200px" }} 
+                                onClick={() => router.push(`/FeedbackForm/${event.id}`)}>
+                                <Typography variant="button">I Picked Up Food</Typography>
+                            </Button>
+                        </Grid>
+                     )}
                     </Grid>
                 </Grid>
             </Paper>

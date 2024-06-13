@@ -26,7 +26,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [foodItems, setFoodItems] = useState(event.foods);
     const [images, setImages] = useState<string[]>(event.images);
     const router = useRouter();
-
+    const defaultImageUrl = "";
     // Save changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -76,7 +76,9 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
     const updateEvent = (status: string) => {
         const validFood = foodItems.filter(({ quantity, unit, item }) => quantity && unit && item) // Filter empty food items
-        const updatedEvent = { ...formData, status: status, images: images, foods: validFood};
+        const updatedImages = images.length === 0 ? [defaultImageUrl] : images;
+
+        const updatedEvent = { ...formData, status: status, images: updatedImages, foods: validFood};
         return updatedEvent;
     };
 

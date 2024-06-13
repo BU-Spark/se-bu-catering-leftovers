@@ -54,7 +54,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px" }}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>
-            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: '160px', objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
+            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: '180px', objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
               <Typography
                 variant="body1"
                 style={{ position: 'absolute', top: 20, right: 0, backgroundColor: "#195626", color: '#FFF',
@@ -67,10 +67,10 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         )}
         <Grid padding={2} paddingTop={1}>
           <Typography fontFamily="Inter" fontWeight="600" fontSize="1em">{event.name}</Typography>
-          <Grid container justifyContent={"space-between"}>
             <Grid item>
               <Typography variant="body1">{event.location}</Typography>
             </Grid>
+            <Grid container justifyContent={"space-between"}>
             <Grid item>
               <Typography variant="body1">
                 {`${foodAvailableDate}, ${foodAvailableTime} - ${endTimeFormatted}`}

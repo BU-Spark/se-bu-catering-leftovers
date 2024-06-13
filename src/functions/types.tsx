@@ -23,6 +23,7 @@ export interface Event {
     status: string;
     images: string[];
     id: string;
+    reviewedBy: string[];
 }
 
 // Define the user interface
@@ -35,15 +36,16 @@ export interface User {
   timePref: string[];
   type: string;
   uid: string;
+  reviews: string[];
 }
 
 // Define the review interface
 export interface Review {
   comment: string;
   date: Timestamp;
-  event: string;
   images: string[];
-  rating: number;
-  reviewer: string;
+  shareContact: boolean;
+  name: string;
+  email: string;
   id: string;
 }

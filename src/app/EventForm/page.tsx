@@ -44,7 +44,8 @@ const EventFormPage = () => {
       foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
       status: 'closed',
       images: [],
-      id: ""
+      id: "",
+      reviewedBy: []
   });
 
   return (
