@@ -114,10 +114,16 @@ const EventsPage = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Grid container xs={12}>
-        {events.map((event) => (
-          <EventCard event={event}/>
-        ))}
+      <Grid container xs={12} justifyContent={"center"}>
+        {events.length === 0 ? (
+            <Typography variant="body1" style={{ marginTop: 20, textAlign: "center", fontStyle: "italic" }}>
+                No events currently available. Stay tuned for updates!
+            </Typography>
+        ) : (
+            events.map((event) => (
+                <EventCard key={event.id} event={event} />
+            ))
+        )}
       </Grid>
     </Container>
     </ThemeProvider>

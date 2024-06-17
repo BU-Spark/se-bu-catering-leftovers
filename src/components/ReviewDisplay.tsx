@@ -39,9 +39,15 @@ const ReviewsDisplay: React.FC<ReviewsDisplayProps> = ({ eventId }) => {
             <ArrowBackIcon color="secondary" />
         </IconButton>
         <Typography variant="h4" marginBottom="0.7rem">Event Reviews</Typography>
-        {reviews.map((review) => (
-          <ReviewCard review={review}/>
-        ))}
+        {reviews.length === 0 ? (
+          <Typography variant="body1" style={{ marginTop: 20, textAlign: "center", fontStyle: "italic" }}>
+              There is no feedback currently available. Stay tuned for updates!
+          </Typography>
+        ) : (
+          reviews.map((review) => (
+            <ReviewCard review={review}/>
+          ))
+        )}
     </Container>
   );
 };

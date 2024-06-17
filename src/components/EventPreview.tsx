@@ -11,6 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { formatEventDateTime, formatEndTime } from '../functions/timeUtil';
 import { useRouter } from 'next/navigation';
 import { onOpen, onEnd } from '../functions/eventUtils';
+import Map from './Map';
 
 interface EventPreviewProps {
     eventId: string;
@@ -107,7 +108,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                 <IconButton onClick={()=> router.back()}>
                     <ArrowBackIcon color="secondary" />
                 </IconButton>
-                <Grid padding= "1em" paddingTop="0">
+                <Grid container padding= "1em" paddingTop="0">
                     <Grid container marginBottom="0.2em" alignItems="center">
                         <Typography variant="h4" style={{ display: 'inline-block', marginTop: "3px", padding:"5px", paddingRight:"0px"}}>
                             {event.name}
@@ -123,20 +124,19 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                             <ImageSlider imageUrls={imageUrls} remainingTime={remainingTime} />
                         </Grid>
                     </Grid>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Location: </Typography>
                             <Typography variant="body1" display="inline">{event.location}</Typography>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Food First Arrived: </Typography>
                             <Typography variant="body1" display="inline">{formatEventDateTime(event.foodArrived)}</Typography>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Food Available: </Typography>
                             <Typography variant="body1" display="inline">{`${formatEventDateTime(event.foodAvailable)} - ${formatEndTime(event)}`}</Typography>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6">Food List </Typography>
                             <ul>
                                 {event.foods.map((food, index) => (
@@ -144,15 +144,20 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                                 ))}
                             </ul>
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6">Notes </Typography>
                             <Typography variant="body1">{event.notes}</Typography>
                         </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="h6">Map </Typography>
+                        <Grid item xs={12} marginBottom="1em">
+                            <Typography variant="h6">Map </Typography>
+                        </Grid>
+                        <Grid container justifyContent="center">
+                            <Grid item sx={{width:{xs: "80%", sm: "70%"}}}>
+                                {event.Location && <Map location={event.Location} />}
+                            </Grid>                       
+                        </Grid>
                     </Grid>
-                    </Grid>
-                    <Grid xs justifyContent="flex-end">
+                    <Grid xs justifyContent="flex-end" paddingBottom="2em">
                     {user && user.type == "Admin" && user.events.includes(eventId) && (
                         event.status === "saved" ? (
                             <Grid container justifyContent={"center"}>
@@ -196,7 +201,6 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                             </Button>
                         </Grid>
                      )}
-                    </Grid>
                 </Grid>
             </Paper>
         </Container>

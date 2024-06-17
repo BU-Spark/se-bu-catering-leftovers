@@ -8,6 +8,10 @@ import { DateTimeSelection } from '../components/DateTimeSelection';
 import { ImageUpload } from '../components/ImageUpload';
 import { Event } from '../functions/types';
 import { useRouter } from 'next/navigation';
+import GeocodeSearch from './GeoCodeSearch';
+import Map from './Map';
+import { Location } from '../functions/types';
+import LocationDropdown from './LocationDropdown';
 
 // TODO: 
 // Only Admin can use this
@@ -18,6 +22,9 @@ interface EventFormProps {
     onPublish: (event: Event, userId: string) => Promise<string>;
 }
 
+const defaultAddress = {address: "Boston University, Commonwealth Avenue, ", abbreviatedAddress: "Boston University, Boston, MA", lat: "42.350499", lon: "-71.105399"};
+const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/bu-catering-leftovers.appspot.com/o/BUCL%20Default.jpeg?alt=media&token=e3b16eef-c37e-4407-85eb-f48cd1b501c2";
+
 // This component is the intake form where admins can create and modify new events
 const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const userId = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
@@ -25,13 +32,15 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [campusArea, setCampusArea] = useState<string>(event.campusArea);
     const [foodItems, setFoodItems] = useState(event.foods);
     const [images, setImages] = useState<string[]>(event.images);
+    const [location, setLocation] = useState<Location>(defaultAddress);
     const router = useRouter();
-    const defaultImageUrl = "";
+
     // Save changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
             campusArea: campusArea,
+            Location: location,
             [e.target.name]: e.target.value
         });
     };
@@ -126,7 +135,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} marginBottom={2}>
                         <StyledTextField
                             fullWidth
                             label="Event Name"
@@ -135,16 +144,22 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12} >
+                    <Grid container xs={12} justifyContent="center">
+                        <LocationDropdown onLocationSelect={setLocation} />
+                        <Grid item sx={{width:{xs: "70%", sm: "60%"}}} marginTop={2}>
+                            {location && <Map location={location} />}
+                        </Grid> 
+                    </Grid>
+                    <Grid item xs={12}>
                         <StyledTextField
                             fullWidth
-                            label="Location"
+                            label="Location Details"
                             name="location"
                             value={formData.location}
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid item xs={12} marginBottom={2}>
+                    <Grid item xs={12}>
                         <FormControl fullWidth sx={{...props}}>
                             <InputLabel id="campus-area-label">Campus Area</InputLabel>
                             <Select

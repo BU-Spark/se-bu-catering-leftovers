@@ -9,6 +9,7 @@ import { Timestamp } from 'firebase/firestore';
 import { Event } from '../../functions/types';
 import { v4 as uuidv4 } from 'uuid';
 import { onPublish } from '../../functions/eventUtils';
+import { Location } from '@/functions/types';
 
 // TODO:
 // Bigger location on eventCard
@@ -34,7 +35,7 @@ const EventFormPage = () => {
   const [newEvent, setNewEvent] = useState<Event>({
       host: '',
       name: '',
-      googleLocation: '',
+      Location: {} as Location,
       location: '',
       campusArea: '',
       notes: '',

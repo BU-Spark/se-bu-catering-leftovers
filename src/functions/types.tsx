@@ -8,11 +8,19 @@ export interface FoodItem {
     item: string;
 }
 
+// Interface for the location of the event
+export interface Location {
+  address: string;
+  abbreviatedAddress: string;
+  lat: string;
+  lon: string;
+}
+
 // Define the event interface
 export interface Event {
     host: string;
     name: string;
-    googleLocation: string;
+    Location: Location;
     location: string;
     campusArea: string;
     notes: string;
