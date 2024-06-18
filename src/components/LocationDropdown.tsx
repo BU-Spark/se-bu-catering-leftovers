@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
-import { locations } from '../functions/locations';
-import { Location } from '../functions/types';
+import { locations } from './locations';
+import { Location } from './types';
 import zIndex from '@mui/material/styles/zIndex';
 
 interface LocationDropdownProps {

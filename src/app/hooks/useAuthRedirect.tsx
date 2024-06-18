@@ -14,15 +14,25 @@ const useAuthRedirect = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRole = localStorage.getItem('userRole');
-                if (userRole) {
-                    // Save user role to Firestore
-                    await setDoc(doc(firestore, 'Users', user.uid), {
+                const userDocRef = doc(firestore, 'Users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (!userDoc.exists() && userRole) {
+                    await setDoc(userDocRef, {
                         uid: user.uid,
                         email: user.email,
                         role: userRole
                     });
                     localStorage.removeItem('userRole');
-                    router.push('/'); //redirect back to homepage
+                }
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (userData.role === 'Admin') {
+                        router.push('/admin/account'); // Redirect to admin account page
+                    } else {
+                        router.push('/'); // Redirect to user home page
+                    }
                 }
             }
         });
@@ -34,3 +44,4 @@ const useAuthRedirect = () => {
 };
 
 export { useAuthRedirect };
+

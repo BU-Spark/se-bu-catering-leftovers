@@ -1,14 +1,14 @@
 .container {
     font-family: Arial, sans-serif;
     width: 100%;
-    max-width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 .main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 0;
+    padding: 40px 20px;
     font-weight: bold;
     font-size: 20px;
     width: 100%;
@@ -17,6 +17,7 @@
 .hero {
     text-align: center;
     position: relative;
+    height: 80vh;
 }
 
 .hero h1 {
@@ -43,14 +44,17 @@
     font-size: medium;
     border-radius: 30px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    &:hover{
-        background-color: darkred;
-    }
+    transition: background-color 0.3s;
+}
+
+.loginButton:hover {
+    background-color: darkred;
 }
 
 .howItWorks {
     text-align: center;
     font-size: large;
+    margin: 40px 0;
 }
 
 .steps {
@@ -58,6 +62,8 @@
     justify-content: space-around;
     margin-top: 20px;
     gap: 30px;
+    flex-wrap: wrap;
+    padding-top: 80px;
 }
 
 .step {
@@ -79,9 +85,10 @@
     cursor: pointer;
     transition: background-color 0.3s;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    &:hover {
-        background-color: #f4c8c8;
-    }
+}
+
+.step:hover {
+    background-color: #f4c8c8;
 }
 
 .signupButton {
@@ -93,10 +100,12 @@
     margin: 10px;
     border-radius: 30px;
     font-size: medium;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);;
-    &:hover{
-        background-color: darkred;
-    }
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.3s;
+}
+
+.signupButton:hover {
+    background-color: darkred;
 }
 
 .faq {
@@ -114,7 +123,7 @@
         font-size: 20px;
     }
 
-    .heroContainer {
+    .hero {
         height: 50vh;
     }
 
@@ -122,6 +131,13 @@
         padding: 8px 16px;
         font-size: 14px;
     }
+
+    .step {
+        width: 120px;
+        height: 120px;
+    }
+
+    .steps {
+        padding-top: 60px;
+    }
 }
-
-

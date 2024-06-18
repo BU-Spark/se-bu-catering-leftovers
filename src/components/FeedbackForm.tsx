@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Button, TextField, Typography, Container, Grid, Paper, IconButton, Checkbox, FormControlLabel } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { styled } from "@mui/material/styles";
-import { props } from "../functions/styling";
+import { props } from "./styling";
 import { ImageUpload } from '../components/ImageUpload';
-import { Review, Event } from '../functions/types';
+import { Review, Event } from './types';
 import { useRouter } from 'next/navigation';
 
 interface FeedbackFormProps {

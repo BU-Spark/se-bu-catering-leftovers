@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { Typography, Paper, Grid } from '@mui/material';
-import { Event } from "../functions/types"
-import { formatEventTimes, calculateRemainingTime } from '../functions/timeUtil';
-import { getImageUrl } from '../functions/imageUtils';
+import { Event } from "./types"
+import { formatEventTimes, calculateRemainingTime } from './timeUtil';
+import { getImageUrl } from './imageUtils';
 import { useRouter } from 'next/navigation';
-import { onEnd } from '../functions/eventUtils';
+import { onEnd } from './eventUtils';
 
 interface EventCardProps {
     event: Event;

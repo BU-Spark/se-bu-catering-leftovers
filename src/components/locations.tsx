@@ -1,4 +1,4 @@
-import { Location } from '../functions/types';
+import { Location } from './types';
   
   export const locations: Location[] = [
     { address: 'Boston, MA, USA', abbreviatedAddress: "BU", lat: "42.3601", lon: "-71.0589" },

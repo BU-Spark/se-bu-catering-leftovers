@@ -4,7 +4,7 @@ import React from 'react';
 import ReviewsDisplay from '../../../components/ReviewDisplay';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../../functions/styling";
+import { theme } from "../../../components/styling";
 
 // TODO:
 // Only Admin can use this

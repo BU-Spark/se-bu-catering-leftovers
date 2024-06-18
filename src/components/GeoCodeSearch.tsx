@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Location } from '../functions/types';
+import { Location } from './types';
 import { TextField, IconButton, List, ListItem, ListItemText, ListItemIcon } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from '@emotion/styled';
-import { props } from '../functions/styling';
+import { props } from './styling';
 
 interface GeocodeSearchProps {
   onLocationSelect: (location: Location) => void;

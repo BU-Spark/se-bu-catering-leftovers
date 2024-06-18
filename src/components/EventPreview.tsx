@@ -3,14 +3,14 @@ import { Typography, Container, Button, Paper, Grid, IconButton } from '@mui/mat
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
 import { firestore } from '../../firebaseConfig';
-import { getImageUrls } from '../functions/imageUtils';
-import { Event, User } from '../functions/types';
-import { calculateRemainingTime } from '../functions/timeUtil';
+import { getImageUrls } from './imageUtils';
+import { Event, User } from './types';
+import { calculateRemainingTime } from './timeUtil';
 import { ImageSlider } from './ImageSlider';
 import EditIcon from '@mui/icons-material/Edit';
-import { formatEventDateTime, formatEndTime } from '../functions/timeUtil';
+import { formatEventDateTime, formatEndTime } from './timeUtil';
 import { useRouter } from 'next/navigation';
-import { onOpen, onEnd } from '../functions/eventUtils';
+import { onOpen, onEnd } from './eventUtils';
 import Map from './Map';
 
 interface EventPreviewProps {

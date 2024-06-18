@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Paper, Grid, Typography } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Rating from '@mui/material/Rating';
-import { Review } from '../functions/types';
-import { getImageUrls } from '../functions/imageUtils';
+import { Review } from './types';
+import { getImageUrls } from './imageUtils';
 import { formatDistanceToNow } from 'date-fns';
 import { styled } from 'styled-components';
 

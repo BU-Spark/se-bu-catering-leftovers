@@ -7,9 +7,9 @@ import { Button, Container, Grid, Typography } from '@mui/material';
 import Navbar from '../../components/Navbar';
 import EventCard from "../../components/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../functions/styling";
+import { theme } from "@/components/styling";
 import FilterComponent from '../../components/FilterComponent';
-import { Event, User } from "../../functions/types";
+import { Event, User } from "@/components/types";
 import { useRouter } from 'next/navigation';
 
 // TODO:

@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react';
 import EventForm from '../../../components/EventForm';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../../functions/styling";
+import { theme } from "../../../components/styling";
 import { doc, getDoc } from 'firebase/firestore';
-import { Event } from '../../../functions/types';
+import { Event } from '../../../components/types';
 import { firestore as db} from '../../../../firebaseConfig';
 import { notFound } from 'next/navigation';
-import { onUpdate } from '../../../functions/eventUtils';
+import { onUpdate } from '../../../components/eventUtils';
 
 // This page is the intake form where admins can create new events
 const EditEventFormPage = ({ params }: { params: { id: string } }) => {

@@ -1,4 +1,3 @@
-// index.tsx
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -11,6 +10,7 @@ import FAQList from '../components/faq.js';
 import { signInWithRedirect, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { firebaseApp, provider } from '../../firebaseConfig';
+import { useRouter } from 'next/router';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -25,8 +25,9 @@ const SectionContainer = styled.section`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 400px;
+  height: auto;
   text-align: center;
+  padding: 40px 20px;
 `;
 
 const ButtonContainer = styled.div`
@@ -39,7 +40,7 @@ const ButtonContainer = styled.div`
 const HeroContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 80vh;
   overflow: hidden;
   margin: 0;
   padding: 0;
@@ -64,10 +65,10 @@ const handleLogin = async () => {
   }
 };
 
-const handleSignUp = async (userRole: 'Student' | 'Administrator') => {
+const handleSignUp = async () => {
   try {
-    console.log("Redirecting for sign-up:", userRole);
-    localStorage.setItem('userRole', userRole);
+    console.log("Redirecting for sign-up");
+    localStorage.setItem('userRole', 'User');
     await signInWithRedirect(auth, provider);
   } catch (error) {
     console.error("Failed to redirect for sign-up:", error);
@@ -78,6 +79,7 @@ const Home = () => {
   const [mounted, setMounted] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -98,6 +100,13 @@ const Home = () => {
             const userData = userDoc.data();
             setUserName(userData.name);
             setUserRole(userData.role);
+            console.log("User role from Firestore:", userData.role);
+            if (userData.role === 'Administrator') {
+              console.log('Redirecting admin to /EventPage');
+              router.push('/EventPage');
+            } else {
+              console.log('User is not an admin, role:', userData.role);
+            }
           } else if (storedUserRole) {
             const displayName = user.displayName || 'Unknown';
             await setDoc(userDocRef, {
@@ -109,6 +118,12 @@ const Home = () => {
             console.log('User signed up successfully');
             setUserName(displayName);
             setUserRole(storedUserRole);
+            if (storedUserRole === 'Admin') {
+              console.log('Redirecting admin to /EventPage after sign-up');
+              router.push('/EventPage');
+            } else {
+              console.log('User signed up as non-admin, role:', storedUserRole);
+            }
             localStorage.removeItem('userRole');
           }
         }
@@ -116,14 +131,26 @@ const Home = () => {
 
       return () => unsubscribe();
     }
-  }, [mounted]);
+  }, [mounted, router]);
+
+  //Admin Token
+  const handleAdminSignUp = async () => {
+    const adminToken = prompt("Enter administrator token:");
+    if (adminToken === "Leftovers") {
+      localStorage.setItem('userRole', 'Administrator');
+    } else {
+      alert("Invalid token. You will be signed up as a student.");
+      localStorage.setItem('userRole', 'Student');
+    }
+    await handleSignUp();
+  };
 
   if (!mounted) return null;
 
   return (
       <div>
         <GlobalStyle />
-        <Navbar userRole={userRole} />  {/* Pass userRole as a prop */}
+        <Navbar userRole={userRole} />
         <div className={styles.container}>
           <Head>
             <title>Reduce Wasted Food</title>
@@ -151,16 +178,10 @@ const Home = () => {
               <section className={styles.howItWorks}>
                 <h2>How it Works</h2>
                 <section className={styles.steps}>
-                  <button className={styles.step}>
+                  <button className={styles.step} onClick={handleAdminSignUp}>
                     <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45} />
                     Sign up
                   </button>
-                  <button className={styles.step}>
-                    <Image src="/terms-conditions.svg" alt="Paper and Pencil Icon" width={45} height={45} />
-                    Agree on Terms
-                  </button>
-                </section>
-                <section className={styles.steps}>
                   <button className={styles.step}>
                     <Image src="/notification.svg" alt="Bell icon" width={45} height={45} />
                     Get notified
@@ -173,13 +194,6 @@ const Home = () => {
               </section>
             </SectionContainer>
 
-            <ButtonContainer>
-              <section className={styles.signup}>
-                <button className={styles.signupButton} onClick={() => handleSignUp('Student')}>Student Sign Up</button>
-                <button className={styles.signupButton} onClick={() => handleSignUp('Administrator')}>Administrator Sign Up</button>
-              </section>
-            </ButtonContainer>
-
             <section className={styles.faq}>
               <h2>FAQ</h2>
               <FAQList />
@@ -191,3 +205,4 @@ const Home = () => {
 };
 
 export default Home;
+

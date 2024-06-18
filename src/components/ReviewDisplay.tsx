@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Typography, Grid } from '@mui/material';
 import { collection, query, onSnapshot, getDocs, orderBy } from 'firebase/firestore';
 import { firestore } from '../../firebaseConfig';
-import { Review } from '../functions/types';
+import { Review } from './types';
 import { ReviewCard } from "./ReviewCard";
 import { useRouter } from 'next/navigation';
 import IconButton from '@mui/material/IconButton';

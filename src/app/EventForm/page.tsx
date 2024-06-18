@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import EventForm from '../../components/EventForm';
 import Navbar from '../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../functions/styling";
+import { theme } from "@/components/styling";
 import { Timestamp } from 'firebase/firestore';
-import { Event } from '../../functions/types';
+import { Event } from '@/components/types';
 import { v4 as uuidv4 } from 'uuid';
-import { onPublish } from '../../functions/eventUtils';
-import { Location } from '@/functions/types';
+import { onPublish } from '@/components/eventUtils';
+import { Location } from '@/components/types';
 
 // TODO:
 // Bigger location on eventCard

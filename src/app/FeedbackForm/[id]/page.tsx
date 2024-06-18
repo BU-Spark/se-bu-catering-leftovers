@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../../functions/styling";
+import { theme } from "../../../components/styling";
 import { FeedbackForm } from '../../../components/FeedbackForm';
 import { Timestamp } from 'firebase/firestore';
-import { Review, Event } from '../../../functions/types';
-import { onSubmit } from '../../../functions/feedbackUtils';
+import { Review, Event } from '../../../components/types';
+import { onSubmit } from '../../../components/feedbackUtils';
 import { firestore as db } from '../../../../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';

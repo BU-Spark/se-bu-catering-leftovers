@@ -140,16 +140,6 @@ const Navbar = ({ userRole }) => {
                         <MenuItem as="a">My Account</MenuItem>
                     </Link>
                 )}
-                {role === 'Administrator' && (
-                    <Link href="/admin" passHref>
-                        <MenuItem as='a'>Admin Dashboard</MenuItem>
-                    </Link>
-                )}
-                {role === 'Student' && (
-                    <Link href="/student" passHref>
-                        <MenuItem as='a'>Student Dashboard</MenuItem>
-                    </Link>
-                )}
                 <Link href="/faq" passHref>
                     <MenuItem as='a'>FAQ</MenuItem>
                 </Link>

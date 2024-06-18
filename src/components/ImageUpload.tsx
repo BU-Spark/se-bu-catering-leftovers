@@ -5,8 +5,8 @@ import { v4 as uuidv4} from 'uuid';
 import { Button, Typography, Grid, IconButton } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
-import { Event, Review } from '../functions/types';
-import { getImageUrls } from '../functions/imageUtils';
+import { Event, Review } from './types';
+import { getImageUrls } from './imageUtils';
 
 interface ImageUploadProps {
     setImageUrl: (url: string) => void;

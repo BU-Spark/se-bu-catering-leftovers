@@ -4,7 +4,7 @@ import React from 'react';
 import EventPreview from '../../../components/EventPreview';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../../functions/styling";
+import { theme } from "../../../components/styling";
 
 // This page shows the complete view of an event
 const EventPreviewPage = ({ params }: { params: { id: string } })  => {
