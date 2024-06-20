@@ -136,7 +136,7 @@ const Home = () => {
   //Admin Token
   const handleAdminSignUp = async () => {
     const adminToken = prompt("Enter administrator token:");
-    if (adminToken === "Leftovers") {
+    if (adminToken === "Terriers2024!") {
       localStorage.setItem('userRole', 'Administrator');
     } else {
       alert("Invalid token. You will be signed up as a student.");
