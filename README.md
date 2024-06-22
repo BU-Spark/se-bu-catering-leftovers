@@ -1,43 +1,23 @@
-# TEMPLATE-base-repo
+[![Netlify Status](https://api.netlify.com/api/v1/badges/589b5f54-8e95-4ceb-950f-262659a1bc4c/deploy-status)](https://app.netlify.com/sites/bu-sustainability-leftovers/deploys)
+# BU Sustainability Catering Leftovers
 
-# Add Users
-To add yourself to the repository, open a Pull Request modifying `COLLABORATORS`, entering your GitHub username in a newline.
+## Overview
+The BU Leftover Catering application is a solution aimed at reducing food waste on campus by facilitating the redistribution of leftover food from catering events within the specified time constraints.
 
-All Pull Requests must follow the Pull Request Template, with a title formatted like such `[Project Name]: <Descriptive Title>`
+## Core Features
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+1. Notification System: Allows food hosts to notify interested parties about avaliable food following catering events
+2. Food Safety Compliance: Incorporates a timer-based function to ensure food is not distributed more than four hours after being first served.
+3. Geographic Mapping: Maps the location of events for easy recipient navigation.
+4. Tracking and Analytics: Tracks metrics such as reduced waste volume, types of food claimed, number of people engaged, speed of food pick-ups, and remaining food.
 
 ## Getting Started
-
-First, run the development server:
-
 ```bash
+cd se-bu-catering-leftovers
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/index.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Deployment
+To view our project deployed checkout: https://bu-sustainability-leftovers.netlify.app/
