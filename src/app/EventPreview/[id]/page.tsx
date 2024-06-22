@@ -4,19 +4,26 @@ import React from 'react';
 import EventPreview from '../../../components/EventPreview';
 import Navbar from '../../../components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "../../../components/styling";
+import { theme } from "@/components/styling";
+import { createGlobalStyle } from 'styled-components';
 
-// This page shows the complete view of an event
-const EventPreviewPage = ({ params }: { params: { id: string } })  => {
+const GlobalStyle = createGlobalStyle`
+  body {
+    font-family: Arial, sans-serif;
+  }
+`;
+
+const EventPreviewPage = ({ params }: { params: { id: string } }) => {
     const eventId = params.id;
 
     return (
-      <div style={{background: "#FFF6EE"}}>
-        <Navbar/>
-        <ThemeProvider theme={theme}>
-          <EventPreview eventId={eventId}/>
-        </ThemeProvider>
-      </div>
+        <div style={{background: "#FFF6EE"}}>
+            <GlobalStyle />
+            <Navbar />
+            <ThemeProvider theme={theme}>
+                <EventPreview eventId={eventId} />
+            </ThemeProvider>
+        </div>
     );
 };
 

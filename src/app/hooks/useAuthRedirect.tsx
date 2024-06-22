@@ -28,8 +28,10 @@ const useAuthRedirect = () => {
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    if (userData.role === 'Admin') {
+                    if (userData.role === 'Administrator') {
                         router.push('/admin/account'); // Redirect to admin account page
+                    } else if (userData.role === 'Student') {
+                        router.push('/student/account'); // Redirect to student account page
                     } else {
                         router.push('/'); // Redirect to user home page
                     }
@@ -44,4 +46,3 @@ const useAuthRedirect = () => {
 };
 
 export { useAuthRedirect };
-

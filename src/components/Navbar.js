@@ -54,7 +54,6 @@ const LogoImage = styled.img`
     }
 `;
 
-
 const MenuItems = styled.div`
     background-color: #fff;
     display: ${({ show }) => (show ? 'block' : 'none')};
@@ -155,3 +154,4 @@ const Navbar = ({ userRole }) => {
 };
 
 export default Navbar;
+

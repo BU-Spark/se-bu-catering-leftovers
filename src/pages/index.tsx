@@ -65,10 +65,10 @@ const handleLogin = async () => {
   }
 };
 
-const handleSignUp = async () => {
+const handleSignUp = async (role: string) => {
   try {
     console.log("Redirecting for sign-up");
-    localStorage.setItem('userRole', 'User');
+    localStorage.setItem('userRole', role);
     await signInWithRedirect(auth, provider);
   } catch (error) {
     console.error("Failed to redirect for sign-up:", error);
@@ -104,6 +104,9 @@ const Home = () => {
             if (userData.role === 'Administrator') {
               console.log('Redirecting admin to /EventPage');
               router.push('/EventPage');
+            } else if (userData.role === 'Student') {
+              console.log('Redirecting student to /student/account');
+              router.push('/student/account');
             } else {
               console.log('User is not an admin, role:', userData.role);
             }
@@ -118,9 +121,12 @@ const Home = () => {
             console.log('User signed up successfully');
             setUserName(displayName);
             setUserRole(storedUserRole);
-            if (storedUserRole === 'Admin') {
+            if (storedUserRole === 'Administrator') {
               console.log('Redirecting admin to /EventPage after sign-up');
               router.push('/EventPage');
+            } else if (storedUserRole === 'Student') {
+              console.log('Redirecting student to /student/account after sign-up');
+              router.push('/student/account');
             } else {
               console.log('User signed up as non-admin, role:', storedUserRole);
             }
@@ -133,16 +139,20 @@ const Home = () => {
     }
   }, [mounted, router]);
 
-  //Admin Token
+  // Admin Token
   const handleAdminSignUp = async () => {
     const adminToken = prompt("Enter administrator token:");
     if (adminToken === "Terriers2024!") {
-      localStorage.setItem('userRole', 'Administrator');
+      await handleSignUp('Administrator');
     } else {
       alert("Invalid token. You will be signed up as a student.");
-      localStorage.setItem('userRole', 'Student');
+      await handleSignUp('Student');
     }
-    await handleSignUp();
+  };
+
+  // Student Sign Up
+  const handleStudentSignUp = async () => {
+    await handleSignUp('Student');
   };
 
   if (!mounted) return null;
@@ -180,7 +190,11 @@ const Home = () => {
                 <section className={styles.steps}>
                   <button className={styles.step} onClick={handleAdminSignUp}>
                     <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45} />
-                    Sign up
+                    Sign up as Admin
+                  </button>
+                  <button className={styles.step} onClick={handleStudentSignUp}>
+                    <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45} />
+                    Sign up as Student
                   </button>
                   <button className={styles.step}>
                     <Image src="/notification.svg" alt="Bell icon" width={45} height={45} />
@@ -205,4 +219,3 @@ const Home = () => {
 };
 
 export default Home;
-

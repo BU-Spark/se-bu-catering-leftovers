@@ -9,51 +9,49 @@ import EventCard from "../../components/EventCard";
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "@/components/styling";
 import FilterComponent from '../../components/FilterComponent';
-import { Event, User } from "@/components/types";
+import { Event, User } from '@/components/types';
 import { useRouter } from 'next/navigation';
-import { createGlobalStyle } from 'styled-components';
+import { getAuth } from 'firebase/auth';
 
-const GlobalStyle = createGlobalStyle`
-  body {
-    font-family: Arial, sans-serif;
-  }
-`;
-
-// TODO:
-// Remove get user function
-// Bigger location on eventCard
-// Only Admin can use this
-// Remaining time only after event starts
-
-// Page to display all events
-const EventsPage = () => {
-    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+// Page to display all events for students
+const StudentEventsPage = () => {
     const [user, setUser] = useState<User>();
-    const router = useRouter();
-
-    // Retrieve available events from database
     const [events, setEvents] = useState<Event[]>([]);
+    const router = useRouter();
+    const auth = getAuth();
+
     useEffect(() => {
         const fetchUser = async () => {
-            setUser(await getUser(userid));
+            const currentUser = auth.currentUser;
+            if (currentUser) {
+                const userDoc = await getDoc(doc(db, 'Users', currentUser.uid));
+                setUser(userDoc.data() as User);
+            }
         };
-
-        fetchUser();
 
         const fetchEvents = async () => {
             setEvents(await getEvents());
         };
 
-        const unsubscribe = onSnapshot(collection(db, 'Events'), (snapshot) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+            if (user) {
+                fetchUser();
+            } else {
+                setUser(undefined);
+            }
+        });
+
+        const unsubscribeEvents = onSnapshot(collection(db, 'Events'), () => {
             fetchEvents();
         });
 
-        return () => unsubscribe(); // Cleanup listener on unmount
-    }, []);
+        return () => {
+            unsubscribeAuth();
+            unsubscribeEvents();
+        };
+    }, [auth]);
 
-    // Retrieve all events from database
     const getEvents = async (): Promise<Event[]> => {
-        setEvents([]);
         const eventsCollection = collection(db, 'Events');
         const eventsQuery = query(eventsCollection, orderBy("foodAvailable", "desc"));
         const eventsSnapshot = await getDocs(eventsQuery);
@@ -63,54 +61,42 @@ const EventsPage = () => {
             ...doc.data()
         })) as Event[];
 
-        // Filter out events that are not open
         newEvents = newEvents.filter((event) => event.status === "open");
 
         return newEvents;
     };
 
-    // Retrieve user from database
-    const getUser = async (userid: string) => {
-        // Placeholder for user authentication
-        const user = await getDoc(doc(db, 'Users', userid));
-        return user.data() as User;
-    };
-
-    // Filter events based on user preferences
     const handleFilterSelect = async (filter: string) => {
         const newEvents = await getEvents();
         if (filter === "All") {
             setEvents(newEvents);
-            return;
         } else {
             setEvents(newEvents.filter((event) => event.campusArea === filter));
         }
     };
 
-    // Route to event form
-    const routeToEventForm = () => {
-        router.push("/EventForm");
+    const routeToPickedUpFood = () => {
+        alert("Food picked up");
     };
 
     return (
         <div style={{ background: "#FFF" }}>
             <ThemeProvider theme={theme}>
-                <GlobalStyle />
                 <Navbar />
                 <Container maxWidth="md" style={{ paddingTop: "7em", background: "#FFF" }}>
                     <Grid container alignItems="center" style={{ paddingLeft: "0.5em" }}>
                         <Grid item xs justifyContent={"center"} display="column">
                             <Grid container xs justifyContent="center">
-                                {user && user.type === "Admin" && (
+                                {user && (
                                     <Button
                                         variant="outlined"
                                         color="primary"
-                                        onClick={routeToEventForm}
+                                        onClick={routeToPickedUpFood}
                                         style={{ borderRadius: "20px", borderWidth: "3px", borderColor: "#ab0101", textTransform: "none" }}
                                         sx={{ width: { xs: "50%", sm: "30%" } }}
                                         size="medium"
                                     >
-                                        <Typography variant="button">New Leftovers</Typography>
+                                        <Typography variant="button">I picked up food</Typography>
                                     </Button>
                                 )}
                             </Grid>
@@ -139,6 +125,5 @@ const EventsPage = () => {
     );
 };
 
-export default EventsPage;
-
+export default StudentEventsPage;
 

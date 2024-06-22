@@ -10,6 +10,13 @@ import { Event } from '@/components/types';
 import { v4 as uuidv4 } from 'uuid';
 import { onPublish } from '@/components/eventUtils';
 import { Location } from '@/components/types';
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    font-family: Arial, sans-serif;
+  }
+`;
 
 // TODO:
 // Bigger location on eventCard
@@ -29,34 +36,35 @@ import { Location } from '@/components/types';
 
 // This page is the intake form where admins can create new events
 const EventFormPage = () => {
-  const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
 
-  // Create empty event
-  const [newEvent, setNewEvent] = useState<Event>({
-      host: '',
-      name: '',
-      Location: {} as Location,
-      location: '',
-      campusArea: '',
-      notes: '',
-      duration: '30',
-      foodArrived: Timestamp.fromDate(new Date()),
-      foodAvailable: Timestamp.fromDate(new Date()),
-      foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
-      status: 'closed',
-      images: [],
-      id: "",
-      reviewedBy: []
-  });
+    // Create empty event
+    const [newEvent, setNewEvent] = useState<Event>({
+        host: '',
+        name: '',
+        Location: {} as Location,
+        location: '',
+        campusArea: '',
+        notes: '',
+        duration: '30',
+        foodArrived: Timestamp.fromDate(new Date()),
+        foodAvailable: Timestamp.fromDate(new Date()),
+        foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
+        status: 'closed',
+        images: [],
+        id: "",
+        reviewedBy: []
+    });
 
-  return (
-    <div>
-      <ThemeProvider theme={theme}>
-      <Navbar/>
-        <EventForm event={newEvent} onPublish={onPublish}/>
-      </ThemeProvider>
-    </div>
-  );
+    return (
+        <div>
+            <ThemeProvider theme={theme}>
+                <GlobalStyle />
+                <Navbar />
+                <EventForm event={newEvent} onPublish={onPublish} />
+            </ThemeProvider>
+        </div>
+    );
 };
 
 export default EventFormPage;
