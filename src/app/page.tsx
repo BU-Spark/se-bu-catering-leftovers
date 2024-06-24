@@ -114,6 +114,7 @@ const Home = () => {
               foodPref: "",
               events: [],
               reviews: [],
+              agreedToTerms: false,
             });
 
             console.log('User signed up successfully');

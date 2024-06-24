@@ -10,8 +10,10 @@ const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'Admin')) {
+    if (!loading && !user ){
       router.push('/');
+    } else if (!loading && user && user.role !== 'Admin'){
+      router.push('/events/explore');
     }
   }, [user, loading, router]);
 

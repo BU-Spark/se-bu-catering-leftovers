@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaCaretDown } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
-import { useRouter } from 'next/router';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 import { firebaseApp } from '@/../firebaseConfig';
 
 const PageContainer = styled.div`
@@ -150,28 +150,6 @@ const TermsConditionsPage: React.FC = () => {
     const auth = getAuth(firebaseApp);
     const firestore = getFirestore(firebaseApp);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const userDocRef = doc(firestore, 'Users', user.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                if (!userDoc.exists()) {
-                    const displayName = user.displayName || 'Unknown';
-                    await setDoc(userDocRef, {
-                        uid: user.uid,
-                        email: user.email,
-                        role: 'user',
-                        name: displayName,
-                        agreedToTerms: false,
-                    });
-                }
-            }
-        });
-
-        return () => unsubscribe();
-    }, [auth, firestore]);
-
     const faqs = [
         {
             category: "General Information",
@@ -205,7 +183,7 @@ const TermsConditionsPage: React.FC = () => {
                     await updateDoc(userDocRef, {
                         agreedToTerms: true
                     });
-                    router.push('/'); // Redirect to home page after agreement
+                    router.push('/events/explore'); // Redirect to home page after agreement
                 } catch (error) {
                     console.error('Error updating user agreement:', error);
                 }

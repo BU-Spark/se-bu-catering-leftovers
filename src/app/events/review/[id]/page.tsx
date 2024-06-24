@@ -11,11 +11,12 @@ import { onSubmit } from '@/utils/feedbackUtils';
 import { firestore as db } from '@/../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { useUser } from "@/context/UserContext";
 
 // This page shows the complete view of an event
 const FeedbackFormPage = ({ params }: { params: { id: string } })  => {
     const eventId = params.id;
-    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+    const { user } = useUser();
     const router = useRouter();
     const [event, setEvent] = useState<Event>();
 
@@ -36,9 +37,11 @@ const FeedbackFormPage = ({ params }: { params: { id: string } })  => {
               const eventRef = doc(db, 'Events', eventId);
               const eventDoc = await getDoc(eventRef);
               const event = eventDoc.data() as Event;
-                if (event.reviewedBy.includes(userid)) {
-                    alert("You have already submitted feedback for this event.");
-                    router.push("/events/explore")
+              if (user) {
+                if (event.reviewedBy.includes(user.uid)) {
+                  alert("You have already submitted feedback for this event.");
+                  router.push("/events/explore")
+                }
               }
               setEvent(event);
         }

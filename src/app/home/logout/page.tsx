@@ -53,7 +53,7 @@ const Logout: React.FC = () => {
     };
 
     const handleReturn = () => {
-        router.push('/'); // Redirect to home page without logging out
+        router.back(); // Redirect back
     };
 
     return (

@@ -45,6 +45,7 @@ export interface User {
   role: string;
   uid: string;
   reviews: string[];
+  agreedToTerms: boolean;
 }
 
 // Define the review interface

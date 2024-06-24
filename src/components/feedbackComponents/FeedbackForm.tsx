@@ -6,6 +6,7 @@ import { props } from "@/styles/styling";
 import { ImageUpload } from '../ImageUpload';
 import { Review, Event } from '@/types/types';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
 
 interface FeedbackFormProps {
     event: Event;
@@ -15,7 +16,7 @@ interface FeedbackFormProps {
 
 // This component is the intake form where users can submit feedback for events
 export const FeedbackForm: React.FC<FeedbackFormProps> = ({ event, review, onSubmit }) => {
-    const userId = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
+    const { user } = useUser();
     const [formData, setFormData] = useState<Review>(review);
     const [images, setImages] = useState<string[]>(review.images);
     const [shareContact, setShareContact] = useState<boolean>(false);
@@ -57,7 +58,10 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ event, review, onSub
             name: shareContact ? name : '',
             email: shareContact ? email : ''
         };
-        await onSubmit(reviewToSubmit, event.id, userId);
+        if (user) {
+            await onSubmit(reviewToSubmit, event.id, user.uid);
+
+        }
         router.back();
     };
 

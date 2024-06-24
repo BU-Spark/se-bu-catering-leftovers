@@ -14,7 +14,6 @@ import { onUpdate } from '@/utils/eventUtils';
 const EditEventFormPage = ({ params }: { params: { id: string } }) => {
   const eventUID = params.id;
   const [event, setEvent] = useState<Event>();
-  const userid = "xQXZfuSgOIfCshFKWAou";
 
   useEffect(() => {
     const fetchEvent = async (id: string) => {

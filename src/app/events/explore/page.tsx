@@ -9,28 +9,21 @@ import EventCard from "@/components/eventComponents/EventCard"
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "@/styles/styling";
 import FilterComponent from '@/components/eventComponents/FilterComponent';
-import { Event, User } from "@/types/types";
+import { Event } from "@/types/types";
 import { useRouter } from 'next/navigation';
-import { createGlobalStyle } from 'styled-components';
+import { useUser } from '@/context/UserContext';
 
 // TODO:
 // Remaining time only after event starts
 
 // Page to display all events
 const EventsPage = () => {
-    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-    const [user, setUser] = useState<User>();
+    const { user } = useUser();
     const router = useRouter();
 
     // Retrieve available events from database
     const [events, setEvents] = useState<Event[]>([]);
     useEffect(() => {
-        const fetchUser = async () => {
-            setUser(await getUser(userid));
-        };
-
-        fetchUser();
-
         const fetchEvents = async () => {
             setEvents(await getEvents());
         };
@@ -58,13 +51,6 @@ const EventsPage = () => {
         newEvents = newEvents.filter((event) => event.status === "open");
 
         return newEvents;
-    };
-
-    // Retrieve user from database
-    const getUser = async (userid: string) => {
-        // Placeholder for user authentication
-        const user = await getDoc(doc(db, 'Users', userid));
-        return user.data() as User;
     };
 
     // Filter events based on user preferences

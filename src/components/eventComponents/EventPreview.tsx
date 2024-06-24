@@ -12,6 +12,7 @@ import { formatEventDateTime, formatEndTime } from '@/utils/timeUtil';
 import { useRouter } from 'next/navigation';
 import { onOpen, onEnd } from '@/utils/eventUtils';
 import Map from '../Map';
+import { useUser } from '@/context/UserContext';
 
 interface EventPreviewProps {
     eventId: string;
@@ -19,9 +20,7 @@ interface EventPreviewProps {
 
 // This component where users can see all the information on an event
 const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
-    const userid = "xQXZfuSgOIfCshFKWAou"; // Placeholder for user authentication
-    const [user, setUser] = useState<User>();
-
+    const { user } = useUser();
     const [event, setEvent] = useState<Event | null>(null);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [remainingTime, setRemainingTime] = useState<string>("00:00:00");
@@ -30,12 +29,6 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
 
     useEffect(() => {
         const eventRef = doc(firestore, 'Events', eventId as string);
-
-        const fetchUser = async () => {
-            setUser(await getUser(userid));
-        }
-        
-        fetchUser();
 
         const unsubscribe = onSnapshot(eventRef, (doc) => {
             if (doc.exists()) {
@@ -53,12 +46,6 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
         return () => unsubscribe();
     }, []);
 
-    // Retrieve user from database
-    const getUser = async (userid: string) => {
-        // Placeholder for user authentication
-        const user = await getDoc(doc(firestore, 'Users', userid));
-        return user.data() as User;
-    };
     // Set up interval to update remaining time of events
     useEffect(() => {
         if (event) {
@@ -79,7 +66,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
-        router.push(`events/admin/edit/${eventId}`, );
+        router.push(`/events/admin/edit/${eventId}`, );
     };
 
     if (!event) return <div>Loading...</div>;
@@ -98,7 +85,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
 
     // Redirect to feedback page
     const viewFeedback = () => {
-        router.push(`events/admin/reviews/${eventId}`);
+        router.push(`/events/admin/reviews/${eventId}`);
     }
 
   return (

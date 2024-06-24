@@ -83,7 +83,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
                     // await sendEmails(updatedEvent);
 
-                    router.push('/events/explore`');
+                    router.push('/events/explore');
                 }
                 return eventUID;
             } else {
