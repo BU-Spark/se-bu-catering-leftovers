@@ -5,6 +5,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { firebaseApp } from '../../../firebaseConfig';
+<<<<<<< HEAD
 import { UserData, PostData } from '@/types';
 import Navbar from '../../components/Navbar';
 import { Typography } from '@mui/material';
@@ -14,6 +15,10 @@ const GlobalStyle = createGlobalStyle`
         font-family: 'Arial', sans-serif;
     }
 `;
+=======
+import Navbar from '../../components/Navbar';
+import { User } from '@/types/types';
+>>>>>>> admin_permissions
 
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
@@ -135,7 +140,7 @@ const capitalizeFirstLetter = (string: string) => {
 };
 
 const StudentAccountPage = () => {
-    const [userData, setUserData] = useState<UserData | null>(null);
+    const [userData, setUserData] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<UserData | null>(null);
@@ -149,6 +154,7 @@ const StudentAccountPage = () => {
                 console.log('Current user:', user); // Debugging log
                 const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
                 if (userDoc.exists()) {
+<<<<<<< HEAD
                     const data = userDoc.data() as UserData;
                     console.log('User data from Firestore:', data); // Debugging log
                     setUserData(data);
@@ -158,6 +164,9 @@ const StudentAccountPage = () => {
                     await fetchUserPosts(user.uid);
                 } else {
                     console.log('No user document found in Firestore.'); // Debugging log
+=======
+                    setUserData(userDoc.data() as User);
+>>>>>>> admin_permissions
                 }
                 setIsLoading(false);
             } else {
@@ -238,6 +247,7 @@ const StudentAccountPage = () => {
                     My Account <EditIcon src="/edit-icon.svg" alt="Edit" onClick={handleEditClick} />
                 </Header>
                 {userData ? (
+<<<<<<< HEAD
                     isEditing ? (
                         <form onSubmit={handleFormSubmit}>
                             <InfoSection>
@@ -331,6 +341,19 @@ const StudentAccountPage = () => {
                             </PreferenceSection>
                         </InfoSection>
                     )
+=======
+                    <InfoSection>
+                        <InfoItem>
+                            <Label>Name:</Label> <Value>{userData.name}</Value>
+                        </InfoItem>
+                        <InfoItem>
+                            <Label>Email:</Label> <Value>{userData.email}</Value>
+                        </InfoItem>
+                        <InfoItem>
+                            <Label>Role:</Label> <Value>{capitalizeFirstLetter(userData.role)}</Value>
+                        </InfoItem>
+                    </InfoSection>
+>>>>>>> admin_permissions
                 ) : (
                     <div>No user data available</div>
                 )}

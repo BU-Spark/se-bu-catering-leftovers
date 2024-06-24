@@ -2,21 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
-import { firebaseApp } from '../../../firebaseConfig';
-import Navbar from '../../components/Navbar';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
+import Navbar from '@/components/Navbar';
 import { Typography } from '@mui/material';
 import { Event, User }from '@/types/types';
-import { firestore } from '../../../firebaseConfig';
+import { firestore, auth } from '@/../firebaseConfig';
 
 const GlobalStyle = createGlobalStyle`
     body {
         font-family: 'YourFontFamily', sans-serif;
     }
 `;
-
-const auth = getAuth(firebaseApp);
 
 const Container = styled.div`
     display: flex;
@@ -110,12 +107,17 @@ const AdminAccountPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<User | null>(null);
     const [userEvents, setUserEvents] = useState<Event[]>([]);
+    const [campusPreferences, setCampusPreferences] = useState<string[]>([]);
+    const [foodPreferences, setFoodPreferences] = useState<string[]>([]);
+
 
     useEffect(() => {
         const fetchUserData = async (user: any) => {
             const userdata = await getUser(user.id);
             setUserData(userdata);
             setFormData(userdata);
+            setCampusPreferences(userdata.locPref || []);
+            setFoodPreferences(userdata.foodPref|| []);
         };
 
         if (auth.currentUser !== null) {
@@ -173,12 +175,31 @@ const AdminAccountPage = () => {
         }) as User);
     };
 
+    const handleCampusPreferenceToggle = (preference: string) => {
+        setCampusPreferences(prevPreferences =>
+            prevPreferences.includes(preference)
+                ? prevPreferences.filter(p => p !== preference)
+                : [...prevPreferences, preference]
+        );
+    };
+
+    const handleFoodPreferenceToggle = (preference: string) => {
+        setFoodPreferences(prevPreferences =>
+            prevPreferences.includes(preference)
+                ? prevPreferences.filter(p => p !== preference)
+                : [...prevPreferences, preference]
+        );
+    };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (auth.currentUser && formData) {
             const userDocRef = doc(firestore, 'Users', auth.currentUser.uid);
-            await updateDoc(userDocRef, { ...formData } as any);
-            setUserData(formData);
+            await updateDoc(userDocRef, { ...formData,
+                locPref: campusPreferences,
+                foodPref: foodPreferences
+             } as any);
+            setUserData({ ...formData, locPref: campusPreferences, foodPref: foodPreferences });
             setIsEditing(false);
         }
     };
@@ -217,6 +238,7 @@ const AdminAccountPage = () => {
                                         onChange={handleInputChange}
                                     />
                                 </InfoItem>
+                                
                                 <Button type="submit">Save Changes</Button>
                             </InfoSection>
                         </form>

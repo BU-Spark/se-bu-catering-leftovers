@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { firebaseApp } from '../../../firebaseConfig';
+import { firebaseApp } from '@/../firebaseConfig';
 
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
@@ -27,14 +27,7 @@ const useAuthRedirect = () => {
                 }
 
                 if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    if (userData.role === 'Administrator') {
-                        router.push('/admin/account'); // Redirect to admin account page
-                    } else if (userData.role === 'Student') {
-                        router.push('/student/account'); // Redirect to student account page
-                    } else {
-                        router.push('/'); // Redirect to user home page
-                    }
+                    router.push("/events/explore");
                 }
             }
         });

@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import Navbar from '../components/Navbar';
+import Navbar from '@/components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
-import styles from '../styles/Home.module.css';
-import FAQList from '../components/faq.js';
+import styles from '@/styles/Home.module.css';
+import FAQList from '@/components/faq.js';
 import { signInWithRedirect, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import { firebaseApp, provider } from '../../firebaseConfig';
-import { useRouter } from 'next/router';
+import { firebaseApp, provider } from '@/../firebaseConfig';
+import { useRouter } from 'next/navigation';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -65,10 +65,10 @@ const handleLogin = async () => {
   }
 };
 
-const handleSignUp = async (role: string) => {
+const handleSignUp = async () => {
   try {
     console.log("Redirecting for sign-up");
-    localStorage.setItem('userRole', role);
+    localStorage.setItem('userRole', 'User');
     await signInWithRedirect(auth, provider);
   } catch (error) {
     console.error("Failed to redirect for sign-up:", error);
@@ -76,17 +76,12 @@ const handleSignUp = async (role: string) => {
 };
 
 const Home = () => {
-  const [mounted, setMounted] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
-    if (mounted) {
       const unsubscribe = auth.onAuthStateChanged(async (user) => {
         if (user) {
           const storedUserRole = localStorage.getItem('userRole');
@@ -104,9 +99,6 @@ const Home = () => {
             if (userData.role === 'Admin') {
               console.log('Redirecting admin to /events/explore');
               router.push('/events/explore');
-            } else if (userData.role === 'Student') {
-              console.log('Redirecting student to /student/account');
-              router.push('/student/account');
             } else {
               console.log('User is not an admin, role:', userData.role);
             }
@@ -116,19 +108,23 @@ const Home = () => {
               uid: user.uid,
               email: user.email,
               role: storedUserRole,
-              name: displayName
+              name: displayName,
+              timePref: "",
+              locPref: "",
+              foodPref: "",
+              events: [],
+              reviews: [],
             });
+
             console.log('User signed up successfully');
             setUserName(displayName);
             setUserRole(storedUserRole);
             if (storedUserRole === 'Admin') {
               console.log('Redirecting admin to /events/explore after sign-up');
               router.push('/events/explore');
-            } else if (storedUserRole === 'Student') {
-              console.log('Redirecting student to /home/account after sign-up');
-              router.push('/home/account');
             } else {
               console.log('User signed up as non-admin, role:', storedUserRole);
+              router.push('/events/explore');
             }
             localStorage.removeItem('userRole');
           }
@@ -136,31 +132,25 @@ const Home = () => {
       });
 
       return () => unsubscribe();
-    }
-  }, [mounted, router]);
 
-  // Admin Token
+    }, [router]);
+
+  //Admin Token
   const handleAdminSignUp = async () => {
     const adminToken = prompt("Enter administrator token:");
     if (adminToken === "Terriers2024!") {
-      await handleSignUp('Administrator');
+      localStorage.setItem('userRole', 'Admin');
     } else {
       alert("Invalid token. You will be signed up as a student.");
-      await handleSignUp('Student');
+      localStorage.setItem('userRole', 'Student');
     }
+    await handleSignUp();
   };
-
-  // Student Sign Up
-  const handleStudentSignUp = async () => {
-    await handleSignUp('Student');
-  };
-
-  if (!mounted) return null;
 
   return (
       <div>
         <GlobalStyle />
-        <Navbar user={false} />
+        <Navbar user= {false}/>
         <div className={styles.container}>
           <Head>
             <title>Reduce Wasted Food</title>
@@ -190,11 +180,7 @@ const Home = () => {
                 <section className={styles.steps}>
                   <button className={styles.step} onClick={handleAdminSignUp}>
                     <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45} />
-                    Sign up as Admin
-                  </button>
-                  <button className={styles.step} onClick={handleStudentSignUp}>
-                    <Image src="/signup-icon.svg" alt="Pencil Icon" width={45} height={45} />
-                    Sign up as Student
+                    Sign up
                   </button>
                   <button className={styles.step}>
                     <Image src="/notification.svg" alt="Bell icon" width={45} height={45} />
@@ -219,3 +205,4 @@ const Home = () => {
 };
 
 export default Home;
+
