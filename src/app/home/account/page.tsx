@@ -2,21 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
-import { firebaseApp } from '../../../firebaseConfig';
-import Navbar from '../../components/Navbar';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, onSnapshot, orderBy } from 'firebase/firestore';
+import Navbar from '@/components/Navbar';
 import { Typography } from '@mui/material';
 import { Event, User }from '@/types/types';
-import { firestore } from '../../../firebaseConfig';
+import { firestore, auth } from '@/../firebaseConfig';
 
 const GlobalStyle = createGlobalStyle`
     body {
         font-family: 'YourFontFamily', sans-serif;
     }
 `;
-
-const auth = getAuth(firebaseApp);
 
 const Container = styled.div`
     display: flex;

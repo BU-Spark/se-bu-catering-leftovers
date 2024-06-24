@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-import { firebaseApp } from '../../firebaseConfig';
+import { firebaseApp } from '@/../firebaseConfig';
 import { createGlobalStyle } from 'styled-components';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import '../styles/globals.css';
+import '@/styles/globals.css';
 import { useAuthRedirect } from '/hooks/useAuthRedirect';
+import { UserProvider } from '/context/UserContext';
 
 const GlobalStyle = createGlobalStyle`
     body {
@@ -44,7 +45,9 @@ function MyApp({ Component, pageProps }) {
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <GlobalStyle />
-            <Component {...pageProps} />
+            <UserProvider>
+              <Component {...pageProps} />
+            </UserProvider>
           </ThemeProvider>
         </>
     );

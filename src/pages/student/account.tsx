@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { firebaseApp } from '../../../firebaseConfig';
-import { UserData } from '@/types';
 import Navbar from '../../components/Navbar';
+import { User } from '@/types/types';
 
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
@@ -67,7 +67,7 @@ const capitalizeFirstLetter = (string: string) => {
 };
 
 const StudentAccountPage = () => {
-    const [userData, setUserData] = useState<UserData | null>(null);
+    const [userData, setUserData] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -76,7 +76,7 @@ const StudentAccountPage = () => {
             if (user) {
                 const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
                 if (userDoc.exists()) {
-                    setUserData(userDoc.data() as UserData);
+                    setUserData(userDoc.data() as User);
                 }
                 setIsLoading(false);
             } else {
@@ -108,9 +108,6 @@ const StudentAccountPage = () => {
                         </InfoItem>
                         <InfoItem>
                             <Label>Role:</Label> <Value>{capitalizeFirstLetter(userData.role)}</Value>
-                        </InfoItem>
-                        <InfoItem>
-                            <Label>Post Created:</Label> <Value>{userData.postsCreated || 'N/A'}</Value>
                         </InfoItem>
                     </InfoSection>
                 ) : (

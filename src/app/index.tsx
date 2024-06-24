@@ -3,14 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import Navbar from '../components/Navbar';
+import Navbar from '@/components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
-import styles from '../styles/Home.module.css';
-import FAQList from '../components/faq.js';
+import styles from '@/styles/Home.module.css';
+import FAQList from '@/components/faq.js';
 import { signInWithRedirect, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-import { firebaseApp, provider } from '../../firebaseConfig';
-import { useRouter } from 'next/router';
+import { firebaseApp, provider } from '@/../firebaseConfig';
+import { useRouter } from 'next/navigation';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -76,17 +76,12 @@ const handleSignUp = async () => {
 };
 
 const Home = () => {
-  const [mounted, setMounted] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
-    if (mounted) {
       const unsubscribe = auth.onAuthStateChanged(async (user) => {
         if (user) {
           const storedUserRole = localStorage.getItem('userRole');
@@ -113,8 +108,14 @@ const Home = () => {
               uid: user.uid,
               email: user.email,
               role: storedUserRole,
-              name: displayName
+              name: displayName,
+              timePref: "",
+              locPref: "",
+              foodPref: "",
+              events: [],
+              reviews: [],
             });
+
             console.log('User signed up successfully');
             setUserName(displayName);
             setUserRole(storedUserRole);
@@ -130,8 +131,8 @@ const Home = () => {
       });
 
       return () => unsubscribe();
-    }
-  }, [mounted, router]);
+
+    }, [router]);
 
   //Admin Token
   const handleAdminSignUp = async () => {
@@ -145,12 +146,10 @@ const Home = () => {
     await handleSignUp();
   };
 
-  if (!mounted) return null;
-
   return (
       <div>
         <GlobalStyle />
-        <Navbar userRole={userRole} />
+        <Navbar user= {false}/>
         <div className={styles.container}>
           <Head>
             <title>Reduce Wasted Food</title>
