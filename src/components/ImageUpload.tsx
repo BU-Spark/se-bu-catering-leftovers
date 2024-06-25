@@ -7,6 +7,7 @@ import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
 import { Event, Review } from '@/types/types';
 import { getImageUrls } from '@/utils/imageUtils';
+import { arrayRemove, updateDoc, doc } from 'firebase/firestore';
 
 interface ImageUploadProps {
     setImageUrl: (url: string) => void;
@@ -64,17 +65,26 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({setImageUrl, removeImag
     // TODO: Has bug
     // Delete image from storage
     const handleDeleteImage = async (url: string) => {
-        const storageRef = ref(storage, url);
-
-        await deleteObject(storageRef);
-
-        // const eventRef = doc(firestore, `Events`, event.id as string);
-        // await updateDoc(eventRef, {images: arrayRemove(url)});
-
-        setUploadedImages((prev) => prev.filter((img) => img !== url));
-        removeImage(url);
-    };
+        if (event) {
+            const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/bu-catering-leftovers.appspot.com/o/BUCL%20Default.jpeg?alt=media&token=e3b16eef-c37e-4407-85eb-f48cd1b501c2";
+            // Check if the image URL is the default image
+            if (url === defaultImageUrl) {
+                // If it's the default image, do not delete from storage
+                console.log('Cannot delete default image.');
+                return;
+            }
+            const storageRef = ref(storage, url);
     
+            await deleteObject(storageRef);
+    
+            const eventRef = doc(firestore, `Events`, event.id as string);
+            await updateDoc(eventRef, {images: arrayRemove(url)});
+    
+            setUploadedImages((prev) => prev.filter((img) => img !== url));
+            removeImage(url);
+        }
+    };
+
     return (
         <Grid container>
             <Grid

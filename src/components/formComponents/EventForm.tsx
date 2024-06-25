@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, TextField, Typography, Container, Grid, Paper, IconButton, FormControl, InputLabel, Select, SelectChangeEvent, MenuItem } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, Typography, Container, Grid, Paper, IconButton, FormControl, InputLabel, Select, SelectChangeEvent, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { styled } from "@mui/material/styles";
 import { props } from "../../styles/styling";
@@ -13,6 +13,7 @@ import Map from '../Map';
 import { Location } from '@/types/types';
 import LocationDropdown from './LocationDropdown';
 import { useUser } from "@/context/UserContext";
+import { onDelete } from '@/utils/eventUtils';
 // import sendEmail from "./sendEmail";
 
 // TODO:
@@ -43,6 +44,23 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [images, setImages] = useState<string[]>(event.images);
     const [location, setLocation] = useState<Location>(defaultAddress);
     const router = useRouter();
+    const [hasChanges, setHasChanges] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+
+    // Prompt user to save changes before leaving the page
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasChanges) {
+                e.preventDefault();
+                e.returnValue = ''; // Show browser's default confirmation dialog
+            }
+        };
+    
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [hasChanges]);
 
     // Save changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,12 +69,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
             Location: location,
             [e.target.name]: e.target.value
         });
-    };
-
-    const handleDropdownChange = (event: SelectChangeEvent<string>) => {
-        setFormData({
-            ...formData
-        });
+        setHasChanges(true);
     };
 
     const isValid = () => {
@@ -84,7 +97,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 if (status === 'open') {
 
                     // await sendEmails(updatedEvent);
-
+                    alert('Event published successfully');
                     router.push('/events/explore');
                 }
                 return eventUID;
@@ -120,17 +133,49 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
 
     const setImageUrl = (url: string) => {
         setImages([...images, url]);
+        setHasChanges(true);
     };
 
     const removeImage = (url: string) => {
-        setImages(images.filter((image) => image !== url));
+        setImages(images.filter((image) => image !== url));    
+        setHasChanges(true);
     };
 
     const previewEvent = async () => {
-        const eventID = await publishEvent('saved');
+        const eventID = await publishEvent(event.status);
         if (eventID !== "") {
-            router.push(`/events/preview/${eventID}`);
+            router.push(`/events/admin/preview/${eventID}`);
         }
+    };
+
+    const handleBackClick = () => {
+        if (hasChanges) {
+            setOpenDialog(true);
+        } else {
+            router.back();
+        }
+    };
+
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+    };
+
+    const handleSaveAndLeave = async () => {
+        await publishEvent('saved');
+        setOpenDialog(false);
+        setHasChanges(false);
+        router.back();
+    };
+    
+    const handleDiscardAndLeave = async () => {
+        if (event.status === 'drafted' || event.id === "") {
+            if (user) {
+                await onDelete(event, user.uid);
+            }
+        }
+        setOpenDialog(false);
+        setHasChanges(false);
+        router.back();
     };
 
     return (
@@ -139,7 +184,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 <Paper elevation={3} style={{ padding: '1em' }}>
                     <Grid container xs={12}>
                         <Grid item maxWidth={"40px"}>
-                            <IconButton onClick={() => router.back()}>
+                            <IconButton onClick={handleBackClick}>
                                 <ArrowBackIcon color="secondary"/>
                             </IconButton>
                         </Grid>
@@ -221,6 +266,30 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                     </Grid>
                 </Paper>
             </Container>
+            <Dialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Unsaved Changes"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        You have unsaved changes. Would you like to save them before leaving?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDiscardAndLeave} color="secondary">
+                        Discard
+                    </Button>
+                    <Button onClick={handleSaveAndLeave} color="primary" autoFocus>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { addDoc, arrayUnion, collection, doc, updateDoc } from '@firebase/firestore';
+import { addDoc, deleteDoc, arrayRemove, arrayUnion, collection, doc, updateDoc } from '@firebase/firestore';
 import { Event } from '../types/types';
 import { firestore as db } from '../../firebaseConfig';
 
@@ -15,7 +15,6 @@ export const onPublish = async (event: Event, userId: string) => {
             const userRef = doc(db, 'Users', userId);
             await updateDoc(userRef, { events: arrayUnion(eventRef.id) });
             eventID = eventRef.id;
-            alert('Event published successfully');
             return eventID;
         } catch (error) {
             console.error('Error publishing event: ', error);
@@ -93,3 +92,24 @@ export const onCopy = async (event: Event, userId: string) => {
         return "";
     }
 }
+
+// Delete event from database and user
+export const onDelete = async (event: Event, userId: string) => {
+    try {
+        // Reference to the event document
+        const eventRef = doc(db, 'Events', event.id);
+
+        // Delete the event document
+        await deleteDoc(eventRef);
+
+        // Remove the event id from the user's events array
+        const userRef = doc(db, 'Users', userId);
+        await updateDoc(userRef, { events: arrayRemove(event.id) });
+
+        return event.id;
+    } catch (error) {
+        console.error('Error deleting event: ', error);
+        alert('Failed to delete event');
+        return "";
+    }
+};

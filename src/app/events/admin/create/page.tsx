@@ -18,28 +18,27 @@ import { Location } from '@/types/types';
 // Delete images on user when deleted on form
 // Delete old events
 // Ask if would like to save before leaving?
-// Save logic: If open, stays open?
-
 
 // This page is the intake form where admins can create new events
-const EventFormPage = () => {
-  // Create empty event
-  const [newEvent, setNewEvent] = useState<Event>({
-      host: '',
-      name: '',
-      Location: {} as Location,
-      location: '',
-      campusArea: '',
-      notes: '',
-      duration: '30',
-      foodArrived: Timestamp.fromDate(new Date()),
-      foodAvailable: Timestamp.fromDate(new Date()),
-      foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
-      status: 'closed',
-      images: [],
-      id: "",
-      reviewedBy: []
-  });
+const EventFormPage = () => {    
+    // Create empty event
+    const [newEvent, setNewEvent] = useState<Event>({
+        host: '',
+        name: '',
+        Location: {} as Location,
+        location: '',
+        campusArea: '',
+        notes: '',
+        duration: '30',
+        foodArrived: Timestamp.fromDate(new Date()),
+        foodAvailable: Timestamp.fromDate(new Date()),
+        foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
+        status: 'drafted',
+        images: [],
+        id: "",
+        reviewedBy: []
+    });
+
 
     return (
         <div>

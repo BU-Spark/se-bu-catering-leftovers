@@ -57,7 +57,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, imageHeight = '180px', adm
       <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px", cursor: 'pointer' }} onClick={handleClick}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>
-            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: imageHeight, objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
+            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: imageHeight, objectFit: "cover", objectPosition: "center", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
               <Typography
                 variant="body1"
                 style={{ position: 'absolute', top: 20, right: 0, backgroundColor: "#195626", color: '#FFF',

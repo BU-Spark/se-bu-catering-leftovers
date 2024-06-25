@@ -16,10 +16,11 @@ import { useUser } from '@/context/UserContext';
 
 interface EventPreviewProps {
     eventId: string;
+    isNew?: boolean; // Optional parameter to control navigation behavior
 }
 
 // This component where users can see all the information on an event
-const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
+const EventPreview: React.FC<EventPreviewProps>  = ({ eventId, isNew = false }) => {
     const { user } = useUser();
     const [event, setEvent] = useState<Event | null>(null);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -27,6 +28,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
     const [isEditing, setIsEditing] = useState(false);
     const router = useRouter();
 
+    // Fetch event data from database
     useEffect(() => {
         const eventRef = doc(firestore, 'Events', eventId as string);
 
@@ -56,14 +58,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
         }
     }, [event]);
 
-    const handleSave = async (updatedEvent: Event) => {
-        if (eventId) {
-            const updatePayload: { [key: string]: any } = { ...updatedEvent };
-            await updateDoc(doc(firestore, 'Events', eventId as string), updatePayload);
-            setIsEditing(false);
-        }
-    };
-
+    // Route to edit Page
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
         router.push(`/events/admin/edit/${eventId}`, );
@@ -96,11 +91,20 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
         router.push(`/events/admin/reviews/${eventId}`);
     }
 
+    // Redirect back to appropriate page
+    const handleBack = () => {
+        if (isNew) {
+            router.push(`/events/admin/edit/${eventId}`);
+        } else {
+            router.back();
+        }
+    }
+
   return (
     <div style={{background: "#FFF6EE"}}>
         <Container maxWidth="sm" style={{padding: "1em", paddingTop: "7em", background: "#FFF6EE" }}>
             <Paper elevation={3} style={{ background: "#FFF"}}>
-                <IconButton onClick={()=> router.back()}>
+                <IconButton onClick={handleBack}>
                     <ArrowBackIcon color="secondary" />
                 </IconButton>
                 <Grid container padding= "1em" paddingTop="0">
@@ -115,9 +119,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                         )}
                     </Grid>
                     <Grid container justifyContent={"center"} marginBottom="1rem">
-                        <Grid container sx={{maxWidth: {xs: "70%", sm: "50%"}, height:{xs:"150px", sm: "150px"}}}>
-                            <ImageSlider imageUrls={imageUrls} remainingTime={remainingTime} />
-                        </Grid>
+                        <ImageSlider imageUrls={imageUrls} remainingTime={remainingTime} />
                     </Grid>
                         <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Location: </Typography>
@@ -154,7 +156,7 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                     </Grid>
                     <Grid xs justifyContent="flex-end" paddingBottom="2em">
                     {user && user.role === "Admin" && user.events.includes(eventId) && (
-                        event.status === "saved" ? (
+                        (event.status === "saved" || event.status === "drafted") ? (
                             <Grid container justifyContent={"center"}>
                                 <Button variant="outlined" color="primary" size="large"
                                     style={{borderRadius: "20px",  borderWidth:"3px", borderColor: "#ab0101", textTransform: "none", width:"200px" }} 
