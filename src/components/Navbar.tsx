@@ -17,7 +17,7 @@ const Nav = styled.nav`
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000;
+    z-index: 100000;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     @media (max-width: 768px) {
         padding: 15px 30px;
@@ -106,14 +106,14 @@ const Navbar = ({ user = true }: { user?: boolean })  => {
             <MenuItems show={showMenu}>
             <MenuItem onClick={() => handleNavigation(user? "/events/explore" : '/')}>Home</MenuItem>
                 {user && (
+                    <>
                     <MenuItem onClick={() => handleNavigation("/home/account")}>
                         My Account
                     </MenuItem>
-                )}
-                <MenuItem onClick={() => handleNavigation('/home/faq')}>FAQ</MenuItem>
-                <MenuItem onClick={() => handleNavigation('/home/terms')}>Terms and Conditions</MenuItem>
-                {user && (
+                    <MenuItem onClick={() => handleNavigation('/faq')}>FAQ</MenuItem>
+                    <MenuItem onClick={() => handleNavigation('/home/terms')}>Terms and Conditions</MenuItem>     
                     <MenuItem onClick={() => handleNavigation('/home/logout')}>Logout</MenuItem>
+                    </>
                 )}
             </MenuItems>
         </Nav>

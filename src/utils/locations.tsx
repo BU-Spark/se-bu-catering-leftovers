@@ -1,16 +1,6 @@
 import { Location } from '../types/types';
   
   export const locations: Location[] = [
-    { address: 'Boston, MA, USA', abbreviatedAddress: "BU", lat: "42.3601", lon: "-71.0589" },
-    { address: 'New York, NY, USA', abbreviatedAddress: "BU", lat: "40.7128", lon: "-74.0060" },
-    { address: 'Los Angeles, CA, USA', abbreviatedAddress: "BU", lat: "34.0522", lon: "-118.2437" },
-    { address: 'Chicago, IL, USA', abbreviatedAddress: "BU", lat: "41.8781", lon: "-87.6298"},
-    // Add more locations as needed
-  ];
-
-
-
-  [
     {
       "name": "Warren Towers",
       "abbreviation": "Warren Towers",

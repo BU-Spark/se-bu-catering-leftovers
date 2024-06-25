@@ -26,7 +26,7 @@ const LocationDropdown: React.FC<LocationDropdownProps> = ({ onLocationSelect })
         options={locationOptions}
         onChange={handleLocationChange}
         placeholder="Location"
-        value={selectedLocation ? { label: selectedLocation.address, value: selectedLocation } : null}
+        value={selectedLocation ? { label: selectedLocation.name, value: selectedLocation } : null}
         styles={customSelectStyles}
       />
     </div>

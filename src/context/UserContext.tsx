@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { User } from '@/types/types';
 import { auth, firestore as db } from '@/../firebaseConfig';
-import { getDoc, doc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface UserContextProps {
   user: User | null;
@@ -17,34 +17,31 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Retrieve user from database
-  const getUser = async (userid: string): Promise<User | null> => {
-    try {
-      const userDoc = await getDoc(doc(db, 'Users', userid));
-      if (userDoc.exists()) {
-        return userDoc.data() as User;
-      } else {
-        console.log('User document does not exist');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      return null;
-    }
-  };
-
+  // Update and store any user changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+    const unsubscribeFromAuth = onAuthStateChanged(auth, async (authUser) => {
       if (!authUser) {
         setUser(null);
         setLoading(false);
         return;
       }
-      const newUser = await getUser(authUser.uid);
-      setUser(newUser);
-      setLoading(false);
+
+      const userRef = doc(db, 'Users', authUser.uid);
+      
+      // Listen to real-time updates from Firestore
+      const unsubscribeFromUser = onSnapshot(userRef, (userDoc) => {
+        if (userDoc.exists()) {
+          setUser(userDoc.data() as User);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      });
+
+      return () => unsubscribeFromUser();
     });
-    return () => unsubscribe();
+
+    return () => unsubscribeFromAuth();
   }, []);
 
   return (

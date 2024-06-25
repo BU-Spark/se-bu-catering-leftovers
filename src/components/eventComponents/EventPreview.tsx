@@ -10,7 +10,7 @@ import { ImageSlider } from './ImageSlider';
 import EditIcon from '@mui/icons-material/Edit';
 import { formatEventDateTime, formatEndTime } from '@/utils/timeUtil';
 import { useRouter } from 'next/navigation';
-import { onOpen, onEnd } from '@/utils/eventUtils';
+import { onOpen, onEnd, onCopy } from '@/utils/eventUtils';
 import Map from '../Map';
 import { useUser } from '@/context/UserContext';
 
@@ -82,6 +82,14 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
         await onEnd(event);
         router.push('/events/explore');
     }
+
+    // Create a copy of the current event and redirect to edit page
+    const copyEvent = async () => {
+        if (user) {
+            const copiedEventID = await onCopy(event, user.uid);
+            router.push(`/events/admin/edit/${copiedEventID}`, );
+        }
+    };
 
     // Redirect to feedback page
     const viewFeedback = () => {
@@ -171,11 +179,18 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId }) => {
                             </Grid>
                         ) : (
                             <Grid container justifyContent={"center"}>
-                                <Typography variant="body1" fontWeight="bold" 
-                                    sx={{textDecoration: "underline"}}
-                                    onClick={viewFeedback}>
-                                    {"View Feedback Section"}
-                                </Typography>
+                                <Grid direction="column" textAlign={"center"}>
+                                    <Button variant="outlined" color="primary" size="large" 
+                                        style={{borderRadius: "20px",  borderWidth:"3px", borderColor: "#ab0101", textTransform: "none", width:"200px", marginBottom: "4px" }} 
+                                        onClick={copyEvent}>
+                                        <Typography variant="button">Copy Event</Typography>
+                                    </Button>
+                                    <Typography variant="body1" fontWeight="bold" 
+                                        sx={{textDecoration: "underline"}}
+                                        onClick={viewFeedback}>
+                                        {"View Feedback Section"}
+                                    </Typography>
+                                </Grid>
                             </Grid>
                         )
                     )}

@@ -105,7 +105,9 @@ const EventsPage = () => {
             </Typography>
         ) : (
             events.map((event) => (
+              <Grid item xs={12} sm={6}>
                 <EventCard key={event.id} event={event} />
+              </Grid>
             ))
         )}
       </Grid>

@@ -69,3 +69,27 @@ export const onEnd = async (event: Event) => {
         return "";
         }
     }
+
+export const onCopy = async (event: Event, userId: string) => {
+    try {
+        // Remove the id from the event object to create a new event
+        const { id, ...eventWithoutId } = event;
+
+        // Add the new event to the database
+        const newEventRef = await addDoc(collection(db, 'Events'), eventWithoutId);
+        
+        // Update the new event with its own id
+        await updateDoc(newEventRef, { id: newEventRef.id });
+
+        // Add the new event id to the user
+        const userRef = doc(db, 'Users', userId);
+        await updateDoc(userRef, { events: arrayUnion(newEventRef.id) });
+
+        alert('Event copied successfully');
+        return newEventRef.id;
+    } catch (error) {
+        console.error('Error copying event: ', error);
+        alert('Failed to copy event');
+        return "";
+    }
+}

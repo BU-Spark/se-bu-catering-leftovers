@@ -25,10 +25,12 @@ interface EventFormProps {
 }
 
 const defaultAddress: Location = {
-    address: 'Boston University, Commonwealth Avenue, ',
-    abbreviatedAddress: 'Boston University, Boston, MA',
+    name: "BU Campus",
+    address: 'Boston University, 899 Commonwealth Avenue, Boston, MA',
+    abbreviation: 'Boston University',
     lat: '42.350499',
     lon: '-71.105399',
+    campus_section: 'Central'
 };
   
 const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/bu-catering-leftovers.appspot.com/o/BUCL%20Default.jpeg?alt=media&token=e3b16eef-c37e-4407-85eb-f48cd1b501c2";

@@ -10,10 +10,12 @@ export interface FoodItem {
 
 // Interface for the location of the event
 export interface Location {
+  name: string;
   address: string;
-  abbreviatedAddress: string;
+  abbreviation: string;
   lat: string;
   lon: string;
+  campus_section: string;
 }
 
 // Define the event interface

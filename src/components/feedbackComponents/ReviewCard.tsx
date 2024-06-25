@@ -42,7 +42,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
                     <AccountCircleIcon sx={{fontSize:"40px", color: "#eb8dbd"}}/>
                     <Grid item direction="column">
                         <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.shareContact? review.name : "Anonymous"}</Typography>
-                        <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.shareContact? "Email: " + review.email : ""}</Typography>
+                        <Typography marginLeft="5px" variant="body1" fontSize="0.8rem">{review.shareContact? review.email : ""}</Typography>
                     </Grid>
                 </Grid>
                 <Grid container direction="column">

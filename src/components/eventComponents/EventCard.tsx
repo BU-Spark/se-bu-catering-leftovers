@@ -8,14 +8,17 @@ import { onEnd } from '@/utils/eventUtils';
 
 interface EventCardProps {
     event: Event;
+    imageHeight?: string;
+    adminView?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
+const EventCard: React.FC<EventCardProps> = ({ event, imageHeight = '180px', adminView = false  }) => {
   const { foodAvailableDate, foodAvailableTime, endTimeFormatted } = formatEventTimes(event);
   const [imageUrl, setImageUrl] = useState<string>();
   const [remainingTime, setRemainingTime] = useState<string>("00:00:00");
   const router = useRouter();
 
+  
   // Set up interval to update remaining time of events
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,11 +53,11 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   }
 
   return (
-    <Grid item xs={12} sm={6} style={{ padding: '0.5em', paddingTop: "0" }} justifyContent="space-between">
-      <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px" }}>
+    <Grid item xs={12} style={{ padding: '0.5em', paddingTop: "0" }} justifyContent="space-between">
+      <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px", cursor: 'pointer' }} onClick={handleClick}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>
-            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: '180px', objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
+            <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: imageHeight, objectFit: "cover", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
               <Typography
                 variant="body1"
                 style={{ position: 'absolute', top: 20, right: 0, backgroundColor: "#195626", color: '#FFF',
@@ -77,9 +80,16 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
               </Typography>
             </Grid>
             <Grid item>
-              <Typography variant="body1" fontWeight="bold" onClick={handleClick}>
-                {"Learn More >"}
-              </Typography>
+              {adminView ? (
+                  <Typography variant="body1" fontWeight="bold">
+                    <span style={{ color: "green" }}>{`(${event.status.charAt(0).toUpperCase() + event.status.slice(1)})`}</span>
+                    <span > Edit &gt;</span>
+                  </Typography>
+                ) : (
+                  <Typography variant="body1" fontWeight="bold">
+                    Learn More &gt;
+                  </Typography>
+                )}  
             </Grid>
           </Grid>
         </Grid>

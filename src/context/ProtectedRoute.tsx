@@ -4,13 +4,21 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from './UserContext';
 import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useUser();
   const router = useRouter();
 
   if (loading) {
-    return <CircularProgress />;
+    return (
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', 
+        justifyContent: 'center', height: '100vh'}}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!loading && !user) {
@@ -18,7 +26,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return null;
   }
 
-  return <>{children}</>;
+  if (!loading && user) {
+    return <>{children}</>;
+  }
 };
 
 export default ProtectedRoute;
