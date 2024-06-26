@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaCaretDown } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { firebaseApp } from '@/../firebaseConfig';
@@ -145,10 +145,19 @@ const Overlay = styled.div`
 const TermsConditionsPage: React.FC = () => {
     const [activeIndex, setActiveIndex] = useState<string | null>(null);
     const [agreed, setAgreed] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const router = useRouter();
     const auth = getAuth(firebaseApp);
     const firestore = getFirestore(firebaseApp);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsAuthenticated(!!user);
+        });
+
+        return () => unsubscribe();
+    }, [auth]);
 
     const faqs = [
         {
@@ -199,7 +208,7 @@ const TermsConditionsPage: React.FC = () => {
 
     return (
         <div>
-            <Navbar />
+            <Navbar user= {isAuthenticated}/>
             <PageContainer>
                 <Title>Terms and Conditions</Title>
                 <Subtitle>You must agree to all conditions in order to get notifications.</Subtitle>
@@ -216,12 +225,18 @@ const TermsConditionsPage: React.FC = () => {
                         ))}
                     </FAQContainer>
                 ))}
-                <CheckboxContainer>
-                    <Checkbox type="checkbox" checked={agreed} onChange={() => setAgreed(!agreed)} />
-                    <label>I agree to all conditions</label>
-                </CheckboxContainer>
-                <Button onClick={handleAgree}>Proceed</Button>
-            </PageContainer>
+                {isAuthenticated ? (
+                    <>
+                        <CheckboxContainer>
+                            <Checkbox type="checkbox" checked={agreed} onChange={() => setAgreed(!agreed)} />
+                            <label>I agree to all conditions</label>
+                        </CheckboxContainer>
+                        <Button onClick={handleAgree}>Proceed</Button>
+                    </>
+                ) : (
+                    <Subtitle>Please sign in to agree to the terms and conditions.</Subtitle>
+                )}
+                </PageContainer>
             {showPopup && (
                 <>
                     <Overlay onClick={closePopup} />

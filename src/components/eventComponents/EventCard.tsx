@@ -54,7 +54,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, imageHeight = '180px', adm
 
   return (
     <Grid item xs={12} style={{ padding: '0.5em', paddingTop: "0" }} justifyContent="space-between">
-      <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px", cursor: 'pointer' }} onClick={handleClick}>
+      <Paper elevation={3} style={{ background: "#FFF6EE", position: 'relative', borderRadius:"15px", cursor: 'pointer', maxWidth: "400px" }} onClick={handleClick}>
         {imageUrl && (
           <div style={{ position: 'relative' }}>
             <img src={imageUrl} alt="Firestore Image" style={{ width: '100%', height: imageHeight, objectFit: "cover", objectPosition: "center", borderTopLeftRadius:"15px", borderTopRightRadius:"15px"}} />
@@ -71,7 +71,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, imageHeight = '180px', adm
         <Grid padding={2} paddingTop={1}>
           <Typography fontFamily="Inter" fontWeight="600" fontSize="1em">{event.name}</Typography>
             <Grid item>
-              <Typography variant="body1">{event.location}</Typography>
+              <Typography variant="body1">{event.Location.abbreviation}</Typography>
             </Grid>
             <Grid container justifyContent={"space-between"}>
             <Grid item>

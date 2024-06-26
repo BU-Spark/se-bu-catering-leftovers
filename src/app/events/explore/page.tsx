@@ -60,7 +60,7 @@ const EventsPage = () => {
             setEvents(newEvents);
             return;
         } else {
-            setEvents(newEvents.filter((event) => event.campusArea === filter));
+            setEvents(newEvents.filter((event) => event.Location.campus_section === filter));
         }
     };
 
@@ -105,7 +105,7 @@ const EventsPage = () => {
             </Typography>
         ) : (
             events.map((event) => (
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={8}>
                 <EventCard key={event.id} event={event} />
               </Grid>
             ))

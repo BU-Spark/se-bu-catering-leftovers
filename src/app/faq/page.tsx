@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaCaretDown } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { firebaseApp } from '@/../firebaseConfig';
 
 const FAQContainer = styled.div`
     margin: 20px;
@@ -88,6 +91,20 @@ interface FAQCategory {
 const FAQPage: React.FC = () => {
     const [activeIndex, setActiveIndex] = useState<string | null>(null);
 
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const auth = getAuth(firebaseApp);
+    const firestore = getFirestore(firebaseApp);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsAuthenticated(!!user);
+        });
+
+        return () => unsubscribe();
+    }, [auth]);
+
+
+
     const faqs: FAQCategory[] = [
         {
             category: "General Information",
@@ -148,7 +165,7 @@ const FAQPage: React.FC = () => {
 
     return (
         <div>
-            <Navbar />
+            <Navbar user={isAuthenticated}/>
             <FAQContainer>
                 {faqs.map((category, catIndex) => (
                     <FAQCategory key={catIndex}>

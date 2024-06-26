@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
 import { firebaseApp } from '@/../firebaseConfig';
 import styled from 'styled-components';

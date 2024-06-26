@@ -23,8 +23,7 @@ export interface Event {
     host: string;
     name: string;
     Location: Location;
-    location: string;
-    campusArea: string;
+    locationDetails: string;
     notes: string;
     duration: string;
     foodArrived: Timestamp;

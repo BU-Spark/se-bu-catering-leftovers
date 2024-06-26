@@ -123,7 +123,11 @@ const EventPreview: React.FC<EventPreviewProps>  = ({ eventId, isNew = false }) 
                     </Grid>
                         <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Location: </Typography>
-                            <Typography variant="body1" display="inline">{event.location}</Typography>
+                            <Typography variant="body1" display="inline">{event.Location.abbreviation + ", " + event.locationDetails}</Typography>
+                        </Grid>
+                        <Grid item xs={12} marginBottom="1em">
+                            <Typography variant="h6" display="inline">Address: </Typography>
+                            <Typography variant="body1" display="inline">{event.Location.address}</Typography>
                         </Grid>
                         <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Food First Arrived: </Typography>

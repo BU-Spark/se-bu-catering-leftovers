@@ -104,16 +104,14 @@ const Navbar = ({ user = true }: { user?: boolean })  => {
                 <MenuIcon fontSize="large" sx={{ color: "#ab0101" }} />
             </IconButton>
             <MenuItems show={showMenu}>
-            <MenuItem onClick={() => handleNavigation(user? "/events/explore" : '/')}>Home</MenuItem>
+                <MenuItem onClick={() => handleNavigation(user? "/events/explore" : '/')}>Home</MenuItem>
                 {user && (
-                    <>
-                    <MenuItem onClick={() => handleNavigation("/home/account")}>
-                        My Account
-                    </MenuItem>
-                    <MenuItem onClick={() => handleNavigation('/faq')}>FAQ</MenuItem>
-                    <MenuItem onClick={() => handleNavigation('/home/terms')}>Terms and Conditions</MenuItem>     
+                    <MenuItem onClick={() => handleNavigation("/home/account")}>My Account</MenuItem>
+                )}
+                <MenuItem onClick={() => handleNavigation('/faq')}>FAQ</MenuItem>
+                <MenuItem onClick={() => handleNavigation('/terms')}>Terms and Conditions</MenuItem>     
+                {user && (
                     <MenuItem onClick={() => handleNavigation('/home/logout')}>Logout</MenuItem>
-                    </>
                 )}
             </MenuItems>
         </Nav>

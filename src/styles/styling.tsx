@@ -11,7 +11,7 @@ export const theme = createTheme({
         }
     },
     typography: {
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: 'Inter',
         fontWeightBold: 600,
         button: {
             textTransform: 'none', // Prevent capitalization for buttons

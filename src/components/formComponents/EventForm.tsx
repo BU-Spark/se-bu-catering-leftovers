@@ -17,8 +17,8 @@ import { onDelete } from '@/utils/eventUtils';
 // import sendEmail from "./sendEmail";
 
 // TODO:
-// Only Admin can use this
 // Choose location API
+// send emails
 
 interface EventFormProps {
     event: Event;
@@ -42,7 +42,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [formData, setFormData] = useState<Event>(event);
     const [foodItems, setFoodItems] = useState(event.foods);
     const [images, setImages] = useState<string[]>(event.images);
-    const [location, setLocation] = useState<Location>(defaultAddress);
+    const [location, setLocation] = useState<Location>(event.Location ? event.Location : defaultAddress);
     const router = useRouter();
     const [hasChanges, setHasChanges] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
@@ -73,7 +73,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     };
 
     const isValid = () => {
-        const requiredFields: (keyof Event)[] = ['host', 'name', 'location']; // Add other required fields if necessary
+        const requiredFields: (keyof Event)[] = ['host', 'name', 'locationDetails', 'Location']; // Add other required fields if necessary
         const missingFields = requiredFields.filter(field => formData[field] === '');
 
         if (missingFields.length > 0) {
@@ -152,7 +152,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         if (hasChanges) {
             setOpenDialog(true);
         } else {
-            router.back();
+            router.push("/events/explore");
         }
     };
 
@@ -164,7 +164,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         await publishEvent('saved');
         setOpenDialog(false);
         setHasChanges(false);
-        router.back();
+        router.push("/events/explore");
     };
     
     const handleDiscardAndLeave = async () => {
@@ -175,7 +175,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         }
         setOpenDialog(false);
         setHasChanges(false);
-        router.back();
+        router.push("/events/explore");
     };
 
     return (
@@ -226,8 +226,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                             <StyledTextField
                                 fullWidth
                                 label="Location Details"
-                                name="location"
-                                value={formData.location}
+                                name="locationDetails"
+                                value={formData.locationDetails}
                                 onChange={handleChange}
                             />
                         </Grid>
