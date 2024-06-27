@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -18,7 +18,7 @@ const Nav = styled.nav`
     top: 0;
     left: 0;
     z-index: 100000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     @media (max-width: 768px) {
         padding: 15px 30px;
         height: 80px;
@@ -52,19 +52,22 @@ const LogoImage = styled.img`
     }
 `;
 
-
-const MenuItems = styled.div<{ show: boolean }>`
+const MenuItems = styled.div`
     background-color: #fff;
-    display: ${({ show }) => (show ? 'block' : 'none')};
+    display: none;
     position: absolute;
     left: 0;
     top: 100%;
     width: 100%;
     text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     z-index: 999;
     border-top: 2px solid #ab0101;
     border-bottom: 2px solid #ab0101;
+
+    &.show {
+        display: block;
+    }
 `;
 
 const MenuItem = styled.div`
@@ -81,8 +84,7 @@ const MenuItem = styled.div`
     }
 `;
 
-
-const Navbar = ({ user = true }: { user?: boolean })  => {
+const Navbar = ({ user = false }: { user?: boolean }) => {
     const [showMenu, setShowMenu] = useState(false);
     const router = useRouter();
 
@@ -95,21 +97,25 @@ const Navbar = ({ user = true }: { user?: boolean })  => {
         router.push(path);
     };
 
+    useEffect(() => {
+        console.log('Navbar user prop:', user);
+    }, [user]);
+
     return (
         <Nav>
             <Logo>
                 <LogoImage src="/bu-logo.png" alt="Boston University Logo" />
             </Logo>
             <IconButton onClick={toggleMenu}>
-                <MenuIcon fontSize="large" sx={{ color: "#ab0101" }} />
+                <MenuIcon fontSize="large" sx={{ color: '#ab0101' }} />
             </IconButton>
-            <MenuItems show={showMenu}>
-                <MenuItem onClick={() => handleNavigation(user? "/events/explore" : '/')}>Home</MenuItem>
+            <MenuItems className={showMenu ? 'show' : ''}>
+                <MenuItem onClick={() => handleNavigation(user ? '/events/explore' : '/')}>Home</MenuItem>
                 {user && (
-                    <MenuItem onClick={() => handleNavigation("/home/account")}>My Account</MenuItem>
+                    <MenuItem onClick={() => handleNavigation('/home/account')}>My Account</MenuItem>
                 )}
                 <MenuItem onClick={() => handleNavigation('/faq')}>FAQ</MenuItem>
-                <MenuItem onClick={() => handleNavigation('/terms')}>Terms and Conditions</MenuItem>     
+                <MenuItem onClick={() => handleNavigation('/terms')}>Terms and Conditions</MenuItem>
                 {user && (
                     <MenuItem onClick={() => handleNavigation('/home/logout')}>Logout</MenuItem>
                 )}

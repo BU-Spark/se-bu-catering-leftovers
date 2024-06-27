@@ -109,8 +109,10 @@ const handleSignUp = async () => {
 };
 
 const Home = () => {
-  const [userName, setUserName] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [user, setUser] = useState<{ userName: string | null; userRole: string | null }>({
+    userName: null,
+    userRole: null,
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -125,8 +127,7 @@ const Home = () => {
         if (userDoc.exists()) {
           console.log('User already exists, logging in');
           const userData = userDoc.data();
-          setUserName(userData.name);
-          setUserRole(userData.role);
+          setUser({ userName: userData.name, userRole: userData.role });
           console.log("User role from Firestore:", userData.role);
           if (userData.role === 'Admin') {
             console.log('Redirecting admin to /events/explore');
@@ -150,8 +151,7 @@ const Home = () => {
           });
 
           console.log('User signed up successfully');
-          setUserName(displayName);
-          setUserRole(storedUserRole);
+          setUser({ userName: displayName, userRole: storedUserRole });
           if (storedUserRole === 'Admin') {
             console.log('Redirecting admin to /events/explore after sign-up');
             router.push('/events/explore');
@@ -182,7 +182,7 @@ const Home = () => {
   return (
       <div>
         <GlobalStyle />
-        <Navbar user={false} />
+        <Navbar user={!!user.userName} />
         <div className={styles.container}>
           <Head>
             <title>Reduce Wasted Food</title>
@@ -192,13 +192,13 @@ const Home = () => {
             <section className={styles.hero}>
               <HeroContainer>
                 <StyledTitle>Reduce Wasted Food</StyledTitle>
-                {!userName ? (
+                {!user.userName ? (
                     <ButtonContainer>
                       <StyledButton onClick={handleLogin}>Login</StyledButton>
                       <StyledButton onClick={handleAdminSignUp}>Sign Up</StyledButton>
                     </ButtonContainer>
                 ) : (
-                    <StyledMessage>Welcome, {userName}</StyledMessage>
+                    <StyledMessage>Welcome, {user.userName}</StyledMessage>
                 )}
               </HeroContainer>
             </section>

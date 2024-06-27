@@ -62,7 +62,7 @@ const Logout: React.FC = () => {
             <LogoutContainer>
                 <Message>Are you sure you want to logout?</Message>
                 <Button onClick={handleLogout}>Logout</Button>
-                <Button onClick={handleReturn}>Return to Home Page</Button>
+                <Button onClick={handleReturn}>Return to Page</Button>
             </LogoutContainer>
         </div>
     );
