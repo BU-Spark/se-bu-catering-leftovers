@@ -20,4 +20,4 @@ npm run dev
 
 
 ## Deployment
-To view our project deployed checkout: https://bu-sustainability-leftovers.netlify.app/
+To view our project deployed checkout: [https://bu-sustainability-leftovers.netlify.app/](https://testing--bu-sustainability-leftovers.netlify.app/)
