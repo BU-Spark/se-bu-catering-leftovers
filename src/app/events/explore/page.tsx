@@ -60,7 +60,7 @@ const EventsPage = () => {
             setEvents(newEvents);
             return;
         } else {
-            setEvents(newEvents.filter((event) => event.campusArea === filter));
+            setEvents(newEvents.filter((event) => event.Location.campus_section === filter));
         }
     };
 
