@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
 import styles from '@/styles/Home.module.css';
-import { signInWithRedirect, getAuth } from 'firebase/auth';
+import { signInWithRedirect, signInWithPopup, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { firebaseApp, provider } from '@/../firebaseConfig';
 import { useRouter } from 'next/navigation';
@@ -94,7 +94,8 @@ const firestore = getFirestore(firebaseApp);
 const handleLogin = async () => {
   try {
     console.log("Redirecting for login");
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
+    // await signInWithRedirect(auth, provider);
   } catch (error) {
     console.error("Failed to redirect for login:", error);
   }
@@ -104,7 +105,9 @@ const handleSignUp = async () => {
   try {
     console.log("Redirecting for sign-up");
     localStorage.setItem('userRole', 'User');
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
+    //await signInWithRedirect(auth, provider);
+
   } catch (error) {
     console.error("Failed to redirect for sign-up:", error);
   }
@@ -119,8 +122,6 @@ const Home = () => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      alert(`Received user ${user}`);
-
       if (user) {
         const storedUserRole = localStorage.getItem('userRole');
         console.log("User role from localStorage:", storedUserRole);

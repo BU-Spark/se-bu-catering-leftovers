@@ -58,7 +58,7 @@ const Logout: React.FC = () => {
 
     return (
         <div>
-            <Navbar />
+            <Navbar user={true}/>
             <LogoutContainer>
                 <Message>Are you sure you want to logout?</Message>
                 <Button onClick={handleLogout}>Logout</Button>
