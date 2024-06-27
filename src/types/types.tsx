@@ -34,7 +34,6 @@ export interface Event {
     images: string[];
     id: string;
     reviewedBy: string[];
-    campusArea: string;
 }
 
 // Define the user interface

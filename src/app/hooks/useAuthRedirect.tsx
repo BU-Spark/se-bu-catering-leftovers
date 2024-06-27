@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { firebaseApp } from '@/../firebaseConfig';
 
 const auth = getAuth(firebaseApp);

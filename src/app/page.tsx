@@ -10,6 +10,7 @@ import { signInWithRedirect, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { firebaseApp, provider } from '@/../firebaseConfig';
 import { useRouter } from 'next/navigation';
+import { Typography } from '@mui/material';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -66,9 +67,10 @@ const ButtonContainer = styled.div`
 `;
 
 const StyledTitle = styled.h1`
-  font-size: 2rem;
+  font-size: 2em;
   color: white;
   margin-bottom: 50px;
+  padding-bottom: 100px;
   text-align: center;
   z-index: 1;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -117,6 +119,8 @@ const Home = () => {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      alert(`Received user ${user}`);
+
       if (user) {
         const storedUserRole = localStorage.getItem('userRole');
         console.log("User role from localStorage:", storedUserRole);
@@ -125,16 +129,10 @@ const Home = () => {
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
-          console.log('User already exists, logging in');
           const userData = userDoc.data();
           setUser({ userName: userData.name, userRole: userData.role });
-          console.log("User role from Firestore:", userData.role);
-          if (userData.role === 'Admin') {
-            console.log('Redirecting admin to /events/explore');
-            router.push('/events/explore');
-          } else {
-            console.log('User is not an admin, role:', userData.role);
-          }
+          router.push('/events/explore');
+          
         } else if (storedUserRole) {
           const displayName = user.displayName || 'Unknown';
           await setDoc(userDocRef, {
@@ -150,22 +148,16 @@ const Home = () => {
             agreedToTerms: false,
           });
 
-          console.log('User signed up successfully');
           setUser({ userName: displayName, userRole: storedUserRole });
-          if (storedUserRole === 'Admin') {
-            console.log('Redirecting admin to /events/explore after sign-up');
-            router.push('/events/explore');
-          } else {
-            console.log('User signed up as non-admin, role:', storedUserRole);
-            router.push('/events/explore');
-          }
+          router.push('/events/explore');
+          
           localStorage.removeItem('userRole');
         }
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   // Admin Token
   const handleAdminSignUp = async () => {
@@ -191,7 +183,7 @@ const Home = () => {
           <main className={styles.main}>
             <section className={styles.hero}>
               <HeroContainer>
-                <StyledTitle>Reduce Wasted Food</StyledTitle>
+                <Typography fontSize="1.8rem" fontFamily="Arial, sans-serif" fontWeight="600" color="#FFF">Reduce Wasted Food</Typography>
                 {!user.userName ? (
                     <ButtonContainer>
                       <StyledButton onClick={handleLogin}>Login</StyledButton>

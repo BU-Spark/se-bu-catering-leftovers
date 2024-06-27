@@ -323,10 +323,10 @@ import { Location } from '../types/types';
     },
     {
       "name": "Center for Computing & Data Sciences",
-      "abbreviation": "CDS",
+      "abbreviation": "Center for Computing & Data Sciences (CDS)",
       "address": "665 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3507",
-      "lon": "-71.1057",
+      "lat": "42.3499",
+      "lon": "-71.1032",
       "campus_section": "Central"
     },
     {
