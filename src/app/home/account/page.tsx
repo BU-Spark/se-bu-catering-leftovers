@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { doc,  updateDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import Navbar from '@/components/Navbar';
-import { Event, User }from '@/types/types';
+import { Event, User } from '@/types/types';
 import { firestore, auth } from '@/../firebaseConfig';
 import { useUser } from '@/context/UserContext';
 import EventCard from '@/components/eventComponents/EventCard';
@@ -22,6 +22,25 @@ const AccountPage = () => {
     const [userEvents, setUserEvents] = useState<Event[]>([]);
     const [campusPreferences, setCampusPreferences] = useState<string[]>(user ? user.locPref : []);
 
+    const fetchUserEvents = useCallback(async () => {
+        setUserEvents([]);
+        const eventsCollection = collection(firestore, 'Events');
+
+        const eventsQuery = query(
+            eventsCollection,
+            orderBy("foodAvailable", "desc"),
+            where("id", "in", user ? user.events : [])
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
+
+        let newEvents = eventsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+        })) as Event[];
+
+        return newEvents;
+    }, [user]);
+
     useEffect(() => {
         const fetchEvents = async () => {
             const eventsData = await fetchUserEvents();
@@ -30,25 +49,7 @@ const AccountPage = () => {
         };
 
         fetchEvents();
-    }, []);
-                    
-    const fetchUserEvents = async () => {
-        setUserEvents([]);
-        const eventsCollection = collection(firestore, 'Events');
-        
-        const eventsQuery = query(
-            eventsCollection, 
-            orderBy("foodAvailable", "desc"),
-            where("id", "in", user? user.events : [])
-        )
-        const eventsSnapshot = await getDocs(eventsQuery);
-
-        let newEvents = eventsSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()})) as Event[];
-
-        return newEvents;
-    };
+    }, [fetchUserEvents]);
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -74,10 +75,11 @@ const AccountPage = () => {
         e.preventDefault();
         if (auth.currentUser && formData) {
             const userDocRef = doc(firestore, 'Users', auth.currentUser.uid);
-            await updateDoc(userDocRef, { ...formData,
+            await updateDoc(userDocRef, {
+                ...formData,
                 locPref: campusPreferences,
-             } as any);
-            setUserData({ ...formData, locPref: campusPreferences});
+            } as any);
+            setUserData({ ...formData, locPref: campusPreferences });
             setIsEditing(false);
         }
     };
@@ -88,15 +90,15 @@ const AccountPage = () => {
     return (
         <ThemeProvider theme={theme}>
             <Navbar user={!!user} />
-            <Container  maxWidth="sm" sx={{ padding: '1em', paddingTop: '7em',  }}>
+            <Container maxWidth="sm" sx={{ padding: '1em', paddingTop: '7em' }}>
                 <Paper elevation={3} sx={{ padding: '2rem' }}>
                     <Grid container marginBottom="2em" alignItems="center">
-                        <Typography variant="h4" style={{ display: 'inline-block', marginTop: "3px", paddingRight:"0px"}}>
+                        <Typography variant="h4" style={{ display: 'inline-block', marginTop: "3px", paddingRight:"0px" }}>
                             My Account
                         </Typography>
-                            <IconButton onClick={handleEditClick} >
-                                <EditIcon color="primary" fontSize="small" />
-                            </IconButton>
+                        <IconButton onClick={handleEditClick}>
+                            <EditIcon color="primary" fontSize="small" />
+                        </IconButton>
                     </Grid>
                     {isEditing ? (
                         <form onSubmit={handleFormSubmit}>
@@ -133,9 +135,9 @@ const AccountPage = () => {
                         <Box sx={{ mt: 2 }}>
                             <Typography variant="h6" marginTop="2em">Name</Typography>
                             <Typography variant="body1" color="primary">{userData?.name}</Typography>
-                            <Typography variant="h6"  marginTop="2em">Email</Typography>
+                            <Typography variant="h6" marginTop="2em">Email</Typography>
                             <Typography variant="body1" color="primary">{userData?.email}</Typography>
-                            <Typography variant="h6"  marginTop="2em">Role</Typography>
+                            <Typography variant="h6" marginTop="2em">Role</Typography>
                             <Typography variant="body1" color="primary">{userData?.role}</Typography>
                         </Box>
                     )}
@@ -165,33 +167,33 @@ const AccountPage = () => {
                     </Box>
                     {userData && userData.role === "Admin" && (
                         <>
-                        <Typography variant="h4" marginBottom="1em">Events Created</Typography>
-                        {userEvents.length > 0 ? (
-                            <>
-                            <Grid container justifyContent="center">
-                            {userEvents.map((event) => 
-                                    <Grid container sx={{width:{xs:"100%", sm: "80%"}, maxWidth:"400px"}}  justifySelf= "center">
-                                        <EventCard key={event.id} event={event} imageHeight="120px" adminView={true} />
+                            <Typography variant="h4" marginBottom="1em">Events Created</Typography>
+                            {userEvents.length > 0 ? (
+                                <>
+                                    <Grid container justifyContent="center">
+                                        {userEvents.map((event) =>
+                                            <Grid container sx={{width:{xs:"100%", sm: "80%"}, maxWidth:"400px"}} justifySelf="center" key={event.id}>
+                                                <EventCard key={event.id} event={event} imageHeight="120px" adminView={true} />
+                                            </Grid>
+                                        )}
                                     </Grid>
-                                    )
-                            }   
-                            </Grid>
-                            </>
-                        ) : (
-                            <Typography variant="body1" sx={{ mt: 2, textAlign: 'center', fontStyle: 'italic' }}>
-                                No events created by you.
-                            </Typography>
-                        )}
+                                </>
+                            ) : (
+                                <Typography variant="body1" sx={{ mt: 2, textAlign: 'center', fontStyle: 'italic' }}>
+                                    No events created by you.
+                                </Typography>
+                            )}
                         </>
                     )}
                 </Paper>
             </Container>
         </ThemeProvider>
-    );}
+    );
+};
 
 export default AccountPage;
 
 // Customize the TextField component
-export const StyledTextField = styled(TextField)({
+const StyledTextField = styled(TextField)({
     ...props
 });

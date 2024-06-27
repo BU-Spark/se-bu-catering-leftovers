@@ -16,6 +16,7 @@ export interface Location {
   lat: string;
   lon: string;
   campus_section: string;
+  abbreviatedAddress?: string;
 }
 
 // Define the event interface
@@ -33,6 +34,7 @@ export interface Event {
     images: string[];
     id: string;
     reviewedBy: string[];
+    campusArea: string;
 }
 
 // Define the user interface

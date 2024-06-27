@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import EventForm from '@/components/formComponents/EventForm';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "@/styles/styling";
@@ -11,17 +11,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { onPublish } from '@/utils/eventUtils';
 import { Location } from '@/types/types';
 
-// TODO:
-// Only Admin can use this
-// Bug: When go back from preview, event dissapears
-// Delete old images
-// Delete images on user when deleted on form
-// Delete old events
-// Ask if would like to save before leaving?
+// Dynamically import EventForm to avoid SSR issues
+const EventForm = dynamic(() => import('@/components/formComponents/EventForm'), { ssr: false });
 
-// This page is the intake form where admins can create new events
-const EventFormPage = () => {    
-    // Create empty event
+const EventFormPage = () => {
     const [newEvent, setNewEvent] = useState<Event>({
         host: '',
         name: '',
@@ -31,13 +24,13 @@ const EventFormPage = () => {
         duration: '30',
         foodArrived: Timestamp.fromDate(new Date()),
         foodAvailable: Timestamp.fromDate(new Date()),
-        foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' },{ id: uuidv4(), quantity: '', item: '', unit: '' }],
+        foods: [{ id: uuidv4(), quantity: '', item: '', unit: '' }, { id: uuidv4(), quantity: '', item: '', unit: '' }, { id: uuidv4(), quantity: '', item: '', unit: '' }],
         status: 'drafted',
         images: [],
         id: "",
-        reviewedBy: []
+        reviewedBy: [],
+        campusArea: ''
     });
-
 
     return (
         <div>

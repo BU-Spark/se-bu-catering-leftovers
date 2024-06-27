@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Container, Typography, Grid } from '@mui/material';
 import { collection, query, onSnapshot, getDocs, orderBy } from 'firebase/firestore';
 import { firestore } from '@/../firebaseConfig';
@@ -16,39 +16,39 @@ const ReviewsDisplay: React.FC<ReviewsDisplayProps> = ({ eventId }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(firestore, `Reviews/${eventId}/Reviews`), (snapshot) => {
-      fetchReviews();
-    });
-    
-    return () => unsubscribe(); // Cleanup listener on unmount
-
-  }, [eventId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     const reviewsRef = collection(firestore, `Reviews/${eventId}/Reviews`);
     const q = query(reviewsRef, orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
     const reviewsList = querySnapshot.docs.map(doc => doc.data() as Review);
     setReviews(reviewsList);
-  };
+  }, [eventId]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(firestore, `Reviews/${eventId}/Reviews`), (snapshot) => {
+      fetchReviews();
+    });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+
+  }, [eventId, fetchReviews]);
 
   return (
-    <Container maxWidth="md" style={{ paddingTop: "7em"}}>
-        <IconButton onClick={()=> router.back()} style={{paddingLeft: "0em"}}>
-            <ArrowBackIcon color="secondary" />
+      <Container maxWidth="md" style={{ paddingTop: "7em"}}>
+        <IconButton onClick={() => router.back()} style={{ paddingLeft: "0em" }}>
+          <ArrowBackIcon color="secondary" />
         </IconButton>
         <Typography variant="h4" marginBottom="0.7rem">Event Reviews</Typography>
         {reviews.length === 0 ? (
-          <Typography variant="body1" style={{ marginTop: 20, textAlign: "center", fontStyle: "italic" }}>
+            <Typography variant="body1" style={{ marginTop: 20, textAlign: "center", fontStyle: "italic" }}>
               There is no feedback currently available. Stay tuned for updates!
-          </Typography>
+            </Typography>
         ) : (
-          reviews.map((review) => (
-            <ReviewCard review={review}/>
-          ))
+            reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+            ))
         )}
-    </Container>
+      </Container>
   );
 };
 

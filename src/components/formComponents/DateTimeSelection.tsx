@@ -12,29 +12,28 @@ interface DateTimeSelectionProps {
 }
 
 export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormData, formData }) => {
-    const today = new Date();    
+    const today = new Date();
     const minimumDate = new Date(today.getTime() - 3.5 * 60 * 60 * 1000); // Allow to create event up to 3 hours before current time
     const defaultDuration = 30;
 
     const [foodArrived, setFoodArrived] = useState<Date>(today);
     const [foodAvailable, setFoodAvailable] = useState<Date>(foodArrived);
     const [duration, setDuration] = useState<Date>(new Date(0, 0, 0, 0, defaultDuration, 0));
-    
+
     const maxTime = 4; // Maximum time in hours for food to be consumed after arrival
     const [availabilityLimit, setLimit] = useState<Date>(new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000 - defaultDuration * 60 * 1000));
 
     useEffect(() => {
-        const newLimit = new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000 - (duration.getMinutes() + 1)*60*1000);
+        const newLimit = new Date(foodArrived.getTime() + maxTime * 60 * 60 * 1000 - (duration.getMinutes() + 1) * 60 * 1000);
         setLimit(newLimit);
 
-        if (foodAvailable < foodArrived){
+        if (foodAvailable < foodArrived) {
             setFoodAvailable(foodArrived);
-        }
-        else if (foodAvailable > newLimit){
+        } else if (foodAvailable > newLimit) {
             console.log(formData.duration);
             setFoodAvailable(newLimit);
         }
-      }, [foodArrived, foodAvailable]);
+    }, [foodArrived, foodAvailable, duration, formData.duration]);
 
     // Save arrival date changes
     const handleArrivalChange = (date: Date | null) => {
@@ -50,7 +49,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
 
     // Save delivery date changes
     const handleDeliveryChange = (date: Date | null) => {
-        if (date){
+        if (date) {
             setFoodAvailable(date);
             const formattedDate = Timestamp.fromDate(date);
             setFormData((prevData) => ({
@@ -72,7 +71,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
         }));
     };
 
-    return(
+    return (
         <Grid item xs={12}>
             <Grid item xs={12} marginBottom={2}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -83,7 +82,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                         onChange={handleArrivalChange}
                         ampm={false}
                         slotProps={{ textField: { fullWidth: true } }}
-                        sx={{...props}}
+                        sx={{ ...props }}
                     />
                 </LocalizationProvider>
             </Grid>
@@ -96,11 +95,13 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                         maxDateTime={availabilityLimit}
                         onChange={handleDeliveryChange}
                         ampm={false}
-                        slotProps = {{textField: {
-                            fullWidth: true, 
-                            helperText: "For safety, food can't be given after 4 hours of arrival"}    
+                        slotProps={{
+                            textField: {
+                                fullWidth: true,
+                                helperText: "For safety, food can't be given after 4 hours of arrival"
+                            }
                         }}
-                        sx={{...props}}
+                        sx={{ ...props }}
                     />
                 </LocalizationProvider>
             </Grid>
@@ -113,17 +114,16 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ setFormDat
                         format="HH:mm"
                         maxTime={dynamicMaxTime}
                         ampm={false}
-                        sx={{...props}}
+                        sx={{ ...props }}
                         slotProps={{
                             textField: {
-                            helperText: `Select up to 4 hours after food arrived`,
-                            fullWidth: true,
+                                helperText: `Select up to 4 hours after food arrived`,
+                                fullWidth: true,
                             },
                         }}
                     />
                 </LocalizationProvider>
             </Grid>
         </Grid>
-
     );
 };

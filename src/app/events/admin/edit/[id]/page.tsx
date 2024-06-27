@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "@/styles/styling";
 import { doc, getDoc } from 'firebase/firestore';
 import { Event } from '@/types/types';
-import { firestore as db} from '@/../firebaseConfig';
+import { firestore as db } from '@/../firebaseConfig';
 import { notFound } from 'next/navigation';
 import { onUpdate } from '@/utils/eventUtils';
 
@@ -27,9 +27,9 @@ const EditEventFormPage = ({ params }: { params: { id: string } }) => {
       const loadedEvent = docSnap.data() as Event;
 
       setEvent(loadedEvent);
-    }
+    };
     fetchEvent(eventUID);
-  }, []);
+  }, [eventUID]);
 
   return (
       <div>

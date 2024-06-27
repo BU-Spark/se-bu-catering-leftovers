@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Typography, Container, Grid, Paper, IconButton, FormControl, InputLabel, Select, SelectChangeEvent, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Button, TextField, Typography, Container, Grid, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { styled } from "@mui/material/styles";
-import { props } from "../../styles/styling";
+import { props } from "@/styles/styling";
 import { FoodSelection } from './FoodSelection';
 import { DateTimeSelection } from './DateTimeSelection';
 import { ImageUpload } from '@/components/ImageUpload';
-import { Event } from '../../types/types';
+import { Event } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import GeocodeSearch from './GeoCodeSearch';
 import Map from '../Map';
@@ -14,11 +14,6 @@ import { Location } from '@/types/types';
 import LocationDropdown from './LocationDropdown';
 import { useUser } from "@/context/UserContext";
 import { onDelete } from '@/utils/eventUtils';
-// import sendEmail from "./sendEmail";
-
-// TODO:
-// Choose location API
-// send emails
 
 interface EventFormProps {
     event: Event;
@@ -33,12 +28,11 @@ const defaultAddress: Location = {
     lon: '-71.105399',
     campus_section: 'Central'
 };
-  
+
 const defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/bu-catering-leftovers.appspot.com/o/BUCL%20Default.jpeg?alt=media&token=e3b16eef-c37e-4407-85eb-f48cd1b501c2";
 
-// This component is the intake form where admins can create and modify new events
 const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
-    const { user, loading } = useUser();
+    const { user } = useUser();
     const [formData, setFormData] = useState<Event>(event);
     const [foodItems, setFoodItems] = useState(event.foods);
     const [images, setImages] = useState<string[]>(event.images);
@@ -47,7 +41,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
 
-    // Prompt user to save changes before leaving the page
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasChanges) {
@@ -55,14 +48,18 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 e.returnValue = ''; // Show browser's default confirmation dialog
             }
         };
-    
-        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('beforeunload', handleBeforeUnload);
+        }
+
         return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            }
         };
     }, [hasChanges]);
 
-    // Save changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
@@ -84,19 +81,13 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         }
     }
 
-    // Save and publish event on website
     const publishEvent = async (status: string) => {
         if (user) {
-    
-            // Check if all required fields are filled out
             if (isValid()) {
                 const updatedEvent = updateEvent(status);
-
                 const eventUID = await onPublish(updatedEvent, user.uid);
 
                 if (status === 'open') {
-
-                    // await sendEmails(updatedEvent);
                     alert('Event published successfully');
                     router.push('/events/explore');
                 }
@@ -106,22 +97,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 return "";
             }
         }
-
     };
-
-    // const sendEmails = async (updatedEvent: Event) => {
-    //     const usersSnapshot = await getDocs(collection(db, 'Users'));
-    //     const users = usersSnapshot.docs.map((doc) => doc.data() as User);
-
-    //     const subject = `New Event: ${updatedEvent.name}`;
-    //     const text = `Hi,\n\nWe are excited to announce a new event: ${updatedEvent.name}. Here are the details:\n\nHost: ${updatedEvent.host}\nLocation: ${updatedEvent.location}\nCampus Area: ${updatedEvent.campusArea}\nNotes: ${updatedEvent.notes}\n\nWe hope to see you there!\n\nBest Regards,\nYour Team`;
-    //     const html = `<p>Hi,</p><p>We are excited to announce a new event: <strong>${updatedEvent.name}</strong>. Here are the details:</p><ul><li>Host: ${updatedEvent.host}</li><li>Location: ${updatedEvent.location}</li><li>Campus Area: ${updatedEvent.campusArea}</li><li>Notes: ${updatedEvent.notes}</li></ul><p>We hope to see you there!</p><p>Best Regards,<br>Your Team</p>`;
-
-    //     users.forEach((user) => {
-    //       sendEmail(user.email, subject, text, html);
-    //     });
-
-    // }
 
     const updateEvent = (status: string) => {
         const validFood = foodItems.filter(({ quantity, unit, item }) => quantity && unit && item) // Filter empty food items
@@ -137,7 +113,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     };
 
     const removeImage = (url: string) => {
-        setImages(images.filter((image) => image !== url));    
+        setImages(images.filter((image) => image !== url));
         setHasChanges(true);
     };
 
@@ -166,7 +142,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         setHasChanges(false);
         router.push("/events/explore");
     };
-    
+
     const handleDiscardAndLeave = async () => {
         if (event.status === 'drafted' || event.id === "") {
             if (user) {
@@ -294,10 +270,8 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     );
 };
 
-
 export default EventForm;
 
-// Customize the TextField component
 export const StyledTextField = styled(TextField)({
     ...props
 });

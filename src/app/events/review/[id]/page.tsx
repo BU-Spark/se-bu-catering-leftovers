@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from "@/context/UserContext";
 
 // This page shows the complete view of an event
-const FeedbackFormPage = ({ params }: { params: { id: string } })  => {
+const FeedbackFormPage = ({ params }: { params: { id: string } }) => {
     const eventId = params.id;
     const { user } = useUser();
     const router = useRouter();
@@ -34,30 +34,27 @@ const FeedbackFormPage = ({ params }: { params: { id: string } })  => {
     // Fetch event to save its name
     useEffect(() => {
         const fetchEvent = async () => {
-              const eventRef = doc(db, 'Events', eventId);
-              const eventDoc = await getDoc(eventRef);
-              const event = eventDoc.data() as Event;
-              if (user) {
+            const eventRef = doc(db, 'Events', eventId);
+            const eventDoc = await getDoc(eventRef);
+            const event = eventDoc.data() as Event;
+            if (user) {
                 if (event.reviewedBy.includes(user.uid)) {
-                  alert("You have already submitted feedback for this event.");
-                  router.push("/events/explore")
+                    alert("You have already submitted feedback for this event.");
+                    router.push("/events/explore");
                 }
-              }
-              setEvent(event);
+            }
+            setEvent(event);
         }
         fetchEvent();
+    }, [eventId, router, user]); // Added eventId, router, and user to the dependency array
 
-    }, []);
-  
-return (
-    <div style={{background: "#FFF6EE"}}>
-      <Navbar/>
-      <ThemeProvider theme={theme}>
-        { event &&
-          <FeedbackForm event={event} review={newReview} onSubmit={onSubmit}/>
-        }
-        </ThemeProvider>
-    </div>
+    return (
+        <div style={{ background: "#FFF6EE" }}>
+            <Navbar />
+            <ThemeProvider theme={theme}>
+                {event && <FeedbackForm event={event} review={newReview} onSubmit={onSubmit} />}
+            </ThemeProvider>
+        </div>
     );
 };
 

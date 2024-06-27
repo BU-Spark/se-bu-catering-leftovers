@@ -6,7 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import '@/styles/globals.css';
 import { useAuthRedirect } from '/hooks/useAuthRedirect';
-import { UserProvider } from '/context/UserContext';
+import { UserProvider } from '../context/UserContext';
 
 const GlobalStyle = createGlobalStyle`
     body {
@@ -17,11 +17,11 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#ab0101", 
+    palette: {
+        primary: {
+            main: "#ab0101",
+        },
     },
-  },
 });
 
 function MyApp({ Component, pageProps }) {
@@ -42,16 +42,17 @@ function MyApp({ Component, pageProps }) {
 
     return (
         <>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <GlobalStyle />
-            <UserProvider>
-              <Component {...pageProps} />
-            </UserProvider>
-          </ThemeProvider>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <GlobalStyle />
+                <UserProvider>
+                    <Component {...pageProps} />
+                </UserProvider>
+            </ThemeProvider>
         </>
     );
 }
 
 export default MyApp;
+
 
