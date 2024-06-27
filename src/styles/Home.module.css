@@ -51,12 +51,6 @@
     background-color: darkred;
 }
 
-.howItWorks {
-    text-align: center;
-    font-size: large;
-    margin: 40px 0;
-}
-
 .steps {
     display: flex;
     justify-content: space-around;
