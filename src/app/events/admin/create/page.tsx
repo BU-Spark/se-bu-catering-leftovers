@@ -29,7 +29,6 @@ const EventFormPage = () => {
         images: [],
         id: "",
         reviewedBy: [],
-        campusArea: ''
     });
 
     return (
