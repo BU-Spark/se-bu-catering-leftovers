@@ -21,6 +21,7 @@ const AccountPage = () => {
     const [formData, setFormData] = useState<User | null>(user);
     const [userEvents, setUserEvents] = useState<Event[]>([]);
     const [campusPreferences, setCampusPreferences] = useState<string[]>(user ? user.locPref : []);
+    const [hasChanges, setHasChanges] = useState(false);
 
     const fetchUserEvents = useCallback(async () => {
         setUserEvents([]);
@@ -64,11 +65,14 @@ const AccountPage = () => {
     };
 
     const handleCampusPreferenceToggle = (preference: string) => {
-        setCampusPreferences(prevPreferences =>
-            prevPreferences.includes(preference)
+        setCampusPreferences(prevPreferences => {
+            const newPreferences = prevPreferences.includes(preference)
                 ? prevPreferences.filter(p => p !== preference)
                 : [...prevPreferences, preference]
-        );
+            setHasChanges(true);
+            return newPreferences;
+            });
+        
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -81,6 +85,7 @@ const AccountPage = () => {
             } as any);
             setUserData({ ...formData, locPref: campusPreferences });
             setIsEditing(false);
+            setHasChanges(false);
         }
     };
 
@@ -165,6 +170,13 @@ const AccountPage = () => {
                             />
                         ))}
                     </Box>
+                    {hasChanges && (
+                        <Grid container justifyContent="center" alignItems="center" >
+                            <Button type="submit" variant="contained" color="primary" sx={{  borderRadius: "20px" }} size="large" onClick={handleFormSubmit}>
+                                <Typography variant="button">Save Changes</Typography>
+                            </Button>
+                        </Grid>
+                    )}
                     {userData && userData.role === "Admin" && (
                         <>
                             <Typography variant="h4" marginBottom="1em">Events Created</Typography>

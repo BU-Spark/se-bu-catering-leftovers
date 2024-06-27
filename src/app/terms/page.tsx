@@ -5,9 +5,10 @@ import styled from 'styled-components';
 import { FaCaretDown } from 'react-icons/fa';
 import Navbar from '@/components/Navbar';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { firebaseApp } from '@/../firebaseConfig';
+import { set } from 'date-fns';
 
 const PageContainer = styled.div`
     margin: 20px;
@@ -147,13 +148,21 @@ const TermsConditionsPage: React.FC = () => {
     const [agreed, setAgreed] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const router = useRouter();
     const auth = getAuth(firebaseApp);
     const firestore = getFirestore(firebaseApp);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setIsAuthenticated(!!user);
+            if (user) {
+                const userDocRef = doc(firestore, 'Users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    setAgreedToTerms(userDoc.data().agreedToTerms);
+                }
+            }
         });
 
         return () => unsubscribe();
@@ -192,6 +201,7 @@ const TermsConditionsPage: React.FC = () => {
                     await updateDoc(userDocRef, {
                         agreedToTerms: true
                     });
+                    setAgreedToTerms(true);
                     router.push('/events/explore'); // Redirect to home page after agreement
                 } catch (error) {
                     console.error('Error updating user agreement:', error);
@@ -199,6 +209,21 @@ const TermsConditionsPage: React.FC = () => {
             }
         } else {
             setShowPopup(true);
+        }
+    };
+
+    const handleUnagree = async () => {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const userDocRef = doc(firestore, 'Users', user.uid);
+                await updateDoc(userDocRef, {
+                    agreedToTerms: false
+                });
+                setAgreedToTerms(false);
+            } catch (error) {
+                console.error('Error updating user agreement:', error);
+            }
         }
     };
 
@@ -226,17 +251,26 @@ const TermsConditionsPage: React.FC = () => {
                     </FAQContainer>
                 ))}
                 {isAuthenticated ? (
-                    <>
-                        <CheckboxContainer>
-                            <Checkbox type="checkbox" checked={agreed} onChange={() => setAgreed(!agreed)} />
-                            <label>I agree to all conditions</label>
-                        </CheckboxContainer>
-                        <Button onClick={handleAgree}>Proceed</Button>
+                   <>
+                        {agreedToTerms ? (
+                            <>
+                                <Subtitle>You have already agreed to the terms and conditions.</Subtitle>
+                                <Button onClick={handleUnagree}>Unaccept Terms and Conditions</Button>
+                            </>
+                        ) : (
+                            <>
+                                <CheckboxContainer>
+                                    <Checkbox type="checkbox" checked={agreed} onChange={() => setAgreed(!agreed)} />
+                                    <label>I agree to all conditions</label>
+                                </CheckboxContainer>
+                                <Button onClick={handleAgree}>Proceed</Button>
+                            </>
+                        )}
                     </>
                 ) : (
                     <Subtitle>Please sign in to agree to the terms and conditions.</Subtitle>
                 )}
-                </PageContainer>
+            </PageContainer>
             {showPopup && (
                 <>
                     <Overlay onClick={closePopup} />

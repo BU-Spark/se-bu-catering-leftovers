@@ -176,7 +176,7 @@ const EventPreview: React.FC<EventPreviewProps> = ({ eventId, isNew = false }) =
                                             <Typography variant="button">End Event</Typography>
                                         </Button>
                                         <Typography variant="body1" fontWeight="bold"
-                                                    sx={{ textDecoration: "underline" }}
+                                                    sx={{ textDecoration: "underline", cursor: 'pointer'  }}
                                                     onClick={viewFeedback}>
                                             {"View Feedback Section"}
                                         </Typography>
@@ -191,7 +191,7 @@ const EventPreview: React.FC<EventPreviewProps> = ({ eventId, isNew = false }) =
                                             <Typography variant="button">Copy Event</Typography>
                                         </Button>
                                         <Typography variant="body1" fontWeight="bold"
-                                                    sx={{ textDecoration: "underline" }}
+                                                    sx={{ textDecoration: "underline", cursor: 'pointer'  }}
                                                     onClick={viewFeedback}>
                                             {"View Feedback Section"}
                                         </Typography>
