@@ -133,7 +133,7 @@ const Home = () => {
           const userData = userDoc.data();
           setUser({ userName: userData.name, userRole: userData.role });
           router.push('/events/explore');
-          
+
         } else if (storedUserRole) {
           const displayName = user.displayName || 'Unknown';
           await setDoc(userDocRef, {
@@ -151,14 +151,14 @@ const Home = () => {
 
           setUser({ userName: displayName, userRole: storedUserRole });
           router.push('/events/explore');
-          
+
           localStorage.removeItem('userRole');
         }
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]); // Add 'router' to the dependency array
 
   // Admin Token
   const handleAdminSignUp = async () => {
