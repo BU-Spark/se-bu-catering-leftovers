@@ -75,7 +75,7 @@ import { Location } from '../types/types';
     },
     {
       "name": "Engineering Product Innovation Center",
-      "abbreviation": "EPIC",
+      "abbreviation": "Engineering Product Innovation Center (EPIC)",
       "address": "750 Commonwealth Avenue, Boston, MA",
       "lat": "42.3500",
       "lon": "-71.1078",
@@ -195,130 +195,130 @@ import { Location } from '../types/types';
     },
     {
       "name": "West Campus Residences",
-      "abbreviation": "West Campus",
+      "abbreviation": "West Campus Residences",
       "address": "273-277 Babcock Street, Boston, MA",
-      "lat": "42.3538",
-      "lon": "-71.1087",
+      "lat": "42.3525",
+      "lon": "-71.1198",
       "campus_section": "West"
     },
     {
-      "name": "610 Beacon Street",
-      "abbreviation": "610 Beacon St",
+      "name": "Myles Standish Hall",
+      "abbreviation": "Myles Standish Hall",
       "address": "610 Beacon Street, Boston, MA",
-      "lat": "42.3490",
-      "lon": "-71.1040",
+      "lat": "42.3497",
+      "lon": "-71.1094",
       "campus_section": "Central"
     },
     {
       "name": "Arvind and Chandan Nandlal Kilachand Honors College",
-      "abbreviation": "KHC",
+      "abbreviation": "Kilachand Honors College (KHC)",
       "address": "91 Bay State Road, Boston, MA",
-      "lat": "42.3494",
-      "lon": "-71.1044",
+      "lat": "42.3503",
+      "lon": "-71.1097",
       "campus_section": "Central"
     },
     {
-      "name": "Marciano Commons",
-      "abbreviation": "Marciano Commons",
+      "name": "Marciano Dining Hall",
+      "abbreviation": "Marciano Dining Hall",
       "address": "100 Bay State Road, Boston, MA",
-      "lat": "42.3495",
-      "lon": "-71.1045",
+      "lat": "42.3498",
+      "lon": "-71.0980",
       "campus_section": "Central"
     },
     {
       "name": "Yawkey Center for Student Services",
-      "abbreviation": "Yawkey Center",
+      "abbreviation": "Yawkey Center (YAW)",
       "address": "100 Bay State Road, Boston, MA",
-      "lat": "42.3495",
-      "lon": "-71.1045",
+      "lat": "42.3498",
+      "lon": "-71.0980",
       "campus_section": "Central"
     },
     {
       "name": "Frederick S. Pardee School of Global Studies",
-      "abbreviation": "Pardee School",
-      "address": "121 Bay State Road, Boston, MA",
-      "lat": "42.3496",
-      "lon": "-71.1046",
+      "abbreviation": "Frederick S. Pardee School of Global Studies",
+      "address": "595 Commonwealth Avenue, Boston, MA",
+      "lat": "42.3497",
+      "lon": "-71.0997",
       "campus_section": "Central"
     },
     {
-      "name": "575 Commonwealth Avenue Residence",
-      "abbreviation": "575 Comm Ave",
+      "name": "HoJo Dormitory",
+      "abbreviation": "HoJo Dormitory",
       "address": "575 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3497",
-      "lon": "-71.1047",
+      "lat": "42.3496",
+      "lon": "-71.0987",
       "campus_section": "Central"
     },
     {
       "name": "Towers Residence & Bay State Road Brownstones",
       "abbreviation": "The Towers",
       "address": "140 Bay State Road, Boston, MA",
-      "lat": "42.3498",
-      "lon": "-71.1048",
+      "lat": "42.3501",
+      "lon": "-71.0998",
       "campus_section": "Central"
     },
     {
       "name": "Questrom School of Business",
-      "abbreviation": "Questrom",
+      "abbreviation": "Questrom School of Business",
       "address": "595 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3499",
-      "lon": "-71.1049",
+      "lat": "42.3497",
+      "lon": "-71.0996",
       "campus_section": "Central"
     },
     {
       "name": "Wheelock College of Education & Human Development",
-      "abbreviation": "Wheelock",
+      "abbreviation": "Wheelock College of Education (WED)",
       "address": "2 Silber Way, Boston, MA",
       "lat": "42.3500",
-      "lon": "-71.1050",
+      "lon": "-71.1008",
       "campus_section": "Central"
     },
     {
       "name": "Metcalf Science Center",
-      "abbreviation": "Metcalf Center",
+      "abbreviation": "Metcalf Science Center (SCI)",
       "address": "590 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3501",
-      "lon": "-71.1051",
+      "lat": "42.3484",
+      "lon": "-71.1002",
       "campus_section": "Central"
     },
     {
-      "name": "Morse Auditorium",
-      "abbreviation": "Morse Auditorium",
+      "name": "Alfred L. Morse Auditorium",
+      "abbreviation": "Alfred L. Morse Auditorium",
       "address": "602 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3502",
-      "lon": "-71.1052",
+      "lat": "42.3490",
+      "lon": "-71.1009",
       "campus_section": "Central"
     },
     {
       "name": "Kilachand Center for Integrated Life Sciences & Engineering",
-      "abbreviation": "Kilachand Center",
+      "abbreviation": "Rajen Kilachand Center (RKC)",
       "address": "610 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3503",
-      "lon": "-71.1053",
+      "lat": "42.3491",
+      "lon": "-71.1015",
       "campus_section": "Central"
     },
     {
       "name": "Sargent College of Health & Rehabilitation Sciences",
-      "abbreviation": "SAR",
+      "abbreviation": "Sargent College of Health (SAR)",
       "address": "635 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3504",
-      "lon": "-71.1054",
+      "lat": "42.3498",
+      "lon": "-71.1020",
       "campus_section": "Central"
     },
     {
       "name": "College of Communication",
-      "abbreviation": "COM",
+      "abbreviation": "College of Communication (COM)",
       "address": "640 Commonwealth Avenue, Boston, MA",
-      "lat": "42.3505",
-      "lon": "-71.1055",
+      "lat": "42.3489",
+      "lon": "-71.1025",
       "campus_section": "Central"
     },
     {
       "name": "College of Engineering",
-      "abbreviation": "ENG",
+      "abbreviation": "College of Engineering (ENG)",
       "address": "44 Cummington Mall, Boston, MA",
-      "lat": "42.3506",
-      "lon": "-71.1056",
+      "lat": "42.3487",
+      "lon": "-71.1029",
       "campus_section": "Central"
     },
     {
@@ -333,8 +333,8 @@ import { Location } from '../types/types';
       "name": "Dahod Family Alumni Center in the BU Castle",
       "abbreviation": "The Castle",
       "address": "225 Bay State Road, Boston, MA",
-      "lat": "42.3508",
-      "lon": "-71.1058",
+      "lat": "42.3509",
+      "lon": "-71.1038",
       "campus_section": "Central"
     }
   ]
