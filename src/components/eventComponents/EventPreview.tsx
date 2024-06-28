@@ -158,7 +158,7 @@ const EventPreview: React.FC<EventPreviewProps> = ({ eventId, isNew = false }) =
                         </Grid>
                     </Grid>
                     <Grid xs justifyContent="flex-end" paddingBottom="2em">
-                        {user && user.role === "Admin" && user.events.includes(eventId) && (
+                        {user && user.role === "Admin" && (user.events.includes(eventId) || isNew) && (
                             (event.status === "saved" || event.status === "drafted") ? (
                                 <Grid container justifyContent={"center"}>
                                     <Button variant="outlined" color="primary" size="large"
@@ -199,7 +199,7 @@ const EventPreview: React.FC<EventPreviewProps> = ({ eventId, isNew = false }) =
                                 </Grid>
                             )
                         )}
-                        {user && !user.events.includes(eventId) && !user.reviews.includes(eventId) && (
+                        {user && !user.events.includes(eventId) && !user.reviews.includes(eventId) && !isNew && (
                             <Grid container justifyContent={"center"}>
                                 <Button variant="outlined" color="primary" size="large"
                                         style={{ borderRadius: "20px", borderWidth: "3px", borderColor: "#ab0101", textTransform: "none", width: "200px" }}

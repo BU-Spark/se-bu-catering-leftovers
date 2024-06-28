@@ -36,7 +36,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ setImageUrl, removeIma
                 fetchImages(review.images);
             }
         }
-    }, [event, review]); // Added event and review to the dependency array
+    }, []); // Added event and review to the dependency array
 
     const uploadImage = () => {
         if (uploadedImages.length >= 3) {

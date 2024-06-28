@@ -41,25 +41,6 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     const [hasChanges, setHasChanges] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
 
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (hasChanges) {
-                e.preventDefault();
-                e.returnValue = ''; // Show browser's default confirmation dialog
-            }
-        };
-
-        if (typeof window !== 'undefined') {
-            window.addEventListener('beforeunload', handleBeforeUnload);
-        }
-
-        return () => {
-            if (typeof window !== 'undefined') {
-                window.removeEventListener('beforeunload', handleBeforeUnload);
-            }
-        };
-    }, [hasChanges]);
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
             ...formData,
@@ -74,7 +55,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
         const missingFields = requiredFields.filter(field => formData[field] === '');
 
         if (missingFields.length > 0) {
-            alert(`The following fields are missing: ${missingFields.join(', ')}`);
+            alert(`Please fill out all required fields before publishing: ${missingFields.join(', ')}`);
             return false;
         } else {
             return true;
@@ -93,7 +74,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
                 }
                 return eventUID;
             } else {
-                alert('Please fill out all required fields before publishing the event');
+                // alert('Please fill out all required fields before publishing the event');
                 return "";
             }
         }
@@ -137,10 +118,12 @@ const EventForm: React.FC<EventFormProps> = ({ event, onPublish }) => {
     };
 
     const handleSaveAndLeave = async () => {
-        await publishEvent('saved');
+        const eventId = await publishEvent('saved');
         setOpenDialog(false);
         setHasChanges(false);
-        router.push("/events/explore");
+        if (eventId !== "") {
+            router.push("/events/explore");
+        }
     };
 
     const handleDiscardAndLeave = async () => {

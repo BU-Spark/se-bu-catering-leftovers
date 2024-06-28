@@ -14,11 +14,20 @@ import { Location } from '@/types/types';
 // Dynamically import EventForm to avoid SSR issues
 const EventForm = dynamic(() => import('@/components/formComponents/EventForm'), { ssr: false });
 
+const defaultAddress: Location = {
+    name: "BU Campus",
+    address: 'Boston University, 899 Commonwealth Avenue, Boston, MA',
+    abbreviation: 'Boston University',
+    lat: '42.350499',
+    lon: '-71.105399',
+    campus_section: 'Central'
+};
+
 const EventFormPage = () => {
     const [newEvent, setNewEvent] = useState<Event>({
         host: '',
         name: '',
-        Location: {} as Location,
+        Location: defaultAddress,
         locationDetails: '',
         notes: '',
         duration: '30',

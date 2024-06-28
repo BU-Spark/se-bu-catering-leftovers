@@ -109,7 +109,7 @@ export const onDelete = async (event: Event, userId: string) => {
         return event.id;
     } catch (error) {
         console.error('Error deleting event: ', error);
-        alert('Failed to delete event');
+        // alert('Failed to delete event');
         return "";
     }
 };
