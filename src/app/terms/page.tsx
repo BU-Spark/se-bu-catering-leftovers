@@ -233,7 +233,7 @@ const TermsConditionsPage: React.FC = () => {
 
     return (
         <div>
-            <Navbar user= {isAuthenticated}/>
+            <Navbar user= {isAuthenticated} agreedToTerms={agreedToTerms}/>
             <PageContainer>
                 <Title>Terms and Conditions</Title>
                 <Subtitle>You must agree to all conditions in order to get notifications.</Subtitle>

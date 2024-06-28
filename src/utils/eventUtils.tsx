@@ -31,7 +31,6 @@ export const onPublish = async (event: Event, userId: string) => {
 
         await updateDoc(eventRef, updatePayload);
 
-        alert('Event updated successfully');
         return event.id;
     } catch (error) {
         console.error('Error updating event: ', error);

@@ -72,7 +72,7 @@ const EventsPage = () => {
     return (
         <div style={{ background: '#FFF' }}>
             <ThemeProvider theme={theme}>
-                <Navbar user={true}/>
+                <Navbar user={true} agreedToTerms={true}/>
                 <Container maxWidth="md" style={{ paddingTop: '7em', background: '#FFF' }}>
                     <Grid container alignItems="center" style={{ paddingLeft: '0.5em' }}>
                         <Grid item xs justifyContent={'center'} display="column">

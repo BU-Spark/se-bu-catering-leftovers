@@ -94,7 +94,7 @@ const AccountPage = () => {
     }
     return (
         <ThemeProvider theme={theme}>
-            <Navbar user={!!user} />
+            <Navbar user={!!user} agreedToTerms={user?.agreedToTerms}/>
             <Container maxWidth="sm" sx={{ padding: '1em', paddingTop: '7em' }}>
                 <Paper elevation={3} sx={{ padding: '2rem' }}>
                     <Grid container marginBottom="2em" alignItems="center">

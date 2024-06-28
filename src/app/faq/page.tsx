@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { firebaseApp } from '@/../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 const FAQContainer = styled.div`
     margin: 20px;
@@ -94,10 +95,18 @@ const FAQPage: React.FC = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const auth = getAuth(firebaseApp);
     const firestore = getFirestore(firebaseApp);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setIsAuthenticated(!!user);
+            if (user) {
+                const userDocRef = doc(firestore, 'Users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    setAgreedToTerms(userDoc.data().agreedToTerms);
+                }
+            }
         });
 
         return () => unsubscribe();
@@ -165,7 +174,7 @@ const FAQPage: React.FC = () => {
 
     return (
         <div>
-            <Navbar user={isAuthenticated}/>
+            <Navbar user={isAuthenticated} agreedToTerms={agreedToTerms}/>
             <FAQContainer>
                 {faqs.map((category, catIndex) => (
                     <FAQCategory key={catIndex}>

@@ -16,7 +16,7 @@ const ReviewsPage= ({ params }: { params: { id: string } }) => {
     return (
         <div>
             <ThemeProvider theme={theme}>
-                <Navbar />
+                <Navbar user={true} agreedToTerms={true}/>
                 <ReviewsDisplay eventId={eventId} />
             </ThemeProvider>
         </div>

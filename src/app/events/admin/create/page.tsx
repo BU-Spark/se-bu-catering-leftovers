@@ -43,7 +43,7 @@ const EventFormPage = () => {
     return (
         <div>
             <ThemeProvider theme={theme}>
-                <Navbar user={true}/>
+                <Navbar user={true} agreedToTerms={true}/>
                 <EventForm event={newEvent} onPublish={onPublish} />
             </ThemeProvider>
         </div>

@@ -11,7 +11,7 @@ const EventPreviewPage = ({ params }: { params: { id: string } }) => {
 
     return (
         <div style={{background: "#FFF6EE"}}>
-            <Navbar user={true}/>
+            <Navbar user={true} agreedToTerms={true}/>
             <ThemeProvider theme={theme}>
                 <EventPreview eventId={eventId} />
             </ThemeProvider>

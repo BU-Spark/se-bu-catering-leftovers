@@ -34,7 +34,7 @@ const EditEventFormPage = ({ params }: { params: { id: string } }) => {
   return (
       <div>
         <ThemeProvider theme={theme}>
-          <Navbar user={true}/>
+          <Navbar user={true} agreedToTerms={true}/>
           {event && <EventForm event={event} onPublish={onUpdate} />}
         </ThemeProvider>
       </div>

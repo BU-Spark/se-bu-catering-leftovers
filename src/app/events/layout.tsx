@@ -1,15 +1,15 @@
 import React from 'react';
 import { UserProvider } from '@/context/UserContext';
-import ProtectedRoute from '@/context/ProtectedRoute';
+import EventsProtectedRoute from '@/context/EventsProtectedRoute';
 
 export default function EventsLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div>
         <UserProvider>
-          <ProtectedRoute> 
+          <EventsProtectedRoute> 
               {children}
-          </ProtectedRoute>
+          </EventsProtectedRoute>
         </UserProvider>
     </div>
   );

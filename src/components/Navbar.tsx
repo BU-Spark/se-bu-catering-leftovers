@@ -84,7 +84,7 @@ const MenuItem = styled.div`
     }
 `;
 
-const Navbar = ({ user = false }: { user?: boolean }) => {
+const Navbar = ({ user = false, agreedToTerms = false }: { user?: boolean, agreedToTerms?: boolean  }) => {
     const [showMenu, setShowMenu] = useState(false);
     const router = useRouter();
 
@@ -93,8 +93,13 @@ const Navbar = ({ user = false }: { user?: boolean }) => {
     };
 
     const handleNavigation = (path: string) => {
-        setShowMenu(false);
-        router.push(path);
+        if (path === '/events/explore' && !agreedToTerms) {
+            alert('You must agree to the terms and conditions before you can access the events.');
+            router.push('/terms');
+        } else {
+            setShowMenu(false);
+            router.push(path);
+        }
     };
 
     useEffect(() => {
