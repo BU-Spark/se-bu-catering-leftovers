@@ -13,14 +13,26 @@ The BU Leftover Catering application is a solution aimed at reducing food waste 
 
 ## Getting Started
 ```bash
+git clone https://github.com/yourgithubusername/se-bu-catering-leftovers.git
 cd se-bu-catering-leftovers
 npm install
 npm run dev
 ```
 
+## Keys and Tokens
+
+Sensitive keys and tokens are not stored wihtin the repository for security reasons. 
+
 ## Framework
 
 This project was done on React with Next.Js. MUI Materials is the main UI framework, and Google Cloud Firestore and Storage systems were utilized. Further, openStreetMaps for the mapping feature was empoyed.
+
+### Tech Stack
+The frontend of this project is built using React alongside Next.js. The primary UI framework utilized is MUI Materials. For additional styling, Styled-components and MUI Material Styles are implemented.
+
+On the backend, Firebase Firestore serves as the database and Firebase Storage is used for storage. User authentication is managed through Firebase Auth, which includes integration with Google OAuth for user login processes. Custom API routes are handled within the Next.js framework and are detailed in the `src/pages/api/` directory.
+
+For third-party services and APIs Google Cloud's Firestore and Storage are used for backend data management and file storage, and OpenStreetMaps is utilized for geographic mapping for locating events on campus.
 
 ## Known issues
 * Google Auth issues on the deployed version.
