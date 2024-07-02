@@ -25,7 +25,7 @@ Sensitive keys and tokens are not stored wihtin the repository for security reas
 
 ## Framework
 
-This project was done on React with Next.Js. MUI Materials is the main UI framework, and Google Cloud Firestore and Storage systems were utilized. Further, openStreetMaps for the mapping feature was empoyed.
+This project was done on React with Next.js. MUI Materials is the main UI framework, and Google Cloud Firestore and Storage systems were utilized. Further, openStreetMaps for the mapping feature was empoyed.
 
 ### Tech Stack
 The frontend of this project is built using React alongside Next.js. The primary UI framework utilized is MUI Materials. For additional styling, Styled-components and MUI Material Styles are implemented.
@@ -35,7 +35,7 @@ On the backend, Firebase Firestore serves as the database and Firebase Storage i
 For third-party services and APIs Google Cloud's Firestore and Storage are used for backend data management and file storage, and OpenStreetMaps is utilized for geographic mapping for locating events on campus.
 
 ## Known issues
-* Google Auth issues on the deployed version.
+* Google Auth issues on the deployed version if popups are blocked on browser.
 * A more secure way of registering admins is suggested, particularly a changing, potentially one-time use, token, or any other better-suited alternative.
 * Google Cloud Storage rules should be modified accordingly to only allow authenticated members its use.
 * Swipeable images component on the event preview is optimized for phone use and is hard to maneuver on PC.
