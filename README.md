@@ -21,7 +21,7 @@ npm run dev
 
 ## Keys and Tokens
 
-Sensitive keys and tokens are not stored wihtin the repository for security reasons. 
+Sensitive keys and tokens are not stored wihtin the repository for security reasons. In order to access the code needed for your `.env.local` file click [here](https://docs.google.com/document/d/1q36ZDuAt48hI16fnFLAFXnPPpRyCHUFzPR3rzwDUCu4/edit?usp=sharing) and request access (place this file at the root of your project).
 
 ## Framework
 
