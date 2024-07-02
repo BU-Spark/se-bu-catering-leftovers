@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { getAnalytics, isSupported } from 'firebase/analytics';
-import { firebaseApp } from '@/../firebaseConfig';
+import { firebaseApp } from '../../firebaseConfig';
 import { createGlobalStyle } from 'styled-components';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import '@/styles/globals.css';
 import { useAuthRedirect } from '/hooks/useAuthRedirect';
-import { UserProvider } from '../context/UserContext';
+import {UserProvider, useUser} from '../context/UserContext';
+import Navbar from '../components/Navbar';
 
 const GlobalStyle = createGlobalStyle`
     body {
@@ -41,18 +42,24 @@ function MyApp({ Component, pageProps }) {
     }, []);
 
     return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <GlobalStyle />
+            <UserProvider>
+                <PageWithNavbar Component={Component} pageProps={pageProps} />
+            </UserProvider>
+        </ThemeProvider>
+    );
+}
+
+function PageWithNavbar({ Component, pageProps }) {
+    const { user, agreedToTerms } = useUser();
+    return (
         <>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <GlobalStyle />
-                <UserProvider>
-                    <Component {...pageProps} />
-                </UserProvider>
-            </ThemeProvider>
+            <Navbar user={user} agreedToTerms={agreedToTerms} />
+            <Component {...pageProps} />
         </>
     );
 }
 
 export default MyApp;
-
-

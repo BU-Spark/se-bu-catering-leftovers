@@ -6,11 +6,16 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import styled, { createGlobalStyle } from 'styled-components';
 import styles from '@/styles/Home.module.css';
-import { signInWithRedirect, signInWithPopup, getAuth } from 'firebase/auth';
+import { signInWithPopup, getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { firebaseApp, provider } from '@/../firebaseConfig';
 import { useRouter } from 'next/navigation';
 import { Typography } from '@mui/material';
+
+interface UserData {
+  userName: string | null;
+  userRole: string | null;
+}
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -91,33 +96,32 @@ const StyledMessage = styled.h2`
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
 
-const handleLogin = async () => {
-  try {
-    console.log("Redirecting for login");
-    await signInWithPopup(auth, provider);
-    // await signInWithRedirect(auth, provider);
-  } catch (error) {
-    console.error("Failed to redirect for login:", error);
-  }
+const handleLogin = () => {
+  console.log("Redirecting for login");
+  signInWithPopup(auth, provider)
+      .then((result) => {
+        // Handle the signed-in user info.
+      })
+      .catch((error) => {
+        console.error("Failed to redirect for login:", error);
+      });
 };
 
-const handleSignUp = async () => {
-  try {
-    console.log("Redirecting for sign-up");
-    localStorage.setItem('userRole', 'User');
-    await signInWithPopup(auth, provider);
-    //await signInWithRedirect(auth, provider);
-
-  } catch (error) {
-    console.error("Failed to redirect for sign-up:", error);
-  }
+const handleSignUp = () => {
+  console.log("Redirecting for sign-up");
+  localStorage.setItem('userRole', 'User');
+  signInWithPopup(auth, provider)
+      .then((result) => {
+        // Handle the signed-in user info.
+      })
+      .catch((error) => {
+        console.error("Failed to redirect for sign-up:", error);
+      });
 };
 
-const Home = () => {
-  const [user, setUser] = useState<{ userName: string | null; userRole: string | null }>({
-    userName: null,
-    userRole: null,
-  });
+
+const Home = (): JSX.Element => {
+  const [user, setUser] = useState<UserData>({ userName: null, userRole: null });
   const router = useRouter();
 
   useEffect(() => {
@@ -130,16 +134,21 @@ const Home = () => {
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
-          const userData = userDoc.data();
+          const userData = userDoc.data() as any;
           setUser({ userName: userData.name, userRole: userData.role });
-          router.push('/events/explore');
 
+          // Check if the user has agreed to terms
+          if (userData.agreedToTerms) {
+            router.push('/events/explore');
+          } else {
+            router.push('/terms'); // Redirect to terms and conditions if they haven't agreed
+          }
         } else if (storedUserRole) {
           const displayName = user.displayName || 'Unknown';
           await setDoc(userDocRef, {
             uid: user.uid,
             email: user.email,
-            role: storedUserRole,
+            role: storedUserRole || "User",
             name: displayName,
             timePref: "",
             locPref: "",
@@ -149,11 +158,11 @@ const Home = () => {
             agreedToTerms: false,
           });
 
-          setUser({ userName: displayName, userRole: storedUserRole });
-          router.push('/events/explore');
-
-          localStorage.removeItem('userRole');
+          setUser({ userName: displayName, userRole: storedUserRole || 'User' });
+          router.push('/terms');
         }
+      } else {
+        router.push('/');
       }
     });
 
@@ -161,16 +170,28 @@ const Home = () => {
   }, [router]); // Add 'router' to the dependency array
 
   // Admin Token
-  const handleAdminSignUp = async () => {
-    const adminToken = prompt("Enter administrator token:");
+  const handleAdminSignUp = () => {
+    const adminToken = prompt("Enter administrator token or press 'cancel' to register as a student:");
+
+    // Immediately attempt to sign up to see if it circumvents the popup blocker.
     if (adminToken === "Terriers2024!") {
+      console.log("Admin token correct, attempting to sign up as admin...");
       localStorage.setItem('userRole', 'Admin');
+      signInWithPopup(auth, provider)
+          .then((result) => {
+            // Success, handle the result
+            console.log("Admin signed in successfully.");
+          })
+          .catch((error) => {
+            console.error("Failed to sign up as admin:", error);
+          });
     } else {
-      alert("Invalid token. You will be signed up as a student.");
-      localStorage.setItem('userRole', 'Student');
+      // Handle other cases similarly directly
+      console.log("Handling non-admin sign up or cancellation...");
+      handleSignUp();
     }
-    await handleSignUp();
   };
+
 
   return (
       <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -11,7 +11,7 @@ const Nav = styled.nav`
     justify-content: space-between;
     align-items: center;
     background-color: #fff;
-    padding: 20px 20px;
+    padding: 20px;
     height: 100px;
     width: 100%;
     position: fixed;
@@ -19,37 +19,19 @@ const Nav = styled.nav`
     left: 0;
     z-index: 100000;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    @media (max-width: 768px) {
-        padding: 15px 30px;
-        height: 80px;
-    }
-
-    @media (max-width: 480px) {
-        padding: 10px 20px;
-        height: 80px;
-    }
 `;
 
 const Logo = styled.div`
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-35%, -50%);
+    transform: translate(-50%, -50%);
     z-index: 10;
 `;
 
 const LogoImage = styled.img`
     height: auto;
     max-height: 100px;
-    width: auto;
-
-    @media (max-width: 768px) {
-        width: 70%;
-    }
-
-    @media (max-width: 480px) {
-        width: 70%;
-    }
 `;
 
 const MenuItems = styled.div`
@@ -62,8 +44,6 @@ const MenuItems = styled.div`
     text-decoration: none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     z-index: 999;
-    border-top: 2px solid #ab0101;
-    border-bottom: 2px solid #ab0101;
 
     &.show {
         display: block;
@@ -71,11 +51,8 @@ const MenuItems = styled.div`
 `;
 
 const MenuItem = styled.div`
-    display: block;
     padding: 10px 20px;
-    text-decoration: none;
     color: #ab0101;
-    font-family: 'Arial', sans-serif;
     font-weight: bold;
     cursor: pointer;
 
@@ -84,27 +61,20 @@ const MenuItem = styled.div`
     }
 `;
 
-const Navbar = ({ user = false, agreedToTerms = false }: { user?: boolean, agreedToTerms?: boolean  }) => {
+const Navbar = ({ user = false, agreedToTerms = false }) => {
     const [showMenu, setShowMenu] = useState(false);
     const router = useRouter();
 
-    const toggleMenu = () => {
-        setShowMenu(!showMenu);
-    };
+    const toggleMenu = () => setShowMenu(!showMenu);
 
     const handleNavigation = (path: string) => {
-        if (path === '/events/explore' && !agreedToTerms) {
-            alert('You must agree to the terms and conditions before you can access the events.');
-            router.push('/terms');
-        } else {
-            setShowMenu(false);
-            router.push(path);
+        if (!agreedToTerms && path !== '/terms') {
+            alert('You must agree to the terms and conditions before accessing this page.');
+            return;
         }
+        setShowMenu(false);
+        router.push(path);
     };
-
-    useEffect(() => {
-        console.log('Navbar user prop:', user);
-    }, [user]);
 
     return (
         <Nav>
@@ -115,7 +85,7 @@ const Navbar = ({ user = false, agreedToTerms = false }: { user?: boolean, agree
                 <MenuIcon fontSize="large" sx={{ color: '#ab0101' }} />
             </IconButton>
             <MenuItems className={showMenu ? 'show' : ''}>
-                <MenuItem onClick={() => handleNavigation(user ? '/events/explore' : '/')}>Home</MenuItem>
+                <MenuItem onClick={() => handleNavigation('/')}>Home</MenuItem>
                 {user && (
                     <MenuItem onClick={() => handleNavigation('/home/account')}>My Account</MenuItem>
                 )}

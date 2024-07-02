@@ -24,22 +24,22 @@ const AccountPage = () => {
     const [hasChanges, setHasChanges] = useState(false);
 
     const fetchUserEvents = useCallback(async () => {
-        setUserEvents([]);
-        const eventsCollection = collection(firestore, 'Events');
+        if (!user || user.events.length === 0) {
+            console.log("No events to query for this user.");
+            return [];
+        }
 
+        const eventsCollection = collection(firestore, 'Events');
         const eventsQuery = query(
             eventsCollection,
             orderBy("foodAvailable", "desc"),
-            where("id", "in", user ? user.events : [])
+            where("id", "in", user.events)
         );
         const eventsSnapshot = await getDocs(eventsQuery);
-
-        let newEvents = eventsSnapshot.docs.map((doc) => ({
+        return eventsSnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data()
         })) as Event[];
-
-        return newEvents;
     }, [user]);
 
     useEffect(() => {
@@ -66,13 +66,12 @@ const AccountPage = () => {
 
     const handleCampusPreferenceToggle = (preference: string) => {
         setCampusPreferences(prevPreferences => {
-            const newPreferences = prevPreferences.includes(preference)
-                ? prevPreferences.filter(p => p !== preference)
-                : [...prevPreferences, preference]
+            const newPreferences = prevPreferences.includes(preference) ?
+                prevPreferences.filter(p => p !== preference) :
+                [...prevPreferences, preference];
             setHasChanges(true);
             return newPreferences;
-            });
-        
+        });
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -92,6 +91,7 @@ const AccountPage = () => {
     if (isLoading) {
         return <Container>Loading...</Container>;
     }
+
     return (
         <ThemeProvider theme={theme}>
             <Navbar user={!!user} agreedToTerms={user?.agreedToTerms}/>
