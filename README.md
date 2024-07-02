@@ -13,7 +13,7 @@ The BU Leftover Catering application is a solution aimed at reducing food waste 
 
 ## Getting Started
 ```bash
-git clone https://github.com/yourgithubusername/se-bu-catering-leftovers.git
+git clone https://github.com/yourgithubusername/se-bu-catering-leftovers.git (or download the entire project to your desktop by pressing the green "code" button and selecting "Download ZIP")
 cd se-bu-catering-leftovers
 npm install
 npm run dev
