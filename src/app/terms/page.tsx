@@ -257,7 +257,9 @@ const TermsConditionsPage: React.FC = () => {
                         ))}
                     </FAQContainer>
                 ))} */}
-        <div>
+        <div style={{
+            maxWidth: 800,
+        }}>
           <div>
             <b>
               1. By signing up for the program, you agree to the following
