@@ -9,7 +9,7 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { firebaseApp } from "@/../firebaseConfig";
 import { set } from "date-fns";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 const PageContainer = styled.div`
   margin: 20px;
@@ -33,6 +33,7 @@ const Subtitle = styled.p`
 
 const FAQContainer = styled.div`
   margin-bottom: 40px;
+  max-width: 800px;
 `;
 
 const SectionHeader = styled.h2`
@@ -257,10 +258,7 @@ const TermsConditionsPage: React.FC = () => {
                         ))}
                     </FAQContainer>
                 ))} */}
-        <div style={{
-            maxWidth: 800,
-        }}>
-          <div>
+        <FAQContainer>
             <b>
               1. By signing up for the program, you agree to the following
               terms:
@@ -304,9 +302,8 @@ const TermsConditionsPage: React.FC = () => {
             To avoid illness, food should be consumed or refrigerated
             immediately.
             <br />
-          </div>
           <div style={{ height: 100 }} />
-        </div>
+        </FAQContainer>
         {isAuthenticated ? (
           <>
             {agreedToTerms ? (
