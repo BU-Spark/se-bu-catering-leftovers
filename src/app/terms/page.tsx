@@ -34,6 +34,7 @@ const Subtitle = styled.p`
 const FAQContainer = styled.div`
   margin-bottom: 40px;
   max-width: 800px;
+  color: black;
 `;
 
 const SectionHeader = styled.h2`
