@@ -239,7 +239,9 @@ const TermsConditionsPage: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{
+      color: "black",
+    }}>
       <Navbar user={isAuthenticated} agreedToTerms={agreedToTerms} />
       <PageContainer>
         <Title>Terms and Conditions</Title>
