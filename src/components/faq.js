@@ -41,11 +41,11 @@ const FAQList = () => {
     const faqs = [
         {
             question: "Who can use BU Leftover to get free food?",
-            answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            answer: "All current BU students and staff"
         },
         {
-            question: "How can I provide feedback?",
-            answer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            question: "How can I provide feedback regarding the food pick up process?",
+            answer: "You can provide feedback to help us imporve the food pick up process"
         },
     ];
 

@@ -180,16 +180,16 @@ const TermsConditionsPage: React.FC = () => {
       items: [
         {
           question: "Food Pickup Policy",
-          answer: "Details about the food pickup policy...",
+          answer: "You will need to arrive within the time remaining and bring your own containers in order to pick up food",
         },
         {
           question: "BU Legal Policy",
-          answer: "Details about the BU legal policy...",
+          answer: "Please Read Through Terms and Conditions before agreeing",
         },
         {
           question: "Allergen Policy",
           answer:
-            "By opting to receive free food, I acknowledge the possibility of encountering food items to which I may be allergic. I understand this risk and agree to this term, along with waiving any liability related to food allergies or health issues that may arise from consuming the provided food.",
+            "If you have food allergies or dietary restrictions, it is recommended that you do not participate in this program. There will not be personnel available to address questions related to dietary restrictions, ingredients, or food allergies.",
         },
       ],
     },
