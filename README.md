@@ -46,11 +46,12 @@ For third-party services and APIs Google Cloud's Firestore and Storage are used 
 * A notifications page to view new feedback could be implemented for a better user experience on the admin side.
 * Email notifications: The component was created but it couldn't be tested as an official email wasn't provided and the security of sendGrid didn't allow the use of any email for testing purposes.
 
-##Priority
+## Priority
 * Fix User feedback component on the user side(Currently students cannot provide feedback on how to improve pickup process)
+* Unify Clock Display on Event Time Reminder. Currently has 24h for Start time, and 12hours for End time.
 * Hide the" Food start time" and only have "Food available at...time" on the User view. The message is unnecessary and it could be confusing to users.
 * Develop a function to take photos and upload them to the website directly rather than uploading from the camera roll.
-* 
+
 
 ## Deployment
 To view our project deployed checkout: [https://bu-sustainability-leftovers.netlify.app/](https://testing--bu-sustainability-leftovers.netlify.app/)
