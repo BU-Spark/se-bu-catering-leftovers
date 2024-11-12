@@ -129,8 +129,8 @@ const EventPreview: React.FC<EventPreviewProps> = ({ eventId, isNew = false }) =
                             <Typography variant="body1" display="inline">{event.Location.address}</Typography>
                         </Grid>
                         <Grid item xs={12} marginBottom="1em">
-                            <Typography variant="h6" display="inline">Food First Arrived: </Typography>
-                            <Typography variant="body1" display="inline">{formatEventDateTime(event.foodArrived)}</Typography>
+                            <Typography variant="h6" display="none">Food First Arrived: </Typography>
+                            <Typography variant="body1" display="none">{formatEventDateTime(event.foodArrived)}</Typography>
                         </Grid>
                         <Grid item xs={12} marginBottom="1em">
                             <Typography variant="h6" display="inline">Food Available: </Typography>
