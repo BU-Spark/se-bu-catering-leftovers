@@ -45,7 +45,7 @@ const FAQList = () => {
         },
         {
             question: "How can I provide feedback regarding the food pick up process?",
-            answer: "You can provide feedback to help us imporve the food pick up process"
+            answer: "You can provide feedback to help us improve the food pick up process"
         },
     ];
 
