@@ -95,7 +95,7 @@ return (
                     </Grid>
                     <Grid item textAlign={"left"} marginTop={1} xs>
                         <Typography variant="h6">
-                            Feedback
+                            Please provide feedback on how we can improve the food pickup process
                         </Typography>
                     </Grid>
                     <Grid item xs={12} marginTop={1}>

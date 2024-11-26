@@ -124,11 +124,7 @@ const FAQPage: React.FC = () => {
                 },
                 {
                     question: "How can I provide feedback?",
-                    answer: "You can provide feedback through the feedback section on the app."
-                },
-                {
-                    question: "Lorem ipsum dolor sit amet, consectetur adipiscing elit?",
-                    answer: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                    answer: "You can provide feedback on food pick up process under events section."
                 },
             ]
         },
@@ -158,11 +154,15 @@ const FAQPage: React.FC = () => {
                 },
                 {
                     question: "Can I edit the posts that are published?",
-                    answer: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. "
+                    answer: "Yes, you can edit posts by first click on your event, then click on the red pen located on the top left of the page."
                 },
                 {
                     question: "Where can I view students' feedback?",
-                    answer: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                    answer: "You can view students' feeback at the end of the event details."
+                },
+                {
+                    question: "Where can I find past events?",
+                    answer: "You can view past events under your account tab."
                 },
             ]
         }
