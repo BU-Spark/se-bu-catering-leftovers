@@ -126,6 +126,10 @@ const FAQPage: React.FC = () => {
                     question: "How can I provide feedback?",
                     answer: "You can provide feedback on food pick up process under events section."
                 },
+                {
+                    question: "What if I have a food allergy or dietary restriction?",
+                    answer: "If you have food allergies or dietary restrictions, it is recommended that you do not participate in this program. There will not be personnel available to address questions related to dietary restrictions, ingredients, or food allergies."
+                },
             ]
         },
         {
