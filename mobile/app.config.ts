@@ -1,11 +1,11 @@
-import type { ConfigContext, ExpoConfig } from "expo/config";
-import * as dotenv from "dotenv";
+import type { ConfigContext, ExpoConfig } from 'expo/config';
+import * as dotenv from 'dotenv';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  dotenv.config({ path: ".env.local" });
+  dotenv.config({ path: '.env.local' });
 
-  const name = config.name ?? "mobile";
-  const slug = config.slug ?? "mobile";
+  const name = config.name ?? 'mobile';
+  const slug = config.slug ?? 'mobile';
 
   const firebase = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
