@@ -1,79 +1,112 @@
-// mobile/app/LoginScreen.tsx
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ImageBackground, Alert } from "react-native";
-import { useRouter } from "expo-router";
-import mockUsers from "../../mock_data/users.json"; // ← imported from repo root
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import mockUsers from "../mock_data/users.json";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
-interface User {
-  uid: string;
-  email: string;
-  name: string;
-  role: string;
-  events: string[];
-  reviews: string[];
-  foodPref: string[];
-  locPref: string[];
-  timePref: string[];
-}
+// 👇 Hide header in Expo Router (works for v2 & v3)
+export const unstable_settings = { headerShown: false };
+export const options = { headerShown: false };
 
 export default function LoginScreen() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
 
-  const handleLogin = (role: string) => {
-    // find the first user with matching role
-    const foundUser = (mockUsers as User[]).find(
-      (u) => u.role.toLowerCase() === role.toLowerCase()
-    );
-
-    if (foundUser) {
-      setUser(foundUser);
-      Alert.alert("Login Successful", `Welcome, ${foundUser.name}!`);
-
-      // Simulate navigation flow
-      if (role.toLowerCase() === "admin" || role.toLowerCase() === "manager") {
-        router.push("/events");
-      } else {
-        router.push("/terms");
-      }
+  const handleLogin = () => {
+    const user = mockUsers.find((u) => u.email === email && u.role === role);
+    if (user) {
+      Alert.alert("Login Successful", `Welcome ${user.name}!`);
     } else {
-      Alert.alert("Login Failed", "No user found with that role in mock_data.");
+      Alert.alert("Invalid Credentials", "Check your email or role again.");
     }
   };
 
   return (
-    <ImageBackground
-      source={require("../../public/landing-page.png")}
-      resizeMode="cover"
-      className="flex-1 justify-center items-center bg-black"
-    >
-      <Text className="text-white text-3xl font-bold mb-10 drop-shadow-lg">
-        Reduce Wasted Food
+    <SafeAreaView className="flex-1 bg-gray-50 justify-center px-8">
+      {/* Header Section */}
+      <View className="items-center mb-8">
+        <Image
+          source={require("../assets/landing-page.png")}
+          className="w-32 h-32 mb-4"
+          resizeMode="contain"
+        />
+        <Text className="text-4xl font-bold text-gray-800 text-center">
+          BU Catering Leftovers
+        </Text>
+      </View>
+
+      {/* Login Form */}
+      <View className="w-full bg-white rounded-2xl p-8 shadow-md shadow-black/10">
+        {/* Email input */}
+        <View className="mb-5">
+          <Text className="text-gray-700 text-base mb-2">Email</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-50">
+            <Ionicons
+              name="mail-outline"
+              size={20}
+              color="#999"
+              className="ml-3"
+            />
+            <TextInput
+              className="flex-1 p-3 text-base"
+              placeholder="Enter your BU email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholderTextColor="#999"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+        </View>
+
+        {/* Role input */}
+        <View className="mb-6">
+          <Text className="text-gray-700 text-base mb-2">Role</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-50">
+            <Ionicons
+              name="person-outline"
+              size={20}
+              color="#999"
+              className="ml-3"
+            />
+            <TextInput
+              className="flex-1 p-3 text-base"
+              placeholder="admin / volunteer / manager"
+              autoCapitalize="none"
+              placeholderTextColor="#999"
+              value={role}
+              onChangeText={setRole}
+            />
+          </View>
+        </View>
+
+        {/* Login button */}
+        <TouchableOpacity onPress={handleLogin}>
+          <LinearGradient
+            colors={["#FF7E5F", "#FD3A69"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="py-4 rounded-xl shadow-sm"
+          >
+            <Text className="text-white text-center text-lg font-semibold">
+              Log In
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      {/* Footer Section */}
+      <Text className="text-gray-400 text-sm text-center mt-8">
+        © 2025 BU Catering Leftovers Project
       </Text>
-
-      {!user ? (
-        <View className="flex-row space-x-4">
-          <TouchableOpacity
-            onPress={() => handleLogin("volunteer")}
-            className="bg-red-600 px-6 py-3 rounded-full active:bg-red-700"
-          >
-            <Text className="text-white text-base font-semibold">Login (Volunteer)</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => handleLogin("admin")}
-            className="bg-red-600 px-6 py-3 rounded-full active:bg-red-700"
-          >
-            <Text className="text-white text-base font-semibold">Login (Admin)</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View className="bg-red-600/90 px-6 py-3 rounded-full mt-10">
-          <Text className="text-white text-base font-medium">
-            Welcome, {user.name} ({user.role})
-          </Text>
-        </View>
-      )}
-    </ImageBackground>
+    </SafeAreaView>
   );
 }
