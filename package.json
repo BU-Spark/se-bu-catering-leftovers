@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "emulators": "firebase emulators:start --only firestore,ui --import=.firebase-data --export-on-exit",
+    "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 tsx tools/seed.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -21,7 +23,6 @@
     "axios": "^1.7.2",
     "date-fns": "^2.25.0",
     "firebase": "^10.12.2",
-    "firebase-admin": "^12.1.1",
     "firebase-functions": "^5.0.1",
     "leaflet": "^1.9.4",
     "next": "^14.2.3",
@@ -42,10 +43,13 @@
     "@types/react-dom": "^18.3.0",
     "@types/react-swipeable-views": "^0.13.5",
     "@types/react-swipeable-views-utils": "^0.13.7",
+    "cross-env": "^10.1.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
+    "firebase-admin": "^13.5.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
