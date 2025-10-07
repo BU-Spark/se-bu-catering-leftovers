@@ -1,1 +1,1 @@
-plugins: ["nativewind/babel"],
+plugins: ['nativewind/babel'];

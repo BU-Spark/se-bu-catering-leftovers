@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,57 +6,55 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import mockUsers from "../mock_data/users.json";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
-
-// 👇 Hide header in Expo Router (works for v2 & v3)
-export const unstable_settings = { headerShown: false };
-export const options = { headerShown: false };
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import mockUsers from '../mock_data/users.json';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
 
   const handleLogin = () => {
-    const user = mockUsers.find((u) => u.email === email && u.role === role);
-    if (user) {
-      Alert.alert("Login Successful", `Welcome ${user.name}!`);
-    } else {
-      Alert.alert("Invalid Credentials", "Check your email or role again.");
-    }
+    const norm = (s?: string) => (s ?? '').trim().toLowerCase();
+    const user = (mockUsers as any[]).find(
+      (u) => norm(u.email) === norm(email) && norm(u.role) === norm(role),
+    );
+    if (!user)
+      return Alert.alert(
+        'Invalid Credentials',
+        'Check your email or role again.',
+      );
+    Alert.alert('Login Successful', `Welcome ${user.name}!`);
+    if (norm(user.role) === 'admin') router.push('/admin');
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 justify-center px-8">
-      {/* Header Section */}
-      <View className="items-center mb-8">
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
         <Image
-          source={require("../assets/landing-page.png")}
-          className="w-32 h-32 mb-4"
+          source={require('../assets/landing-page.png')}
+          style={styles.logo}
           resizeMode="contain"
         />
-        <Text className="text-4xl font-bold text-gray-800 text-center">
-          BU Catering Leftovers
-        </Text>
+        <Text style={styles.appTitle}>BU Catering Leftovers</Text>
       </View>
 
-      {/* Login Form */}
-      <View className="w-full bg-white rounded-2xl p-8 shadow-md shadow-black/10">
-        {/* Email input */}
-        <View className="mb-5">
-          <Text className="text-gray-700 text-base mb-2">Email</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-50">
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Email</Text>
+          <View style={styles.inputRow}>
             <Ionicons
               name="mail-outline"
               size={20}
               color="#999"
-              className="ml-3"
+              style={styles.icon}
             />
             <TextInput
-              className="flex-1 p-3 text-base"
+              style={styles.input}
               placeholder="Enter your BU email"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -67,18 +65,17 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {/* Role input */}
-        <View className="mb-6">
-          <Text className="text-gray-700 text-base mb-2">Role</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-xl bg-gray-50">
+        <View style={styles.field}>
+          <Text style={styles.label}>Role</Text>
+          <View style={styles.inputRow}>
             <Ionicons
               name="person-outline"
               size={20}
               color="#999"
-              className="ml-3"
+              style={styles.icon}
             />
             <TextInput
-              className="flex-1 p-3 text-base"
+              style={styles.input}
               placeholder="admin / volunteer / manager"
               autoCapitalize="none"
               placeholderTextColor="#999"
@@ -88,25 +85,77 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        {/* Login button */}
-        <TouchableOpacity onPress={handleLogin}>
+        <TouchableOpacity onPress={handleLogin} activeOpacity={0.9}>
           <LinearGradient
-            colors={["#FF7E5F", "#FD3A69"]}
+            colors={['#FF7E5F', '#FD3A69']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="py-4 rounded-xl shadow-sm"
+            style={styles.cta}
           >
-            <Text className="text-white text-center text-lg font-semibold">
-              Log In
-            </Text>
+            <Text style={styles.ctaText}>Log In</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
-      {/* Footer Section */}
-      <Text className="text-gray-400 text-sm text-center mt-8">
-        © 2025 BU Catering Leftovers Project
-      </Text>
+      <Text style={styles.footer}>© 2025 BU Catering Leftovers Project</Text>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  header: { alignItems: 'center', marginBottom: 24 },
+  logo: { width: 128, height: 128, marginBottom: 12 },
+  appTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1f2937',
+    textAlign: 'center',
+  },
+
+  card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowOpacity: 0.1,
+  },
+  field: { marginBottom: 14 },
+  label: { color: '#374151', fontSize: 14, marginBottom: 6 },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    backgroundColor: '#f9fafb',
+  },
+  icon: { marginLeft: 10 },
+  input: { flex: 1, paddingVertical: 10, paddingHorizontal: 10, fontSize: 16 },
+
+  cta: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 4,
+    shadowOpacity: 0.1,
+  },
+  ctaText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  footer: {
+    color: '#9ca3af',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 24,
+  },
+});

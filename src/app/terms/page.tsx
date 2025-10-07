@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { FaCaretDown } from "react-icons/fa";
-import Navbar from "@/components/Navbar";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
-import { firebaseApp } from "@/../firebaseConfig";
-import { set } from "date-fns";
-import { Box, Typography } from "@mui/material";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { FaCaretDown } from 'react-icons/fa';
+import Navbar from '@/components/Navbar';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { firebaseApp } from '@/../firebaseConfig';
+import { set } from 'date-fns';
+import { Box, Typography } from '@mui/material';
 
 const PageContainer = styled.div`
   margin: 20px;
@@ -21,14 +21,14 @@ const Title = styled.h1`
   font-size: 2.5em;
   color: #000;
   margin-bottom: 10px;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 `;
 
 const Subtitle = styled.p`
   font-size: 1.2em;
   color: #666;
   margin-bottom: 20px;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 `;
 
 const FAQContainer = styled.div`
@@ -56,7 +56,7 @@ const Question = styled.div`
   gap: 20px;
   margin-bottom: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 `;
 
 const Answer = styled.div<{ show: boolean }>`
@@ -65,15 +65,15 @@ const Answer = styled.div<{ show: boolean }>`
   border: 1px solid #fff0f0;
   border-radius: 10px;
   color: rgba(0, 0, 0, 0.87);
-  display: ${(props) => (props.show ? "block" : "none")};
-  font-family: "Arial", sans-serif;
+  display: ${(props) => (props.show ? 'block' : 'none')};
+  font-family: 'Arial', sans-serif;
   margin-top: 5px;
   margin-bottom: 15px;
 `;
 
 const Icon = styled(FaCaretDown)<{ rotate: boolean }>`
   transition: transform 0.3s ease-in-out;
-  transform: ${(props) => (props.rotate ? "rotate(180deg)" : "rotate(0deg)")};
+  transform: ${(props) => (props.rotate ? 'rotate(180deg)' : 'rotate(0deg)')};
 `;
 
 interface CollapsibleFAQItemProps {
@@ -102,7 +102,7 @@ const CheckboxContainer = styled.div`
   display: flex;
   align-items: center;
   margin-top: 20px;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 `;
 
 const Checkbox = styled.input`
@@ -118,7 +118,7 @@ const Button = styled.button`
   font-size: 1em;
   cursor: pointer;
   margin-top: 20px;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
   &:hover {
     background-color: #a21d18;
   }
@@ -136,7 +136,7 @@ const Popup = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   text-align: center;
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
 `;
 
 const Overlay = styled.div`
@@ -163,7 +163,7 @@ const TermsConditionsPage: React.FC = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsAuthenticated(!!user);
       if (user) {
-        const userDocRef = doc(firestore, "Users", user.uid);
+        const userDocRef = doc(firestore, 'Users', user.uid);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
           setAgreedToTerms(userDoc.data().agreedToTerms);
@@ -176,20 +176,21 @@ const TermsConditionsPage: React.FC = () => {
 
   const faqs = [
     {
-      category: "General Information",
+      category: 'General Information',
       items: [
         {
-          question: "Food Pickup Policy",
-          answer: "You will need to arrive within the time remaining and bring your own containers in order to pick up food",
-        },
-        {
-          question: "BU Legal Policy",
-          answer: "Please Read Through Terms and Conditions before agreeing",
-        },
-        {
-          question: "Allergen Policy",
+          question: 'Food Pickup Policy',
           answer:
-            "If you have food allergies or dietary restrictions, it is recommended that you do not participate in this program. There will not be personnel available to address questions related to dietary restrictions, ingredients, or food allergies.",
+            'You will need to arrive within the time remaining and bring your own containers in order to pick up food',
+        },
+        {
+          question: 'BU Legal Policy',
+          answer: 'Please Read Through Terms and Conditions before agreeing',
+        },
+        {
+          question: 'Allergen Policy',
+          answer:
+            'If you have food allergies or dietary restrictions, it is recommended that you do not participate in this program. There will not be personnel available to address questions related to dietary restrictions, ingredients, or food allergies.',
         },
       ],
     },
@@ -204,14 +205,14 @@ const TermsConditionsPage: React.FC = () => {
       const user = auth.currentUser;
       if (user) {
         try {
-          const userDocRef = doc(firestore, "Users", user.uid);
+          const userDocRef = doc(firestore, 'Users', user.uid);
           await updateDoc(userDocRef, {
             agreedToTerms: true,
           });
           setAgreedToTerms(true);
-          router.push("/events/explore"); // Redirect to home page after agreement
+          router.push('/events/explore'); // Redirect to home page after agreement
         } catch (error) {
-          console.error("Error updating user agreement:", error);
+          console.error('Error updating user agreement:', error);
         }
       }
     } else {
@@ -223,13 +224,13 @@ const TermsConditionsPage: React.FC = () => {
     const user = auth.currentUser;
     if (user) {
       try {
-        const userDocRef = doc(firestore, "Users", user.uid);
+        const userDocRef = doc(firestore, 'Users', user.uid);
         await updateDoc(userDocRef, {
           agreedToTerms: false,
         });
         setAgreedToTerms(false);
       } catch (error) {
-        console.error("Error updating user agreement:", error);
+        console.error('Error updating user agreement:', error);
       }
     }
   };
@@ -239,9 +240,11 @@ const TermsConditionsPage: React.FC = () => {
   };
 
   return (
-    <div style={{
-      color: "black",
-    }}>
+    <div
+      style={{
+        color: 'black',
+      }}
+    >
       <Navbar user={isAuthenticated} agreedToTerms={agreedToTerms} />
       <PageContainer>
         <Title>Terms and Conditions</Title>
@@ -262,49 +265,47 @@ const TermsConditionsPage: React.FC = () => {
                     </FAQContainer>
                 ))} */}
         <FAQContainer>
-            <b>
-              1. By signing up for the program, you agree to the following
-              terms:
-            </b>
-            <br />
-            You will receive email notifications when leftover food is available
-            from catering events.
-            <br />
-            <br />
-            <b>2. Program Rules:</b>
-            <br />
-            <b>Notifications:</b> The email notification will provide the
-            location, quantity, and type of food available.
-            <br />
-            <b>Pickup Window:</b>
-            <br />
-            Students will have a specified window of time to pick up leftover
-            food, starting from the time the notification is sent. The duration
-            of the pickup window will be included in the notification, along
-            with a live countdown on the online event posting.
-            <br />
-            <b>Availability:</b>
-            <br />
-            Food is available on a first-come, first-served basis. BU Dining
-            cannot guarantee availability of food for the entire duration of the
-            pickup window.
-            <br />
-            <b>Food Allergies and Dietary Restrictions:</b>
-            <br />
-            If you have food allergies or dietary restrictions, it is
-            recommended that you do not participate in this program. There will
-            not be personnel available to address questions related to dietary
-            restrictions, ingredients, or food allergies.
-            <br />
-            <b>Containers:</b>
-            <br />
-            Catering on the Charles will provide containers for students to use.
-            <br />
-            <b>Food Safety:</b>
-            <br />
-            To avoid illness, food should be consumed or refrigerated
-            immediately.
-            <br />
+          <b>
+            1. By signing up for the program, you agree to the following terms:
+          </b>
+          <br />
+          You will receive email notifications when leftover food is available
+          from catering events.
+          <br />
+          <br />
+          <b>2. Program Rules:</b>
+          <br />
+          <b>Notifications:</b> The email notification will provide the
+          location, quantity, and type of food available.
+          <br />
+          <b>Pickup Window:</b>
+          <br />
+          Students will have a specified window of time to pick up leftover
+          food, starting from the time the notification is sent. The duration of
+          the pickup window will be included in the notification, along with a
+          live countdown on the online event posting.
+          <br />
+          <b>Availability:</b>
+          <br />
+          Food is available on a first-come, first-served basis. BU Dining
+          cannot guarantee availability of food for the entire duration of the
+          pickup window.
+          <br />
+          <b>Food Allergies and Dietary Restrictions:</b>
+          <br />
+          If you have food allergies or dietary restrictions, it is recommended
+          that you do not participate in this program. There will not be
+          personnel available to address questions related to dietary
+          restrictions, ingredients, or food allergies.
+          <br />
+          <b>Containers:</b>
+          <br />
+          Catering on the Charles will provide containers for students to use.
+          <br />
+          <b>Food Safety:</b>
+          <br />
+          To avoid illness, food should be consumed or refrigerated immediately.
+          <br />
           <div style={{ height: 100 }} />
         </FAQContainer>
         {isAuthenticated ? (
