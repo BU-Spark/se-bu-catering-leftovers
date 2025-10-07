@@ -1,10 +1,9 @@
 [
-    {
-      "id": "R001",
-      "eventId": "E001",
-      "comment": "Well organized, food went fast. Clear pickup spot.",
-      "images": ["https://example.com/img/r001-1.jpg"],
-      "date": "2025-10-06T19:30:00Z"
-    }
-  ]
-  
+  {
+    "id": "R001",
+    "eventId": "E001",
+    "comment": "Well organized, food went fast. Clear pickup spot.",
+    "images": ["https://example.com/img/r001-1.jpg"],
+    "date": "2025-10-06T19:30:00Z"
+  }
+]

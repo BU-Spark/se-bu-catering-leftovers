@@ -1,39 +1,56 @@
 [
-    {
-      "id": "E001",
-      "host": "U001",
-      "name": "Leftover Chicken & Rice",
-      "location": {
-        "formatted": "BU GSU Basement, 775 Commonwealth Ave, Boston, MA",
-        "lat": 42.3502,
-        "lng": -71.1073
-      },
-      "foods": [
-        { "name": "Chicken Breast", "description": "Tray-pan slices", "quantity": 12, "unit": "servings", "allergens": ["none"] },
-        { "name": "Rice", "description": "Steamed jasmine", "quantity": 10, "unit": "cups", "allergens": ["none"] }
-      ],
-      "status": "active",
-      "images": [
-        "https://example.com/img/e001-1.jpg",
-        "https://example.com/img/e001-2.jpg"
-      ],
-      "reviewedBy": ["U002"]
+  {
+    "id": "E001",
+    "host": "U001",
+    "name": "Leftover Chicken & Rice",
+    "location": {
+      "formatted": "BU GSU Basement, 775 Commonwealth Ave, Boston, MA",
+      "lat": 42.3502,
+      "lng": -71.1073
     },
-    {
-      "id": "E002",
-      "host": "U003",
-      "name": "Veggie Pasta Trays",
-      "location": {
-        "formatted": "Questrom Lobby, 595 Commonwealth Ave, Boston, MA",
-        "lat": 42.3494,
-        "lng": -71.1007
+    "foods": [
+      {
+        "name": "Chicken Breast",
+        "description": "Tray-pan slices",
+        "quantity": 12,
+        "unit": "servings",
+        "allergens": ["none"]
       },
-      "foods": [
-        { "name": "Penne Marinara", "description": "Vegetarian", "quantity": 15, "unit": "servings", "allergens": ["gluten"] }
-      ],
-      "status": "draft",
-      "images": [],
-      "reviewedBy": []
-    }
-  ]
-  
+      {
+        "name": "Rice",
+        "description": "Steamed jasmine",
+        "quantity": 10,
+        "unit": "cups",
+        "allergens": ["none"]
+      }
+    ],
+    "status": "active",
+    "images": [
+      "https://example.com/img/e001-1.jpg",
+      "https://example.com/img/e001-2.jpg"
+    ],
+    "reviewedBy": ["U002"]
+  },
+  {
+    "id": "E002",
+    "host": "U003",
+    "name": "Veggie Pasta Trays",
+    "location": {
+      "formatted": "Questrom Lobby, 595 Commonwealth Ave, Boston, MA",
+      "lat": 42.3494,
+      "lng": -71.1007
+    },
+    "foods": [
+      {
+        "name": "Penne Marinara",
+        "description": "Vegetarian",
+        "quantity": 15,
+        "unit": "servings",
+        "allergens": ["gluten"]
+      }
+    ],
+    "status": "draft",
+    "images": [],
+    "reviewedBy": []
+  }
+]
