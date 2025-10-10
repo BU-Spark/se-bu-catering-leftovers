@@ -1,0 +1,35 @@
+[
+  {
+    "uid": "U001",
+    "email": "nathan@bu.edu",
+    "name": "Nathan Chang",
+    "role": "admin",
+    "events": ["E001"],
+    "reviews": [],
+    "foodPref": ["high-protein", "low-sodium"],
+    "locPref": ["GSU", "Questrom"],
+    "timePref": ["15:00-18:00"]
+  },
+  {
+    "uid": "U002",
+    "email": "emma@bu.edu",
+    "name": "Emma Li",
+    "role": "volunteer",
+    "events": ["E001"],
+    "reviews": ["R001"],
+    "foodPref": ["vegetarian"],
+    "locPref": ["GSU"],
+    "timePref": ["12:00-15:00"]
+  },
+  {
+    "uid": "U003",
+    "email": "sam@bu.edu",
+    "name": "Sam Patel",
+    "role": "manager",
+    "events": ["E002"],
+    "reviews": [],
+    "foodPref": ["no-dairy"],
+    "locPref": ["Questrom"],
+    "timePref": ["09:00-12:00"]
+  }
+]

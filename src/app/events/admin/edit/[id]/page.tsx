@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import EventForm from '@/components/formComponents/EventForm';
 import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@mui/material/styles';
-import { theme } from "@/styles/styling";
+import { theme } from '@/styles/styling';
 import { doc, getDoc } from 'firebase/firestore';
 import { Event } from '@/types/types';
 import { firestore as db } from '@/../firebaseConfig';
@@ -20,7 +20,7 @@ const EditEventFormPage = ({ params }: { params: { id: string } }) => {
       const docRef = doc(db, 'Events', id);
       const docSnap = await getDoc(docRef);
 
-      console.log("id: ", id);
+      console.log('id: ', id);
       if (!docSnap.exists()) {
         notFound();
       }
@@ -32,12 +32,12 @@ const EditEventFormPage = ({ params }: { params: { id: string } }) => {
   }, [eventUID]);
 
   return (
-      <div>
-        <ThemeProvider theme={theme}>
-          <Navbar user={true} agreedToTerms={true}/>
-          {event && <EventForm event={event} onPublish={onUpdate} />}
-        </ThemeProvider>
-      </div>
+    <div>
+      <ThemeProvider theme={theme}>
+        <Navbar user={true} agreedToTerms={true} />
+        {event && <EventForm event={event} onPublish={onUpdate} />}
+      </ThemeProvider>
+    </div>
   );
 };
 
