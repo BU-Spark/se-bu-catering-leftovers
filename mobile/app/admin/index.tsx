@@ -17,7 +17,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { firestore } from '../../firebase/config';
+import { firestore } from '../../src/lib/firebase/config';
 import {
   addDoc,
   collection,
