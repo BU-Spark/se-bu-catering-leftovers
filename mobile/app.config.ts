@@ -7,6 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     name: config.name ?? 'mobile',
     slug: config.slug ?? 'mobile',
+    scheme: 'leftovers',
     extra: {
       firebase: {
         apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
