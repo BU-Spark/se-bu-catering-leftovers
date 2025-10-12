@@ -36,7 +36,7 @@ async function seed() {
 
   // --- AUTH USERS ---
   console.log('\n📧 Creating Auth users...');
-  
+
   try {
     await auth.createUser({
       uid: 'user_admin_1',
@@ -71,7 +71,7 @@ async function seed() {
 
   // --- FIRESTORE USERS ---
   console.log('\n👥 Creating Firestore user documents...');
-  
+
   await upsert('Users', 'user_admin_1', {
     uid: 'user_admin_1',
     email: 'admin@bu.edu',
@@ -145,7 +145,12 @@ async function seed() {
     foodAvailable: ts(new Date(now.getTime() + 15 * 60 * 1000)),
     foods: [
       { id: 'f1', item: 'Chicken Skewers', quantity: '20', unit: 'Pieces' },
-      { id: 'f2', item: 'Vegetable Spring Rolls', quantity: '30', unit: 'Pieces' },
+      {
+        id: 'f2',
+        item: 'Vegetable Spring Rolls',
+        quantity: '30',
+        unit: 'Pieces',
+      },
       { id: 'f3', item: 'Rice Bowls', quantity: '10', unit: 'Portions' },
     ],
     status: 'open',
