@@ -32,7 +32,7 @@ export type UserDoc = {
   agreedToTerms: boolean;
 };
 
-const USERS = 'users';
+const USERS = 'Users';
 const usersCol = collection(firestore, USERS);
 
 // Remove undefined values to avoid Firestore errors
