@@ -29,12 +29,15 @@ export const firestore: Firestore = initializeFirestore(app, {
 if (__DEV__) {
   const HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
   const PORT = 8080;
-  
+
   try {
     connectFirestoreEmulator(firestore, HOST, PORT);
     console.log(`🔧 Connected to Firestore Emulator at ${HOST}:${PORT}`);
   } catch (error) {
-    console.warn('Emulator connection failed (may already be connected):', error);
+    console.warn(
+      'Emulator connection failed (may already be connected):',
+      error,
+    );
   }
 }
 

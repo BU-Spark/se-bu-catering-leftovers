@@ -1,7 +1,15 @@
 import {
-  doc, getDoc, setDoc, updateDoc, writeBatch,
-  type FirestoreDataConverter, type QueryDocumentSnapshot, type SnapshotOptions, type DocumentData,
-  arrayUnion, arrayRemove
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  writeBatch,
+  type FirestoreDataConverter,
+  type QueryDocumentSnapshot,
+  type SnapshotOptions,
+  type DocumentData,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import { firestore } from './config';
 
@@ -11,11 +19,11 @@ export type UserDoc = {
   email: string;
   name: string;
   role: Role;
-  events: string[];        // Event IDs user created/joined
-  reviews: string[];       // Event IDs user reviewed
-  locPref: string[];       // Location preferences
-  timePref: string[];      // Time preferences
-  foodPref: string[];      // Food preferences
+  events: string[]; // Event IDs user created/joined
+  reviews: string[]; // Event IDs user reviewed
+  locPref: string[]; // Location preferences
+  timePref: string[]; // Time preferences
+  foodPref: string[]; // Food preferences
   agreedToTerms: boolean;
 };
 
@@ -53,7 +61,8 @@ const userConverter: FirestoreDataConverter<UserDoc> = {
   },
 };
 
-const userRef = (uid: string) => doc(firestore, USERS, uid).withConverter(userConverter);
+const userRef = (uid: string) =>
+  doc(firestore, USERS, uid).withConverter(userConverter);
 
 /**
  * READ: Fetch a user by UID
@@ -94,7 +103,7 @@ export async function ensureUser(uid: string, seed: Partial<UserDoc> = {}) {
  */
 export async function updateUserPreferences(
   uid: string,
-  prefs: Partial<Pick<UserDoc, 'locPref' | 'timePref' | 'foodPref'>>
+  prefs: Partial<Pick<UserDoc, 'locPref' | 'timePref' | 'foodPref'>>,
 ) {
   await updateDoc(userRef(uid), stripUndef(prefs));
 }

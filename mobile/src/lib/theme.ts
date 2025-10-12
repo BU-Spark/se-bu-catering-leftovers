@@ -6,29 +6,29 @@ export const colors = {
   primaryLight: '#cc0101',
   secondary: '#2D2926',
   secondaryLight: '#505050',
-  
+
   background: '#f9fafb',
   surface: '#ffffff',
-  
+
   text: {
     primary: '#1f2937',
     secondary: '#374151',
     tertiary: '#6b7280',
     light: '#9ca3af',
   },
-  
+
   border: {
     light: '#e5e7eb',
     default: '#d1d5db',
   },
-  
+
   status: {
     open: '#0b8457',
     closed: '#999',
     drafted: '#f59e0b',
     saved: '#2952e3',
   },
-  
+
   error: '#d93025',
   errorBg: '#fdecea',
   success: '#0b8457',

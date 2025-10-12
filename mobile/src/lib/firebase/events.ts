@@ -28,7 +28,7 @@ const EVENTS = 'Events';
 
 // Convert various date formats to Firestore Timestamp
 const toTimestampOrUndef = (
-  v: Date | string | number | Timestamp | null | undefined
+  v: Date | string | number | Timestamp | null | undefined,
 ): Timestamp | undefined => {
   if (v == null) return undefined;
   if (v instanceof Timestamp) return v;
@@ -75,7 +75,10 @@ const eventConverter: FirestoreDataConverter<Event> = {
       Location: d?.Location,
       locationDetails: d?.locationDetails ?? '',
       notes: d?.notes ?? '',
-      duration: typeof d?.duration === 'number' ? d.duration : Number(d?.duration ?? 30),
+      duration:
+        typeof d?.duration === 'number'
+          ? d.duration
+          : Number(d?.duration ?? 30),
       foodArrived: d?.foodArrived,
       foodAvailable: d?.foodAvailable,
       foods: Array.isArray(d?.foods) ? d.foods : [],
@@ -116,8 +119,10 @@ export async function fetchEventsPage(opts?: {
     : query(eventsCol, ...base);
 
   const snap = await getDocs(q);
-  const events = snap.docs.map(d => d.data());
-  const lastDoc = snap.docs.length ? (snap.docs[snap.docs.length - 1] as QueryDocumentSnapshot<Event>) : null;
+  const events = snap.docs.map((d) => d.data());
+  const lastDoc = snap.docs.length
+    ? (snap.docs[snap.docs.length - 1] as QueryDocumentSnapshot<Event>)
+    : null;
   return { events, lastDoc };
 }
 
@@ -136,14 +141,20 @@ export async function fetchOpenEventsPage(opts?: {
   lastDoc: QueryDocumentSnapshot<Event> | null;
 }> {
   const pageSize = opts?.pageSize ?? 20;
-  const base = [where('status', '==', 'open'), orderBy('foodAvailable', 'desc'), limit(pageSize)];
+  const base = [
+    where('status', '==', 'open'),
+    orderBy('foodAvailable', 'desc'),
+    limit(pageSize),
+  ];
   const q = opts?.after
     ? query(eventsCol, ...base, startAfter(opts.after))
     : query(eventsCol, ...base);
 
   const snap = await getDocs(q);
-  const events = snap.docs.map(d => d.data());
-  const lastDoc = snap.docs.length ? (snap.docs[snap.docs.length - 1] as QueryDocumentSnapshot<Event>) : null;
+  const events = snap.docs.map((d) => d.data());
+  const lastDoc = snap.docs.length
+    ? (snap.docs[snap.docs.length - 1] as QueryDocumentSnapshot<Event>)
+    : null;
   return { events, lastDoc };
 }
 
@@ -166,13 +177,14 @@ export async function getEvent(eventId: string): Promise<Event | null> {
 export async function fetchEventsByIds(eventIds: string[]): Promise<Event[]> {
   if (!eventIds.length) return [];
   const chunks: string[][] = [];
-  for (let i = 0; i < eventIds.length; i += 10) chunks.push(eventIds.slice(i, i + 10));
+  for (let i = 0; i < eventIds.length; i += 10)
+    chunks.push(eventIds.slice(i, i + 10));
 
   const results: Event[] = [];
   for (const ids of chunks) {
     const q = query(eventsCol, where(documentId(), 'in', ids));
     const snap = await getDocs(q);
-    results.push(...snap.docs.map(d => d.data()));
+    results.push(...snap.docs.map((d) => d.data()));
   }
   return results;
 }
@@ -187,7 +199,7 @@ export async function fetchEventsByIds(eventIds: string[]): Promise<Event[]> {
  * @returns Generated event ID
  */
 export async function createEvent(
-  eventData: Partial<Event> & { creatorUid?: string }
+  eventData: Partial<Event> & { creatorUid?: string },
 ): Promise<string> {
   const payload = stripUndef({
     host: eventData.host ?? 'Unknown',
@@ -230,7 +242,10 @@ export async function createEvent(
  * @param eventId Event to update
  * @param updates Partial event data to update
  */
-export async function updateEvent(eventId: string, updates: Partial<Event>): Promise<void> {
+export async function updateEvent(
+  eventId: string,
+  updates: Partial<Event>,
+): Promise<void> {
   const data: Record<string, any> = stripUndef({
     host: updates.host,
     name: updates.name,
@@ -254,7 +269,10 @@ export async function updateEvent(eventId: string, updates: Partial<Event>): Pro
  * @param eventId Event to update
  * @param status New status (drafted, open, closed)
  */
-export async function updateEventStatus(eventId: string, status: EventStatus): Promise<void> {
+export async function updateEventStatus(
+  eventId: string,
+  status: EventStatus,
+): Promise<void> {
   const ref = doc(firestore, EVENTS, eventId);
   await updateDoc(ref, { status });
 }
@@ -265,7 +283,10 @@ export async function updateEventStatus(eventId: string, status: EventStatus): P
  * @param eventId Event to delete
  * @param opts.ownerUid If provided, removes event from user's events array
  */
-export async function deleteEvent(eventId: string, opts?: { ownerUid?: string }): Promise<void> {
+export async function deleteEvent(
+  eventId: string,
+  opts?: { ownerUid?: string },
+): Promise<void> {
   const batch = writeBatch(firestore);
   const eventRef = doc(firestore, EVENTS, eventId);
   batch.delete(eventRef);
