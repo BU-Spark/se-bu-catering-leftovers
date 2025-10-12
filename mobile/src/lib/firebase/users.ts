@@ -10,6 +10,11 @@ import {
   type DocumentData,
   arrayUnion,
   arrayRemove,
+  getDocs,
+  collection,
+  query,
+  where,
+  limit,
 } from 'firebase/firestore';
 import { firestore } from './config';
 
@@ -27,7 +32,8 @@ export type UserDoc = {
   agreedToTerms: boolean;
 };
 
-const USERS = 'Users';
+const USERS = 'users';
+const usersCol = collection(firestore, USERS);
 
 // Remove undefined values to avoid Firestore errors
 const stripUndef = <T extends Record<string, any>>(obj: T): Partial<T> => {
@@ -74,6 +80,17 @@ export async function getUser(uid: string): Promise<UserDoc | null> {
 }
 
 /**
+ * READ: Fetch a user by email (normalized to lowercase)
+ * @returns UserDoc if exists, null otherwise
+ */
+export async function getUserByEmail(email: string): Promise<UserDoc | null> {
+  const normalized = email.trim().toLowerCase();
+  const q = query(usersCol, where('email', '==', normalized), limit(1));
+  const snap = await getDocs(q);
+  return snap.docs.length ? (snap.docs[0].data() as UserDoc) : null;
+}
+
+/**
  * CREATE: Create user if doesn't exist
  * Initializes with seed data or defaults
  */
@@ -83,7 +100,7 @@ export async function ensureUser(uid: string, seed: Partial<UserDoc> = {}) {
   if (!snap.exists()) {
     const full: UserDoc = {
       uid,
-      email: seed.email ?? '',
+      email: (seed.email ?? '').trim().toLowerCase(),
       name: seed.name ?? '',
       role: (seed.role ?? 'User') as Role,
       events: [],
