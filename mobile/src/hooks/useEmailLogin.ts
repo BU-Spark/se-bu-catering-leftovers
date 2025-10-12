@@ -15,10 +15,10 @@ export function useEmailLogin() {
     try {
       if (!isBUEmail(email)) throw new Error('Please sign in with your @bu.edu email.');
 
-      // Mock: derive uid from email (replace with Clerk later)
+      // Mock: derive uid from email (will replace with Clerk later)
       const uid = `mock_User_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
-      // Ensure there is a user doc (idempotent)
+      // Ensure there is a user doc
       await ensureUser(uid, { email, name: 'Student User', role: 'User' });
 
       const doc = await getUser(uid);

@@ -1,5 +1,5 @@
 // src/hooks/useEvents.ts
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   fetchEventsPage,
   fetchOpenEventsPage,
