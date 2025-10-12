@@ -1,161 +1,144 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Image,
-  StyleSheet,
-} from 'react-native';
+// app/index.tsx
+import * as React from 'react';
+import { View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import mockUsers from '../mock_data/users.json';
+import { Text, TextInput, Button, Surface, useTheme } from 'react-native-paper';
+import { useAuth } from '../src/contexts/AuthContext';
+import { spacing } from '../src/lib/theme';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const { login, loading, user, isAuthenticated } = useAuth();
+  const theme = useTheme();
 
-  const handleLogin = () => {
-    const norm = (s?: string) => (s ?? '').trim().toLowerCase();
-    const user = (mockUsers as any[]).find(
-      (u) => norm(u.email) === norm(email) && norm(u.role) === norm(role),
-    );
-    if (!user)
-      return Alert.alert(
-        'Invalid Credentials',
-        'Check your email or role again.',
-      );
-    Alert.alert('Login Successful', `Welcome ${user.name}!`);
-    if (norm(user.role) === 'admin') router.push('/admin');
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'Admin') {
+        router.replace('/(admin)');
+      } else {
+        router.replace('/(student)');
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
+    if (!email.endsWith('@bu.edu')) {
+      Alert.alert('Error', 'Please use your @bu.edu email');
+      return;
+    }
+
+    const user = await login(email, password);
+    if (!user) {
+      Alert.alert('Error', 'Login failed. Please try again.');
+      return;
+    }
+
+    // Navigate and reset stack so back button doesn't return to login
+    if (user.role === 'Admin') {
+      router.replace('/(admin)');
+    } else {
+      router.replace('/(student)');
+    }
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <Image
-          source={require('../assets/landing-page.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.appTitle}>BU Catering Leftovers</Text>
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Email</Text>
-          <View style={styles.inputRow}>
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color="#999"
-              style={styles.icon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your BU email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Role</Text>
-          <View style={styles.inputRow}>
-            <Ionicons
-              name="person-outline"
-              size={20}
-              color="#999"
-              style={styles.icon}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="admin / volunteer / manager"
-              autoCapitalize="none"
-              placeholderTextColor="#999"
-              value={role}
-              onChangeText={setRole}
-            />
-          </View>
-        </View>
-
-        <TouchableOpacity onPress={handleLogin} activeOpacity={0.9}>
-          <LinearGradient
-            colors={['#FF7E5F', '#FD3A69']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.cta}
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Surface
+        elevation={0}
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          paddingHorizontal: spacing.xl,
+        }}
+      >
+        <View style={{ alignItems: 'center', marginBottom: spacing.xxl * 2 }}>
+          <View
+            style={{
+              width: 120,
+              height: 120,
+              borderRadius: 60,
+              backgroundColor: theme.colors.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: spacing.lg,
+            }}
           >
-            <Text style={styles.ctaText}>Log In</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+            <Text variant="displaySmall" style={{ color: '#ffffff' }}>
+              🍽️
+            </Text>
+          </View>
+          <Text
+            variant="headlineMedium"
+            style={{ 
+              textAlign: 'center', 
+              marginBottom: spacing.xs,
+              fontWeight: '700'
+            }}
+          >
+            BU Catering Leftovers
+          </Text>
+          <Text
+            variant="bodyMedium"
+            style={{ textAlign: 'center', opacity: 0.7 }}
+          >
+            Reduce waste, feed community
+          </Text>
+        </View>
 
-      <Text style={styles.footer}>© 2025 BU Catering Leftovers Project</Text>
+        <View>
+          <TextInput
+            mode="outlined"
+            label="BU Email"
+            placeholder="you@bu.edu"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            left={<TextInput.Icon icon="email-outline" />}
+            style={{ marginBottom: spacing.md }}
+          />
+          
+          <TextInput
+            mode="outlined"
+            label="Password"
+            placeholder="Enter password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            left={<TextInput.Icon icon="lock-outline" />}
+            style={{ marginBottom: spacing.lg }}
+          />
+
+          <Button
+            mode="contained"
+            onPress={handleLogin}
+            disabled={loading}
+            loading={loading}
+          >
+            {loading ? 'Logging in...' : 'Log In'}
+          </Button>
+        </View>
+
+        <Text
+          variant="bodySmall"
+          style={{ 
+            textAlign: 'center', 
+            marginTop: spacing.xxl * 2, 
+            opacity: 0.6 
+          }}
+        >
+          © 2025 BU Catering Leftovers Project
+        </Text>
+      </Surface>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  header: { alignItems: 'center', marginBottom: 24 },
-  logo: { width: 128, height: 128, marginBottom: 12 },
-  appTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1f2937',
-    textAlign: 'center',
-  },
-
-  card: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    elevation: 2,
-    shadowOpacity: 0.1,
-  },
-  field: { marginBottom: 14 },
-  label: { color: '#374151', fontSize: 14, marginBottom: 6 },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 12,
-    backgroundColor: '#f9fafb',
-  },
-  icon: { marginLeft: 10 },
-  input: { flex: 1, paddingVertical: 10, paddingHorizontal: 10, fontSize: 16 },
-
-  cta: {
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 4,
-    shadowOpacity: 0.1,
-  },
-  ctaText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  footer: {
-    color: '#9ca3af',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 24,
-  },
-});
