@@ -7,12 +7,19 @@ if (!process.env.FIRESTORE_EMULATOR_HOST) {
   process.exit(1);
 }
 
+if (!process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+  console.error('⚠️  FIREBASE_AUTH_EMULATOR_HOST not set');
+  console.error('Run: export FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099');
+  process.exit(1);
+}
+
 // Initialize Firebase Admin
 if (admin.apps.length === 0) {
   admin.initializeApp({ projectId: 'bu-catering-leftovers' });
 }
 
 const db = admin.firestore();
+const auth = admin.auth();
 
 async function upsert(col: string, id: string, data: Record<string, any>) {
   await db
@@ -25,9 +32,46 @@ const now = new Date();
 const ts = (d: Date) => admin.firestore.Timestamp.fromDate(d);
 
 async function seed() {
-  console.log('🌱 Seeding Firestore emulator...');
+  console.log('🌱 Seeding Firebase emulators...');
 
-  // --- USERS ---
+  // --- AUTH USERS ---
+  console.log('\n📧 Creating Auth users...');
+  
+  try {
+    await auth.createUser({
+      uid: 'user_admin_1',
+      email: 'admin@bu.edu',
+      password: 'password123',
+      displayName: 'Admin User',
+    });
+    console.log('  ✓ Created admin@bu.edu (password: password123)');
+  } catch (e: any) {
+    if (e.code === 'auth/uid-already-exists') {
+      console.log('  - admin@bu.edu already exists');
+    } else {
+      throw e;
+    }
+  }
+
+  try {
+    await auth.createUser({
+      uid: 'user_student_1',
+      email: 'student@bu.edu',
+      password: 'password123',
+      displayName: 'Student User',
+    });
+    console.log('  ✓ Created student@bu.edu (password: password123)');
+  } catch (e: any) {
+    if (e.code === 'auth/uid-already-exists') {
+      console.log('  - student@bu.edu already exists');
+    } else {
+      throw e;
+    }
+  }
+
+  // --- FIRESTORE USERS ---
+  console.log('\n👥 Creating Firestore user documents...');
+  
   await upsert('Users', 'user_admin_1', {
     uid: 'user_admin_1',
     email: 'admin@bu.edu',
@@ -221,13 +265,15 @@ async function seed() {
     });
 
   console.log('✅ Seeding complete!');
-  console.log('   - 2 Users (1 Admin, 1 Student)');
+  console.log('\n📊 Summary:');
+  console.log('   - 2 Auth Users (admin@bu.edu, student@bu.edu)');
+  console.log('   - 2 Firestore User docs');
   console.log('   - 6 Events (3 Open, 1 Closed, 1 Saved, 1 Drafted)');
   console.log('   - 1 Review');
+  console.log('\n🔐 Test credentials:');
+  console.log('   Admin:   admin@bu.edu / password123');
+  console.log('   Student: student@bu.edu / password123');
   console.log('');
-  console.log('Test credentials:');
-  console.log('  Admin: admin@bu.edu / role: admin');
-  console.log('  Student: student@bu.edu / role: student');
 }
 
 seed().catch((e) => {
