@@ -359,7 +359,7 @@ EOF
   assert_not_null "$id" "Event creation should return ID" || return 1
 
   # Mirror ID in document
-  curl -sS -X PATCH "${FS_DOCS}/Events/${id}" \
+  curl -sS -X PATCH "${FS_DOCS}/Events/${id}?updateMask.fieldPaths=id" \
     -H "Content-Type: application/json" \
     -d "{\"fields\":{\"id\":{\"stringValue\":\"${id}\"}}}" >/dev/null
 
