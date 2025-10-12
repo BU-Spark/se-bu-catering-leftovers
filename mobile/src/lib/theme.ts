@@ -11,10 +11,9 @@ export const colors = {
   surface: '#ffffff',
 
   text: {
-    primary: '#1f2937',
-    secondary: '#374151',
-    tertiary: '#6b7280',
-    light: '#9ca3af',
+    primary: '#111827',
+    secondary: '#4B5563',
+    onPrimary: '#ffffff',
   },
 
   border: {
@@ -22,17 +21,17 @@ export const colors = {
     default: '#d1d5db',
   },
 
-  status: {
-    open: '#0b8457',
-    closed: '#999',
-    drafted: '#f59e0b',
-    saved: '#2952e3',
-  },
-
   error: '#d93025',
   errorBg: '#fdecea',
   success: '#0b8457',
   warning: '#f59e0b',
+};
+
+export const status = {
+  open: '#0b8457',
+  closed: '#999',
+  drafted: '#f59e0b',
+  saved: '#2952e3',
 };
 
 // Typography styles
@@ -73,3 +72,6 @@ export const elevation = {
   md: 2,
   lg: 4,
 };
+
+const theme = { colors, status, typography, spacing, borderRadius, elevation };
+export default theme;
