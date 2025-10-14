@@ -24,8 +24,6 @@ const app: FirebaseApp = getApps()[0] ?? initializeApp(extra.firebase);
 // Initialize Auth
 export const auth: Auth = getAuth(app);
 
-// Initialize Firestore with RN-friendly transport
-// Use ONLY experimentalForceLongPolling for React Native (do not combine with auto-detect)
 export const firestore: Firestore = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });

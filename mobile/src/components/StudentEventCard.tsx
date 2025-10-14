@@ -22,7 +22,6 @@ export function StudentEventCard({ event, onPress }: Props) {
 
   const { minutes, seconds, hours, days, isElapsed } = useCountdown(target || null, 1000);
 
-  // If elapsed, parent list should already be hiding this card—early return makes it extra safe.
   if (!target || isElapsed) return null;
 
   const hasImage = Array.isArray(event.images) && event.images.length > 0;

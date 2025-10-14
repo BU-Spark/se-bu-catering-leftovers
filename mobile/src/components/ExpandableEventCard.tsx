@@ -41,7 +41,6 @@ export function ExpandableEventCard({
     onToggle();
   };
 
-  // Countdown and time logic
   const startMs = tsToMs(event.foodAvailable);
   const expiryMs = getExpiryMs(event);
   const now = Date.now();
@@ -52,7 +51,6 @@ export function ExpandableEventCard({
   const isExpired = expiryMs ? now >= expiryMs : false;
   const shouldShowCountdown = event.status === 'open' && hasStarted && !isExpired;
 
-  // Students shouldn’t see expired events
   if (!isAdmin && isElapsed) return null;
 
   const totalMs =
@@ -221,7 +219,6 @@ export function ExpandableEventCard({
   );
 }
 
-// Helper for displaying info rows
 function InfoRow({ label, value }: { label: string; value?: any }) {
   if (!value) return null;
   return (

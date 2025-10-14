@@ -29,7 +29,6 @@ export function useStudentEvents(options?: { pageSize?: number }) {
 
   React.useEffect(() => {
     const db = getFirestore();
-    // Students see OPEN events only; ordered by most recent start
     const q = query(
       collection(db, 'Events'),
       where('status', '==', 'open'),
@@ -43,9 +42,7 @@ export function useStudentEvents(options?: { pageSize?: number }) {
         const raw: Event[] = [];
         snap.forEach((doc) => raw.push(doc.data() as Event));
 
-        // Hide already expired on client for safety (server rules should also enforce)
         const now = Date.now();
-        // Students see events currently open (status=open and within time window)
         const filtered = raw.filter(e => {
         const start = tsToMs(e.foodAvailable);
         const end = getExpiryMs(e);
@@ -55,7 +52,6 @@ export function useStudentEvents(options?: { pageSize?: number }) {
         });
 
 
-        // For UX: sort by soonest to expire
         filtered.sort((a, b) => {
           const aExp = getExpiryMs(a) ?? 0;
           const bExp = getExpiryMs(b) ?? 0;
@@ -71,7 +67,6 @@ export function useStudentEvents(options?: { pageSize?: number }) {
   }, [pageSize]);
 
   const refresh = React.useCallback(async () => {
-    // onSnapshot is live; no-op to satisfy pull-to-refresh UI
     return;
   }, []);
 

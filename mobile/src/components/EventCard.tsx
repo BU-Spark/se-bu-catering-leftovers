@@ -29,8 +29,6 @@ function useCountdown(expiryMs: number | null) {
 }
 
 function computeExpiryMs(event: Event): number | null {
-  // Expiration = foodAvailable + duration (minutes)
-  // Fallback to foodArrived if needed; if missing, treat as no expiry
   const baseTs = (event.foodAvailable ?? event.foodArrived)?.toDate?.()
     ? (event.foodAvailable ?? event.foodArrived).toDate()
     : null;
@@ -44,7 +42,6 @@ export default function EventCard({ event, role, onPress, onEdit, onDelete }: Pr
   const expiryMs = React.useMemo(() => computeExpiryMs(event), [event]);
   const { expired, label } = useCountdown(expiryMs);
 
-  // Students: card hidden by parent when expired. Admin: show with expired styling.
   const isAdmin = role === 'Admin';
   const showExpiredBadge = isAdmin && expired;
   const statusColor = expired ? theme.colors.error : theme.colors.primary;

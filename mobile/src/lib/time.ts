@@ -2,14 +2,12 @@
 import type { Event } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
-/** Firestore Timestamp -> number (ms) */
 export function tsToMs(ts?: Timestamp | null): number | null {
   if (!ts) return null;
   const d = ts.toDate?.() ?? new Date(ts as unknown as string);
   return d.getTime();
 }
 
-/** Compute event expiry time (ms since epoch) from schema. */
 export function getExpiryMs(event: Pick<Event, 'foodAvailable' | 'duration'>): number | null {
   const startMs = tsToMs(event.foodAvailable);
   if (!startMs) return null;

@@ -26,16 +26,13 @@ export function EventEditorModal({
   const [draft, setDraft] = React.useState<Partial<Event> | null>(null);
   const [showPicker, setShowPicker] = React.useState(false);
 
-  // Initialize modal draft when opened
   React.useEffect(() => {
     if (visible) {
       const init = event ?? {};
-      console.log("📥 Modal mounted / visible:", visible, "event:", init);
       setDraft(init);
     }
   }, [visible, event]);
 
-  // ✅ Notify parent AFTER draft changes (not during render)
   React.useEffect(() => {
     if (draft && visible) {
       onDraftChange?.(draft);
@@ -47,7 +44,6 @@ export function EventEditorModal({
     if (draft) {
       try {
         await onSave(draft);
-        console.log("✅ onSave callback complete.");
         onDismiss();
       } catch (err) {
         console.error("❌ Error saving draft:", err);
