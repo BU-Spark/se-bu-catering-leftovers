@@ -6,6 +6,7 @@ import {
   connectFirestoreEmulator,
   Firestore,
 } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
 import Constants from 'expo-constants';
 
 // Extract Firebase config from Expo constants
@@ -20,7 +21,11 @@ if (!extra.firebase) {
 // Initialize Firebase app (singleton pattern)
 const app: FirebaseApp = getApps()[0] ?? initializeApp(extra.firebase);
 
-// Initialize Firestore with long polling for React Native
+// Initialize Auth
+export const auth: Auth = getAuth(app);
+
+// Initialize Firestore with RN-friendly transport
+// Use ONLY experimentalForceLongPolling for React Native (do not combine with auto-detect)
 export const firestore: Firestore = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
@@ -32,7 +37,9 @@ if (__DEV__) {
 
   try {
     connectFirestoreEmulator(firestore, HOST, PORT);
+    connectAuthEmulator(auth, `http://${HOST}:9099`, { disableWarnings: true });
     console.log(`🔧 Connected to Firestore Emulator at ${HOST}:${PORT}`);
+    console.log(`🔧 Connected to Auth Emulator at ${HOST}:9099`);
   } catch (error) {
     console.warn(
       'Emulator connection failed (may already be connected):',
