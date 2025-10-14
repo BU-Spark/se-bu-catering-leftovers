@@ -4,6 +4,7 @@ import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Modal, Portal, Text, Button, TextInput, Chip, Card } from 'react-native-paper';
 import type { Event, EventStatus, FoodItem } from '../types';
 import theme from '../lib/theme';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface EventEditorModalProps {
   event: Partial<Event> | null;
@@ -11,6 +12,7 @@ interface EventEditorModalProps {
   onDismiss: () => void;
   onSave: (event: Partial<Event>) => Promise<void>;
   loading?: boolean;
+  onDraftChange?: (draft: Partial<Event>) => void;
 }
 
 export function EventEditorModal({
@@ -19,18 +21,40 @@ export function EventEditorModal({
   onDismiss,
   onSave,
   loading = false,
+  onDraftChange,
 }: EventEditorModalProps) {
   const [draft, setDraft] = React.useState<Partial<Event> | null>(null);
+  const [showPicker, setShowPicker] = React.useState(false);
 
   React.useEffect(() => {
-    if (visible && event) setDraft(event);
+    if (visible) {
+      const init = event ?? {};
+      setDraft(init);
+    }
   }, [visible, event]);
 
-  const handleSave = async () => {
-    if (draft) {
-      await onSave(draft);
-      onDismiss();
+  React.useEffect(() => {
+    if (draft && visible) {
+      onDraftChange?.(draft);
     }
+  }, [draft, visible]);
+
+  const handleSave = async () => {
+    console.log("🧾 Modal save pressed. Current draft:", draft);
+    if (draft) {
+      try {
+        await onSave(draft);
+        onDismiss();
+      } catch (err) {
+        console.error("❌ Error saving draft:", err);
+      }
+    } else {
+      console.warn("⚠️ No draft to save!");
+    }
+  };
+
+  const update = (next: Partial<Event>) => {
+    setDraft(next);
   };
 
   const addFoodItem = () => {
@@ -51,7 +75,10 @@ export function EventEditorModal({
   };
 
   const removeFoodItem = (index: number) => {
-    setDraft(prev => ({ ...prev, foods: prev?.foods?.filter((_, i) => i !== index) }));
+    setDraft(prev => ({
+      ...prev,
+      foods: prev?.foods?.filter((_, i) => i !== index),
+    }));
   };
 
   if (!draft) return null;
@@ -60,7 +87,10 @@ export function EventEditorModal({
     <Portal>
       <Modal
         visible={visible}
-        onDismiss={onDismiss}
+        onDismiss={() => {
+    console.log("❌ Modal dismissed before save");
+    onDismiss();
+  }}
         contentContainerStyle={{
           backgroundColor: theme.colors.surface,
           margin: theme.spacing.lg,
@@ -79,7 +109,7 @@ export function EventEditorModal({
               mode="outlined"
               label="Host"
               value={draft.host ?? ''}
-              onChangeText={t => setDraft({ ...draft, host: t })}
+              onChangeText={t => update({ ...draft, host: t })}
               style={{ marginBottom: theme.spacing.sm }}
             />
 
@@ -87,7 +117,7 @@ export function EventEditorModal({
               mode="outlined"
               label="Event Name"
               value={draft.name ?? ''}
-              onChangeText={t => setDraft({ ...draft, name: t })}
+              onChangeText={t => update({ ...draft, name: t })}
               style={{ marginBottom: theme.spacing.sm }}
             />
 
@@ -95,7 +125,12 @@ export function EventEditorModal({
               mode="outlined"
               label="Location Name"
               value={draft.Location?.name ?? ''}
-              onChangeText={t => setDraft({ ...draft, Location: { ...(draft.Location ?? {} as any), name: t } })}
+              onChangeText={t =>
+                update({
+                  ...draft,
+                  Location: { ...(draft.Location ?? {}), name: t },
+                })
+              }
               style={{ marginBottom: theme.spacing.sm }}
             />
 
@@ -103,7 +138,12 @@ export function EventEditorModal({
               mode="outlined"
               label="Location Address"
               value={draft.Location?.address ?? ''}
-              onChangeText={t => setDraft({ ...draft, Location: { ...(draft.Location ?? {} as any), address: t } })}
+              onChangeText={t =>
+                update({
+                  ...draft,
+                  Location: { ...(draft.Location ?? {}), address: t },
+                })
+              }
               style={{ marginBottom: theme.spacing.sm }}
             />
 
@@ -111,24 +151,63 @@ export function EventEditorModal({
               mode="outlined"
               label="Campus Section"
               value={draft.Location?.campus_section ?? ''}
-              onChangeText={t => setDraft({ ...draft, Location: { ...(draft.Location ?? {} as any), campus_section: t } })}
+              onChangeText={t =>
+                update({
+                  ...draft,
+                  Location: { ...(draft.Location ?? {}), campus_section: t },
+                })
+              }
               style={{ marginBottom: theme.spacing.sm }}
             />
 
-            <TextInput
-              mode="outlined"
-              label="Food Available (YYYY-MM-DDTHH:MM)"
-              value={(draft.foodAvailable as string) ?? ''}
-              onChangeText={t => setDraft({ ...draft, foodAvailable: t })}
-              placeholder="2025-10-15T12:00"
-              style={{ marginBottom: theme.spacing.sm }}
-            />
+            {/* 🕒 Food Available Time Picker */}
+            <View style={{ marginBottom: theme.spacing.sm }}>
+              <Button
+                mode="outlined"
+                icon="calendar"
+                onPress={() => setShowPicker(true)}
+              >
+                {draft.foodAvailable
+                  ? `Food Available: ${new Date(draft.foodAvailable as string).toLocaleString('en-US', {
+                      timeZone: 'America/New_York',
+                    })}`
+                  : 'Set Food Available Time'}
+              </Button>
+
+              {showPicker && (
+                <DateTimePicker
+                  value={
+                    draft.foodAvailable
+                      ? new Date(draft.foodAvailable as string)
+                      : new Date()
+                  }
+                  mode="datetime"
+                  display="default"
+                  minimumDate={new Date()}
+                  onChange={(event, selected) => {
+                    if (Platform.OS === 'ios') {
+                      if (event.type === 'set' && selected) {
+                        update({ ...draft, foodAvailable: selected.toISOString() });
+                      }
+                      if (event.type === 'set' || event.type === 'dismissed') {
+                        setShowPicker(false);
+                      }
+                    } else {
+                      setShowPicker(false);
+                      if (selected) {
+                        update({ ...draft, foodAvailable: selected.toISOString() });
+                      }
+                    }
+                  }}
+                />
+              )}
+            </View>
 
             <TextInput
               mode="outlined"
               label="Duration (minutes)"
               value={String(draft.duration ?? 30)}
-              onChangeText={t => setDraft({ ...draft, duration: parseInt(t) || 30 })}
+              onChangeText={t => update({ ...draft, duration: parseInt(t) || 30 })}
               keyboardType="numeric"
               style={{ marginBottom: theme.spacing.sm }}
             />
@@ -137,23 +216,29 @@ export function EventEditorModal({
               mode="outlined"
               label="Notes"
               value={draft.notes ?? ''}
-              onChangeText={t => setDraft({ ...draft, notes: t })}
+              onChangeText={t => update({ ...draft, notes: t })}
               multiline
               numberOfLines={3}
               style={{ marginBottom: theme.spacing.md }}
             />
 
+            {/* 🔖 Status */}
             <Text variant="titleSmall" style={{ marginBottom: theme.spacing.xs }}>
               Status
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
               {(['drafted', 'saved', 'open', 'closed'] as EventStatus[]).map(status => (
-                <Chip key={status} selected={draft.status === status} onPress={() => setDraft({ ...draft, status })}>
+                <Chip
+                  key={status}
+                  selected={draft.status === status}
+                  onPress={() => update({ ...draft, status })}
+                >
                   {status}
                 </Chip>
               ))}
             </View>
 
+            {/* 🍽 Food Items */}
             <Text variant="titleSmall" style={{ marginBottom: theme.spacing.xs }}>
               Food Items
             </Text>
@@ -195,10 +280,55 @@ export function EventEditorModal({
               </Card>
             ))}
 
-            <Button mode="text" icon="plus" onPress={addFoodItem} style={{ marginBottom: theme.spacing.md }}>
+            <Button
+              mode="text"
+              icon="plus"
+              onPress={addFoodItem}
+              style={{ marginBottom: theme.spacing.md }}
+            >
               Add Food Item
             </Button>
 
+            {/* 🖼 Event Photos */}
+            <Text variant="titleSmall" style={{ marginBottom: theme.spacing.xs }}>
+              Event Photos (Paste Firebase URLs)
+            </Text>
+            {(draft.images ?? []).map((url, i) => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.xs }}>
+                <TextInput
+                  mode="outlined"
+                  label={`Photo ${i + 1} URL`}
+                  value={url}
+                  onChangeText={t => {
+                    const next = { ...draft, images: [...(draft.images ?? [])] };
+                    next.images![i] = t;
+                    update(next);
+                  }}
+                  style={{ flex: 1 }}
+                />
+                <Button
+                  mode="text"
+                  textColor={theme.colors.error}
+                  onPress={() => {
+                    const next = { ...draft, images: draft.images?.filter((_, j) => j !== i) ?? [] };
+                    update(next);
+                  }}
+                >
+                  Remove
+                </Button>
+              </View>
+            ))}
+
+            <Button
+              mode="text"
+              icon="plus"
+              onPress={() => update({ ...draft, images: [...(draft.images ?? []), ''] })}
+              style={{ marginBottom: theme.spacing.md }}
+            >
+              Add Photo
+            </Button>
+
+            {/* 💾 Save / Cancel */}
             <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
               <Button mode="contained" onPress={handleSave} loading={loading} style={{ flex: 1 }}>
                 Save
