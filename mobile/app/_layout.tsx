@@ -7,6 +7,11 @@ import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { AuthProvider } from '../src/contexts/AuthContext';
 import { colors } from '../src/lib/theme';
 
+// Clerk
+import { ClerkProvider } from '@clerk/clerk-expo';
+import { tokenCache } from '@clerk/clerk-expo/token-cache';
+import Constants from 'expo-constants';
+
 const theme = {
   ...MD3LightTheme,
   colors: {
@@ -22,20 +27,28 @@ const theme = {
   },
 };
 
+const publishableKey = (Constants.expoConfig?.extra as any)?.clerk?.publishableKey;
+
+if (!publishableKey) {
+  throw new Error('Missing Clerk publishableKey in app.config.ts extra');
+}
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <PaperProvider theme={theme}>
-        <AuthProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: theme.colors.background },
-            }}
-          />
-          <StatusBar style="dark" />
-        </AuthProvider>
-      </PaperProvider>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <PaperProvider theme={theme}>
+          <AuthProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: theme.colors.background },
+              }}
+            />
+            <StatusBar style="dark" />
+          </AuthProvider>
+        </PaperProvider>
+      </ClerkProvider>
     </SafeAreaProvider>
   );
 }

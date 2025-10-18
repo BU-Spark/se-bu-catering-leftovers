@@ -18,6 +18,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           ? { databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL }
           : {}),
       },
+      clerk: {
+        publishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!,
+      },
     },
     plugins: ['expo-router'],
   };

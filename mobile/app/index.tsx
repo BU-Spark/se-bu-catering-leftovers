@@ -4,48 +4,54 @@ import { View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Text, TextInput, Button, Surface, useTheme } from 'react-native-paper';
-import { useAuth } from '../src/contexts/AuthContext';
 import { spacing } from '../src/lib/theme';
+import { useSignIn, useAuth, useUser } from '@clerk/clerk-expo';
 
 export default function LoginScreen() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const { login, loading, user, isAuthenticated } = useAuth();
   const theme = useTheme();
+
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const { isSignedIn, signOut } = useAuth();
+  const { user } = useUser();
 
   // Redirect if already logged in
   React.useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === 'Admin') {
-        router.replace('/(admin)');
-      } else {
-        router.replace('/(student)');
-      }
+    if (!isSignedIn || !user) return;
+
+    const role =
+      (user.publicMetadata as any)?.role ||
+      'Student';
+
+    if (String(role).toLowerCase() === 'admin') {
+      router.replace('/(admin)');
+    } else {
+      router.replace('/(student)');
     }
-  }, [isAuthenticated, user]);
+  }, [isSignedIn, user]);
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
-
-    if (!email.endsWith('@bu.edu')) {
+    if (!email.toLowerCase().endsWith('@bu.edu')) {
       Alert.alert('Error', 'Please use your @bu.edu email');
       return;
     }
+    if (!isLoaded) return;
 
-    const user = await login(email, password);
-    if (!user) {
-      Alert.alert('Error', 'Login failed. Please try again.');
-      return;
-    }
-
-    // Navigate and reset stack so back button doesn't return to login
-    if (user.role === 'Admin') {
-      router.replace('/(admin)');
-    } else {
-      router.replace('/(student)');
+    try {
+      const res = await signIn.create({ identifier: email, password });
+      await setActive({ session: res.createdSessionId });
+      // redirect effect above will run
+    } catch (e: any) {
+      const msg =
+        e?.errors?.[0]?.longMessage ||
+        e?.errors?.[0]?.message ||
+        'Login failed. Please try again.';
+      Alert.alert('Error', msg);
     }
   };
 
@@ -77,63 +83,67 @@ export default function LoginScreen() {
           </View>
           <Text
             variant="headlineMedium"
-            style={{ 
-              textAlign: 'center', 
+            style={{
+              textAlign: 'center',
               marginBottom: spacing.xs,
-              fontWeight: '700'
+              fontWeight: '700',
             }}
           >
             BU Catering Leftovers
           </Text>
-          <Text
-            variant="bodyMedium"
-            style={{ textAlign: 'center', opacity: 0.7 }}
-          >
+          <Text variant="bodyMedium" style={{ textAlign: 'center', opacity: 0.7 }}>
             Reduce waste, feed community
           </Text>
         </View>
 
-        <View>
-          <TextInput
-            mode="outlined"
-            label="BU Email"
-            placeholder="you@bu.edu"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            left={<TextInput.Icon icon="email-outline" />}
-            style={{ marginBottom: spacing.md }}
-          />
-          
-          <TextInput
-            mode="outlined"
-            label="Password"
-            placeholder="Enter password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            left={<TextInput.Icon icon="lock-outline" />}
-            style={{ marginBottom: spacing.lg }}
-          />
+        {!isSignedIn ? (
+          <View>
+            <TextInput
+              mode="outlined"
+              label="BU Email"
+              placeholder="you@bu.edu"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              left={<TextInput.Icon icon="email-outline" />}
+              style={{ marginBottom: spacing.md }}
+            />
 
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            disabled={loading}
-            loading={loading}
-          >
-            {loading ? 'Logging in...' : 'Log In'}
-          </Button>
-        </View>
+            <TextInput
+              mode="outlined"
+              label="Password"
+              placeholder="Enter password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+              left={<TextInput.Icon icon="lock-outline" />}
+              style={{ marginBottom: spacing.lg }}
+            />
+
+            <Button mode="contained" onPress={handleLogin}>
+              Log In
+            </Button>
+          </View>
+        ) : (
+          <View style={{ gap: spacing.md }}>
+            <Text>Signed in as {user?.primaryEmailAddress?.emailAddress}</Text>
+            <Button
+              mode="outlined"
+              onPress={() => signOut().then(() => router.replace('/'))}
+            >
+              Sign out
+            </Button>
+          </View>
+        )}
 
         <Text
           variant="bodySmall"
-          style={{ 
-            textAlign: 'center', 
-            marginTop: spacing.xxl * 2, 
-            opacity: 0.6 
+          style={{
+            textAlign: 'center',
+            marginTop: spacing.xxl * 2,
+            opacity: 0.6,
           }}
         >
           © 2025 BU Catering Leftovers Project
