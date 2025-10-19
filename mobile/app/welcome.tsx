@@ -1,3 +1,4 @@
+// app/welcome.tsx
 import { Text, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Redirect } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';

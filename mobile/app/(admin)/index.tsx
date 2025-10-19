@@ -1,46 +1,170 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+// app/(admin)/index.tsx
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
-import CustomButton from '../../src/components/CustomButton';
 import { colors, typography, spacing, borderRadius } from '../../src/lib/theme';
+import { useAllEvents } from '../../src/hooks/useEvents';
+import { EventCard } from '../../src/components/EventCard';
+import { EventEditorModal } from '../../src/components/EventEditorModal';
+import { router } from 'expo-router';
+import type { Event } from '../../src/types';
+import { updateEvent } from '../../src/lib/firebase/events';
+
+type TabType = 'open' | 'previous';
 
 export default function AdminHomeScreen() {
   const { user } = useUser();
   const { signOut } = useAuth();
+  const { events, loading, refresh } = useAllEvents();
+  const [activeTab, setActiveTab] = useState<TabType>('open');
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/sign-in');
+  };
+
+  const handleEdit = (event: Event) => {
+    setEditingEvent(event);
+    setShowEditor(true);
+  };
+
+  const handleSave = async (updates: Partial<Event>) => {
+    if (!editingEvent?.id) return;
+
+    try {
+      await updateEvent(editingEvent.id, updates);
+      Alert.alert('Success', 'Event updated successfully');
+      refresh();
+      setShowEditor(false);
+      setEditingEvent(null);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      Alert.alert('Error', 'Failed to update event');
+    }
+  };
+
+  // Filter events based on active tab
+  const filteredEvents = events.filter((event) => {
+    if (activeTab === 'open') {
+      return event.status === 'open';
+    } else {
+      // Previous events: closed, drafted, or saved
+      return event.status === 'closed' || event.status === 'drafted' || event.status === 'saved';
+    }
+  });
 
   return (
     <View style={styles.container}>
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>ADMIN</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <View style={styles.titleRow}>
+            <Text style={styles.greeting}>
+              Welcome, {user?.firstName || 'Admin'}
+            </Text>
+            <View style={styles.adminBadge}>
+              <Text style={styles.adminBadgeText}>ADMIN</Text>
+            </View>
+          </View>
+          <Text style={styles.subtitle}>Manage all events</Text>
+        </View>
+        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
       </View>
 
-      {user?.imageUrl && (
-        <Image
-          source={{ uri: user.imageUrl }}
-          style={styles.avatar}
-        />
-      )}
-      
-      <Text style={styles.welcomeText}>
-        Welcome, {user?.firstName || 'Admin'}
-      </Text>
-
-      <Text style={styles.subtitle}>
-        You have full access to manage events
-      </Text>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.infoText}>
-          ✓ Create events{'\n'}
-          ✓ Edit events{'\n'}
-          ✓ Delete events{'\n'}
-          ✓ Manage student access
-        </Text>
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[styles.tab, activeTab === 'open' && styles.activeTab]}
+          onPress={() => setActiveTab('open')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'open' && styles.activeTabText,
+            ]}
+          >
+            Open Events
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tab, activeTab === 'previous' && styles.activeTab]}
+          onPress={() => setActiveTab('previous')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'previous' && styles.activeTabText,
+            ]}
+          >
+            Previous Events
+          </Text>
+        </Pressable>
       </View>
 
-      <CustomButton 
-        text='Sign out' 
-        onPress={() => signOut()} 
+      {/* Events List */}
+      <FlatList
+        data={filteredEvents}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <AdminEventCard event={item} onEdit={handleEdit} />
+        )}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refresh}
+            tintColor={colors.primary}
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>
+              {loading
+                ? 'Loading events...'
+                : activeTab === 'open'
+                ? 'No open events'
+                : 'No previous events'}
+            </Text>
+            <Text style={styles.emptySubtext}>Pull down to refresh</Text>
+          </View>
+        }
       />
+
+      {/* Event Editor Modal */}
+      <EventEditorModal
+        visible={showEditor}
+        event={editingEvent}
+        onClose={() => {
+          setShowEditor(false);
+          setEditingEvent(null);
+        }}
+        onSave={handleSave}
+      />
+    </View>
+  );
+}
+
+// Admin Event Card with status badge
+function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event) => void }) {
+  const statusColor =
+    event.status === 'open'
+      ? colors.success
+      : event.status === 'closed'
+      ? colors.text.secondary
+      : event.status === 'drafted'
+      ? colors.warning
+      : colors.primary;
+
+  return (
+    <View style={styles.adminCardWrapper}>
+      <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+        <Text style={styles.statusBadgeText}>{event.status.toUpperCase()}</Text>
+      </View>
+      <EventCard event={event} isAdmin onEdit={onEdit} />
     </View>
   );
 }
@@ -48,50 +172,112 @@ export default function AdminHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: colors.background,
-    padding: spacing.xl,
-    gap: spacing.lg,
   },
-  badge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.sm,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: spacing.lg,
+    paddingTop: spacing.xxl + 20,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
-  badgeText: {
-    color: colors.text.onPrimary,
-    ...typography.h6,
-    fontWeight: '700',
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
-  avatar: {
-    height: 100,
-    width: 100,
-    borderRadius: borderRadius.full,
-    borderWidth: 3,
-    borderColor: colors.primary,
-  },
-  welcomeText: {
-    ...typography.h3,
+  greeting: {
+    ...typography.h4,
     color: colors.text.primary,
   },
+  adminBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  adminBadgeText: {
+    ...typography.caption,
+    color: colors.text.onPrimary,
+    fontWeight: '700',
+  },
   subtitle: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+  signOutButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.error,
+    borderRadius: 8,
+  },
+  signOutText: {
+    ...typography.bodySmall,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: colors.primary,
+  },
+  tabText: {
     ...typography.body,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  activeTabText: {
+    color: colors.primary,
+  },
+  listContent: {
+    padding: spacing.lg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xxl * 2,
+  },
+  emptyText: {
+    ...typography.h5,
     color: colors.text.secondary,
     textAlign: 'center',
   },
-  infoBox: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    width: '100%',
-  },
-  infoText: {
+  emptySubtext: {
     ...typography.body,
-    color: colors.text.primary,
-    lineHeight: 24,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+  adminCardWrapper: {
+    position: 'relative',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 10,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.sm,
+  },
+  statusBadgeText: {
+    ...typography.caption,
+    color: colors.text.onPrimary,
+    fontWeight: '700',
   },
 });

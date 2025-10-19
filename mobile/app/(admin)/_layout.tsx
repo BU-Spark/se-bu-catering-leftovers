@@ -1,3 +1,4 @@
+// app/(admin)/_layout.tsx
 import { Slot, Redirect } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { ActivityIndicator, View } from 'react-native';
