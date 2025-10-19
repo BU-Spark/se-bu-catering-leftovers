@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "emulators": "firebase emulators:start --only auth,firestore,ui --import=.firebase-data --export-on-exit",
-    "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 tsx tools/seed.ts",
+    "emulators": "firebase emulators:start --only firestore,ui --import=.firebase-data --export-on-exit",
+    "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 tsx tools/seed.ts",
     "format": "prettier --write ."
   },
   "dependencies": {
