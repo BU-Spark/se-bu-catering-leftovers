@@ -1,3 +1,4 @@
+// app/(auth)/sign-in.tsx
 import {
   StyleSheet,
   Text,

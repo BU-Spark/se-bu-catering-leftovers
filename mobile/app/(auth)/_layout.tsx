@@ -1,3 +1,4 @@
+// app/(auth)/_layout.tsx
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '@clerk/clerk-expo';
 import { ActivityIndicator, View } from 'react-native';
@@ -25,8 +26,11 @@ export default function AuthLayout() {
         name='sign-in'
         options={{ headerShown: false, title: 'Sign in' }}
       />
-      <Stack.Screen name='sign-up' options={{ headerShown: false, title: 'Sign up' }} />
-      <Stack.Screen name='verify' options={{ headerShown: false, title: 'Verify' }} />
+      <Stack.Screen 
+        name='sign-up' 
+        options={{ headerShown: false, title: 'Sign up' }} 
+      />
+      {/* verify.tsx is no longer needed - merged into sign-up */}
     </Stack>
   );
 }
