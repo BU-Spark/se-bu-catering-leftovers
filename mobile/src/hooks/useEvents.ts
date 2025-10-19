@@ -1,60 +1,99 @@
 // src/hooks/useEvents.ts
-import { useCallback, useRef, useState } from 'react';
-import {
-  fetchEventsPage,
-  fetchOpenEventsPage,
-} from '../lib/firebase/events';
+import { useState, useEffect } from 'react';
+import { fetchOpenEventsPage, fetchEventsPage } from '../lib/firebase/events';
 import type { Event } from '../types';
-import type { QueryDocumentSnapshot } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
-type UseEventsOptions = {
-  pageSize?: number;
-  openOnly?: boolean;
-  order?: 'foodAvailable' | 'foodArrived';
-  direction?: 'asc' | 'desc';
-};
-
-export function useEvents(openOnly: boolean = false, options: UseEventsOptions = {}) {
-  const {
-    pageSize = 20,
-    order = 'foodAvailable',
-    direction = 'desc',
-  } = options;
-
+export function useOpenEvents() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
 
-  const afterRef = useRef<QueryDocumentSnapshot<Event> | null>(null);
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
-  const loadEvents = useCallback(async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
-    setError(null);
-    
+  const loadEvents = async () => {
     try {
-      const result = openOnly
-        ? await fetchOpenEventsPage({ pageSize, after: afterRef.current })
-        : await fetchEventsPage({ pageSize, after: afterRef.current, order, direction });
+      setLoading(true);
+      const { events: fetchedEvents } = await fetchOpenEventsPage({ pageSize: 50 });
+      
+      // Sort by expiry time (soonest first)
+      const sorted = fetchedEvents.sort((a, b) => {
+        const expiryA = getEventExpiryTime(a);
+        const expiryB = getEventExpiryTime(b);
+        return expiryA - expiryB;
+      });
+      
+      setEvents(sorted);
+      setError(null);
+    } catch (err) {
 
-      setEvents(prev => [...prev, ...result.events]);
-      afterRef.current = result.lastDoc;
-      setHasMore(Boolean(result.lastDoc));
-    } catch (e: any) {
-      setError(e?.message ?? 'Failed to load events');
+      setError('Failed to load events');
     } finally {
       setLoading(false);
     }
-  }, [direction, hasMore, loading, openOnly, order, pageSize]);
+  };
 
-  const refresh = useCallback(async () => {
-    afterRef.current = null;
-    setHasMore(true);
-    setEvents([]);
-    setLoading(false);
-    await loadEvents();
-  }, [loadEvents]);
+  const refresh = () => {
+    loadEvents();
+  };
 
-  return { events, loading, error, hasMore, loadEvents, refresh };
+  return { events, loading, error, refresh };
+}
+
+export function useAllEvents() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const { events: fetchedEvents } = await fetchEventsPage({ 
+        pageSize: 100,
+        order: 'foodAvailable',
+        direction: 'desc'
+      });
+      setEvents(fetchedEvents);
+      setError(null);
+    } catch (err) {
+
+      setError('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refresh = () => {
+    loadEvents();
+  };
+
+  return { events, loading, error, refresh };
+}
+
+function getEventExpiryTime(event: Event): number {
+  try {
+    // Handle Firestore Timestamp
+    let startMs = 0;
+    if (event.foodAvailable) {
+      if (event.foodAvailable instanceof Timestamp) {
+        startMs = event.foodAvailable.toMillis();
+      } else if (typeof event.foodAvailable === 'object' && 'toDate' in event.foodAvailable) {
+        startMs = event.foodAvailable.toDate().getTime();
+      } else if (typeof event.foodAvailable === 'number') {
+        startMs = event.foodAvailable;
+      }
+    }
+    
+    const durationMs = (event.duration ?? 30) * 60 * 1000;
+    return startMs + durationMs;
+  } catch (error) {
+
+    return Date.now() + 30 * 60 * 1000; // Default to 30 minutes from now
+  }
 }
