@@ -21,24 +21,3 @@ export function formatTimestamp(timestamp: any): string {
     return 'Invalid date';
   }
 }
-
-export function timestampToISO(timestamp: any): string {
-  if (!timestamp) return '';
-  
-  try {
-    const date = timestamp instanceof Timestamp 
-      ? timestamp.toDate() 
-      : new Date(timestamp);
-    
-    if (isNaN(date.getTime())) return '';
-    
-    return date.toISOString().slice(0, 16);
-  } catch {
-    return '';
-  }
-}
-
-export function normalize(str: string): 'User' | 'Admin' {
-  const lower = str.toLowerCase().trim();
-  return lower === 'admin' ? 'Admin' : 'User';
-}
