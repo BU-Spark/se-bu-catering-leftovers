@@ -2,18 +2,49 @@
 import type { Event } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
-export function tsToMs(ts?: Timestamp | null): number | null {
+export function tsToMs(ts?: any): number | null {
   if (!ts) return null;
-  const d = ts.toDate?.() ?? new Date(ts as unknown as string);
-  return d.getTime();
+  
+  try {
+    // Handle Firestore Timestamp
+    if (ts instanceof Timestamp) {
+      return ts.toMillis();
+    }
+    
+    // Handle object with toDate method
+    if (typeof ts === 'object' && 'toDate' in ts && typeof ts.toDate === 'function') {
+      const date = ts.toDate();
+      return date.getTime();
+    }
+    
+    // Handle object with seconds property (Firestore timestamp-like)
+    if (typeof ts === 'object' && 'seconds' in ts) {
+      return ts.seconds * 1000 + (ts.nanoseconds || 0) / 1000000;
+    }
+    
+    // Handle number (already milliseconds)
+    if (typeof ts === 'number') {
+      return ts;
+    }
+    
+    // Handle string or Date
+    const date = ts instanceof Date ? ts : new Date(ts);
+    const time = date.getTime();
+    return isNaN(time) ? null : time;
+  } catch (error) {
+
+    return null;
+  }
 }
 
 export function getExpiryMs(event: Pick<Event, 'foodAvailable' | 'duration'>): number | null {
   const startMs = tsToMs(event.foodAvailable);
   if (!startMs) return null;
+  
   const durationMin = typeof event.duration === 'number'
     ? event.duration
-    : Number(event.duration ?? 0);
+    : Number(event.duration ?? 30);
+  
   return startMs + durationMin * 60_000;
 }
 

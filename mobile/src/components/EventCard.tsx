@@ -1,88 +1,286 @@
-import * as React from 'react';
-import { Image, View } from 'react-native';
-import { Card, Text, Badge, IconButton, useTheme } from 'react-native-paper';
-import type { Event, UserRole } from '../types';
-import { spacing } from '../lib/theme';
+// src/components/EventCard.tsx
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, Pressable } from 'react-native';
+import { Text } from 'react-native';
+import { colors, typography, spacing, borderRadius } from '../lib/theme';
+import { formatTimestamp } from '../lib/utils';
+import { tsToMs } from '../lib/time';
+import { useCountdown } from '../hooks/useCountdown';
+import type { Event } from '../types';
 
-type Props = {
+interface EventCardProps {
   event: Event;
-  role: UserRole;
-  onPress?: (event: Event) => void;
+  onPress?: () => void;
+  isAdmin?: boolean;
   onEdit?: (event: Event) => void;
-  onDelete?: (event: Event) => void;
-};
+}
 
-function useCountdown(expiryMs: number | null) {
-  const [now, setNow] = React.useState<number>(Date.now());
+export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Timer should ONLY show for open events and ONLY depend on duration
+  const shouldShowCountdown = event.status === 'open';
+  
+  // Calculate expiry based ONLY on duration (in minutes)
+  const durationMs = (event.duration ?? 30) * 60 * 1000;
+  const startMs = tsToMs(event.foodAvailable);
+  const expiryMs = startMs ? startMs + durationMs : null;
+  
+  // Pass null if shouldn't show countdown to ensure hook resets
+  const { remainingMs, hours, minutes, seconds, isElapsed } = useCountdown(
+    shouldShowCountdown && expiryMs ? expiryMs : null
+  );
+
+  const toggleExpand = () => {
+    setExpanded(!expanded);
+    onPress?.();
+  };
+
+  // Calculate progress for countdown bar (based on duration)
+  // Use React.useMemo to ensure it recalculates when remainingMs changes
+  const progress = React.useMemo(() => {
+    if (!shouldShowCountdown || !expiryMs || !startMs || !(remainingMs > 0)) {
+      return 0;
+    }
+    const totalDurationMs = (event.duration ?? 30) * 60 * 1000;
+    if (totalDurationMs <= 0) return 0;
+    const calculatedProgress = Math.max(0, Math.min(1, remainingMs / totalDurationMs));
+return calculatedProgress;
+  }, [shouldShowCountdown, remainingMs, expiryMs, startMs, event.duration, event.name]);
+
+  // Auto-close event when timer expires (admin only to avoid multiple updates)
   React.useEffect(() => {
-    if (!expiryMs) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [expiryMs]);
-  const remainingMs = expiryMs ? Math.max(0, expiryMs - now) : 0;
-  const expired = expiryMs ? now >= expiryMs : false;
-  const secs = Math.floor(remainingMs / 1000) % 60;
-  const mins = Math.floor(remainingMs / (1000 * 60)) % 60;
-  const hrs = Math.floor(remainingMs / (1000 * 60 * 60));
-  const label = expired ? 'Expired' : `${hrs}h ${mins}m ${secs}s`;
-  return { expired, label };
-}
+    if (isAdmin && isElapsed && event.status === 'open' && event.id && shouldShowCountdown) {
+      // Import dynamically to avoid circular deps
+      import('../lib/firebase/events').then(({ updateEventStatus }) => {
+        updateEventStatus(event.id, 'closed').catch(console.error);
+      });
+    }
+  }, [isElapsed, isAdmin, event.status, event.id, shouldShowCountdown]);
 
-function computeExpiryMs(event: Event): number | null {
-  const baseTs = (event.foodAvailable ?? event.foodArrived)?.toDate?.()
-    ? (event.foodAvailable ?? event.foodArrived).toDate()
-    : null;
-  if (!baseTs) return null;
-  const ms = baseTs.getTime() + (Number(event.duration || 0) * 60_000);
-  return ms;
-}
-
-export default function EventCard({ event, role, onPress, onEdit, onDelete }: Props) {
-  const theme = useTheme();
-  const expiryMs = React.useMemo(() => computeExpiryMs(event), [event]);
-  const { expired, label } = useCountdown(expiryMs);
-
-  const isAdmin = role === 'Admin';
-  const showExpiredBadge = isAdmin && expired;
-  const statusColor = expired ? theme.colors.error : theme.colors.primary;
+  // Don't show expired open events to students
+  if (isElapsed && !isAdmin && event.status === 'open') return null;
 
   return (
-    <Card
-      mode="elevated"
-      onPress={() => onPress?.(event)}
-      style={{ marginBottom: spacing.lg }}
-    >
-      {event.images?.[0] ? (
-        <Card.Cover source={{ uri: event.images[0] }} />
-      ) : (
-        <View style={{ height: 160, backgroundColor: theme.colors.surface }} />
+    <Pressable onPress={toggleExpand} style={styles.card}>
+      {/* Event Image */}
+      {event.images && event.images.length > 0 && event.images[0] && (
+        <Image source={{ uri: event.images[0] }} style={styles.image} />
       )}
 
-      <Card.Title
-        title={event.name}
-        subtitle={event.Location?.name ?? 'Unknown location'}
-        right={(props) => (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {showExpiredBadge ? (
-              <Badge style={{ backgroundColor: theme.colors.error, marginRight: spacing.sm }}>Expired</Badge>
-            ) : null}
-            <Badge style={{ backgroundColor: statusColor }}>{label}</Badge>
+      <View style={styles.content}>
+        {/* Title */}
+        <Text style={styles.title} numberOfLines={1}>
+          {event.name}
+        </Text>
+
+        {/* Location & Time */}
+        <Text style={styles.subtitle} numberOfLines={1}>
+          📍 {event.Location?.name || event.host} • {formatTimestamp(event.foodAvailable)}
+        </Text>
+
+        {/* Countdown Bar - ONLY shows for open events */}
+        {shouldShowCountdown && !!expiryMs && !isElapsed && (
+          <View style={styles.countdownContainer}>
+            <Text style={styles.countdownText}>
+              ⏰ {hours > 0 ? `${hours}:${minutes.toString().padStart(2, '0')}` : minutes}:{seconds.toString().padStart(2, '0')} left
+            </Text>
+            <View style={styles.progressBarBg}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  {
+                    width: `${progress * 100}%`,
+                    backgroundColor: colors.error,
+                  },
+                ]}
+              />
+            </View>
           </View>
         )}
-      />
 
-      {(isAdmin && (onEdit || onDelete)) ? (
-        <Card.Actions>
-          {onEdit ? (
-            <IconButton icon="pencil" onPress={() => onEdit(event)} accessibilityLabel="Edit event" />
-          ) : null}
-          {onDelete ? (
-            <IconButton icon="delete" onPress={() => onDelete(event)} accessibilityLabel="Delete event" />
-          ) : null}
-        </Card.Actions>
-      ) : null}
-    </Card>
+        {/* Food Items Preview */}
+        {event.foods && event.foods.length > 0 && !expanded && (
+          <View style={styles.foodPreview}>
+            {event.foods.slice(0, 2).filter(f => f.item?.trim()).map((food, index) => (
+              <Text key={index} style={styles.foodItem} numberOfLines={1}>
+                • {food.item} ({food.quantity} {food.unit})
+              </Text>
+            ))}
+            {event.foods.filter(f => f.item?.trim()).length > 2 && (
+              <Text style={styles.moreItems}>
+                +{event.foods.filter(f => f.item?.trim()).length - 2} more
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* Expanded Details */}
+        {expanded && (
+          <View style={styles.expandedContent}>
+            <View style={styles.divider} />
+
+            {event.Location?.address && (
+              <InfoRow label="Address" value={event.Location.address} />
+            )}
+            {event.locationDetails && (
+              <InfoRow label="Details" value={event.locationDetails} />
+            )}
+            <InfoRow label="Duration" value={`${event.duration} minutes`} />
+            {event.notes && <InfoRow label="Notes" value={event.notes} />}
+
+            {event.foods && event.foods.length > 0 && (
+              <View style={styles.foodList}>
+                <Text style={styles.sectionLabel}>Available Food:</Text>
+                {event.foods.filter(f => f.item?.trim()).map((food, index) => (
+                  <Text key={index} style={styles.foodDetailItem}>
+                    • {food.item} ({food.quantity} {food.unit})
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {/* Admin Edit Button */}
+            {isAdmin && onEdit && (
+              <Pressable
+                style={styles.editButton}
+                onPress={() => onEdit(event)}
+              >
+                <Text style={styles.editButtonText}>✏️ Edit Event</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {/* Expand Indicator */}
+        <Text style={styles.expandIndicator}>
+          {expanded ? '▲ Tap to collapse' : '▼ Tap for details'}
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}:</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
+}
 
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  content: {
+    padding: spacing.lg,
+  },
+  title: {
+    ...typography.h5,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
+  },
+  countdownContainer: {
+    marginBottom: spacing.sm,
+  },
+  countdownText: {
+    ...typography.bodySmall,
+    color: colors.error,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  progressBarBg: {
+    height: 8,
+    backgroundColor: colors.border.light,
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: borderRadius.sm,
+  },
+  foodPreview: {
+    marginTop: spacing.sm,
+  },
+  foodItem: {
+    ...typography.body,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  moreItems: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
+  },
+  expandedContent: {
+    marginTop: spacing.md,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border.light,
+    marginBottom: spacing.md,
+  },
+  infoRow: {
+    marginBottom: spacing.sm,
+  },
+  infoLabel: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  infoValue: {
+    ...typography.body,
+    color: colors.text.primary,
+    marginTop: spacing.xs / 2,
+  },
+  foodList: {
+    marginTop: spacing.md,
+  },
+  sectionLabel: {
+    ...typography.body,
+    color: colors.text.secondary,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  foodDetailItem: {
+    ...typography.body,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  editButton: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    ...typography.body,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+  },
+  expandIndicator: {
+    ...typography.caption,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: spacing.md,
+  },
+});

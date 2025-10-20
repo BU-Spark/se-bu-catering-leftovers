@@ -1,335 +1,283 @@
-import * as React from 'react';
-import { View, ScrollView, RefreshControl, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  Text,
-  ActivityIndicator,
-  FAB,
-  IconButton,
-  useTheme,
-  SegmentedButtons,
-} from 'react-native-paper';
-import { router } from 'expo-router';
-import { useEvents } from '../../src/hooks/useEvents';
-import {
-  createEvent,
-  updateEvent,
-  deleteEvent,
-} from '../../src/lib/firebase/events';
-import { ExpandableEventCard } from '../../src/components/ExpandableEventCard';
+// app/(admin)/index.tsx
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert } from 'react-native';
+import { useAuth, useUser } from '@clerk/clerk-expo';
+import { colors, typography, spacing, borderRadius } from '../../src/lib/theme';
+import { useAllEvents } from '../../src/hooks/useEvents';
+import { EventCard } from '../../src/components/EventCard';
 import { EventEditorModal } from '../../src/components/EventEditorModal';
-import { timestampToISO } from '../../src/lib/utils';
+import { router } from 'expo-router';
 import type { Event } from '../../src/types';
-import { spacing } from '../../src/lib/theme';
-import { useAuth } from '../../src/contexts/AuthContext';
-import { getExpiryMs } from '../../src/lib/time';
+import { updateEvent } from '../../src/lib/firebase/events';
 
-export default function AdminDashboard() {
-  const { events, loading, error, loadEvents, refresh } = useEvents(false);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [mutating, setMutating] = React.useState(false);
-  const [expandedEventId, setExpandedEventId] = React.useState<string | null>(
-    null,
-  );
-  const [editingEvent, setEditingEvent] =
-    React.useState<Partial<Event> | null>(null);
-  const [showEditor, setShowEditor] = React.useState(false);
-  const [currentDraft, setCurrentDraft] =
-    React.useState<Partial<Event> | null>(null);
-  const [filterView, setFilterView] =
-    React.useState<'active' | 'closed'>('active');
-  const theme = useTheme();
-  const { logout, user } = useAuth();
+type TabType = 'open' | 'previous';
 
-  // Load events initially
-  React.useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+export default function AdminHomeScreen() {
+  const { user } = useUser();
+  const { signOut } = useAuth();
+  const { events, loading, refresh } = useAllEvents();
+  const [activeTab, setActiveTab] = useState<TabType>('open');
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
 
-  // 🕒 Add 1-minute buffer to avoid “on-the-minute” invisible events
-  const BUFFER_MS = 60_000;
-
-  // ✅ Filter active vs closed events, handling time boundaries safely
-  const filteredEvents = React.useMemo(() => {
-    const now = Date.now();
-
-    if (filterView === 'closed') {
-      // Past events = manually closed OR expired
-      return events.filter((e) => {
-        const expiry = getExpiryMs(e);
-        return e.status === 'closed' || (expiry && expiry < now - BUFFER_MS);
-      });
-    }
-
-    // Active = not closed & not expired (with buffer)
-    return events.filter((e) => {
-      const expiry = getExpiryMs(e);
-      return e.status !== 'closed' && (!expiry || expiry > now - BUFFER_MS);
-    });
-  }, [events, filterView]);
-
-  // 🔁 Auto-close expired “open” events
-  React.useEffect(() => {
-    const now = Date.now();
-
-    events.forEach(async (e) => {
-      const expiry = getExpiryMs(e);
-
-      // Only close if open + expired (beyond buffer)
-      if (expiry && expiry < now - BUFFER_MS && e.status === 'open') {
-        try {
-          console.log(`⚙️ Auto-closing event ${e.id}:`, e.name);
-          await updateEvent(e.id, { status: 'closed' });
-          console.log(`✅ Event ${e.name} marked as closed`);
-          await refresh(); // refresh after auto-close
-        } catch (err) {
-          console.error('❌ Auto-close failed for', e.id, err);
-        }
-      }
-    });
-  }, [events]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refresh();
-    setRefreshing(false);
-  };
-
-  const handleCreateNew = () => {
-    console.log('🆕 Creating new draft event...');
-    setEditingEvent({
-      host: '',
-      name: '',
-      status: 'drafted',
-      Location: {
-        name: '',
-        address: '',
-        abbreviation: '',
-        lat: '',
-        lon: '',
-        campus_section: '',
-      },
-      locationDetails: '',
-      notes: '',
-      duration: 30,
-      foodArrived: '',
-      foodAvailable: '',
-      foods: [{ id: '1', item: '', quantity: '', unit: 'Pieces' }],
-      images: [],
-      reviewedBy: [],
-    });
-    setShowEditor(true);
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/sign-in');
   };
 
   const handleEdit = (event: Event) => {
-    setEditingEvent({
-      ...event,
-      foodArrived: timestampToISO(event.foodArrived),
-      foodAvailable: timestampToISO(event.foodAvailable),
-    });
+    setEditingEvent(event);
     setShowEditor(true);
   };
 
-  const handleSave = async (eventData: Partial<Event>) => {
-    console.log('💾 handleSave called with:', eventData);
-    setMutating(true);
+  const handleSave = async (updates: Partial<Event>) => {
+    if (!editingEvent?.id) return;
+
     try {
-      if (eventData.id) {
-        await updateEvent(eventData.id, eventData);
-      } else {
-        await createEvent({ ...eventData, creatorUid: user?.uid });
-      }
-      await refresh();
+      await updateEvent(editingEvent.id, updates);
+      Alert.alert('Success', 'Event updated successfully');
+      refresh();
       setShowEditor(false);
       setEditingEvent(null);
-      setCurrentDraft(null);
-    } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'Failed to save event');
-    } finally {
-      setMutating(false);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      Alert.alert('Error', 'Failed to update event');
     }
   };
 
-  const handleDelete = async (event: Event) => {
-    Alert.alert('Delete Event', `Delete "${event.name}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          setMutating(true);
-          try {
-            await deleteEvent(event.id, { ownerUid: user?.uid });
-            setExpandedEventId(null);
-            await refresh();
-          } catch (e: any) {
-            Alert.alert('Error', e?.message ?? 'Failed to delete event');
-          } finally {
-            setMutating(false);
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.replace('/');
-  };
+  // Filter events based on active tab
+  const filteredEvents = events.filter((event) => {
+    if (activeTab === 'open') {
+      return event.status === 'open';
+    } else {
+      // Previous events: closed, drafted, or saved
+      return event.status === 'closed' || event.status === 'drafted' || event.status === 'saved';
+    }
+  });
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-    >
+    <View style={styles.container}>
       {/* Header */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: spacing.lg,
-          paddingTop: spacing.md,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
-            Admin Dashboard
-          </Text>
-          <Text variant="bodyMedium" style={{ opacity: 0.7 }}>
-            Manage catering events
-          </Text>
+      <View style={styles.header}>
+        <View>
+          <View style={styles.titleRow}>
+            <Text style={styles.greeting}>
+              Welcome, {user?.firstName || 'Admin'}
+            </Text>
+            <View style={styles.adminBadge}>
+              <Text style={styles.adminBadgeText}>ADMIN</Text>
+            </View>
+          </View>
+          <Text style={styles.subtitle}>Manage all events</Text>
         </View>
-        <IconButton icon="logout" size={24} onPress={handleLogout} />
+        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
       </View>
 
-      {/* Segmented Filter */}
-      <View
-        style={{
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.md,
-        }}
-      >
-        <SegmentedButtons
-          value={filterView}
-          onValueChange={(value) =>
-            setFilterView(value as 'active' | 'closed')
-          }
-          buttons={[
-            { value: 'active', label: 'Active' },
-            { value: 'closed', label: 'Past Events' },
-          ]}
-        />
-      </View>
-
-      {/* Error Banner */}
-      {error && (
-        <View
-          style={{
-            backgroundColor: theme.colors.errorContainer,
-            padding: spacing.md,
-            margin: spacing.lg,
-            borderRadius: 8,
-          }}
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        <Pressable
+          style={[styles.tab, activeTab === 'open' && styles.activeTab]}
+          onPress={() => setActiveTab('open')}
         >
-          <Text style={{ color: theme.colors.error }}>{error}</Text>
-        </View>
-      )}
-
-      {/* Main Content */}
-      {loading && events.length === 0 ? (
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <ActivityIndicator animating size="large" />
-        </View>
-      ) : filteredEvents.length === 0 ? (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingHorizontal: spacing.xl,
-          }}
-        >
-          <Text style={{ fontSize: 56, lineHeight: 64, marginBottom: spacing.md }}>
-            📋
-          </Text>
           <Text
-            variant="bodyLarge"
-            style={{ textAlign: 'center', opacity: 0.7 }}
+            style={[
+              styles.tabText,
+              activeTab === 'open' && styles.activeTabText,
+            ]}
           >
-            {filterView === 'closed'
-              ? 'No past events yet.'
-              : 'No active events.\nCreate one to get started!'}
+            Open Events
           </Text>
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: 80 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-            />
-          }
+        </Pressable>
+        <Pressable
+          style={[styles.tab, activeTab === 'previous' && styles.activeTab]}
+          onPress={() => setActiveTab('previous')}
         >
-          {filteredEvents.map((event) => (
-            <ExpandableEventCard
-              key={event.id}
-              event={event}
-              isAdmin
-              isExpanded={expandedEventId === event.id}
-              onToggle={() =>
-                setExpandedEventId(
-                  expandedEventId === event.id ? null : event.id,
-                )
-              }
-              onEdit={() => handleEdit(event)}
-              onDelete={() => handleDelete(event)}
-            />
-          ))}
-        </ScrollView>
-      )}
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'previous' && styles.activeTabText,
+            ]}
+          >
+            Previous Events
+          </Text>
+        </Pressable>
+      </View>
 
-      {/* Floating Action Buttons */}
-      <FAB
-        icon="plus"
-        style={{
-          position: 'absolute',
-          right: spacing.lg,
-          bottom: spacing.xl,
-          backgroundColor: theme.colors.primary,
-        }}
-        onPress={handleCreateNew}
+      {/* Events List */}
+      <FlatList
+        data={filteredEvents}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <AdminEventCard event={item} onEdit={handleEdit} />
+        )}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refresh}
+            tintColor={colors.primary}
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>
+              {loading
+                ? 'Loading events...'
+                : activeTab === 'open'
+                ? 'No open events'
+                : 'No previous events'}
+            </Text>
+            <Text style={styles.emptySubtext}>Pull down to refresh</Text>
+          </View>
+        }
       />
 
+      {/* Event Editor Modal */}
       <EventEditorModal
-        event={editingEvent}
         visible={showEditor}
-        onDismiss={() => {
+        event={editingEvent}
+        onClose={() => {
           setShowEditor(false);
           setEditingEvent(null);
-          setCurrentDraft(null);
         }}
         onSave={handleSave}
-        loading={mutating}
-        onDraftChange={(d) => setCurrentDraft(d)}
       />
-
-      {showEditor && (
-        <FAB
-          icon="content-save"
-          style={{
-            position: 'absolute',
-            right: spacing.lg,
-            bottom: spacing.xl * 3.2,
-            backgroundColor: theme.colors.primary,
-          }}
-          loading={mutating}
-          onPress={() => currentDraft && handleSave(currentDraft)}
-          disabled={!currentDraft || mutating}
-        />
-      )}
-    </SafeAreaView>
+    </View>
   );
 }
+
+// Admin Event Card with status badge
+function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event) => void }) {
+  const statusColor =
+    event.status === 'open'
+      ? colors.success
+      : event.status === 'closed'
+      ? colors.text.secondary
+      : event.status === 'drafted'
+      ? colors.warning
+      : colors.primary;
+
+  return (
+    <View style={styles.adminCardWrapper}>
+      <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+        <Text style={styles.statusBadgeText}>{event.status.toUpperCase()}</Text>
+      </View>
+      <EventCard event={event} isAdmin onEdit={onEdit} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: spacing.lg,
+    paddingTop: spacing.xxl + 20,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  greeting: {
+    ...typography.h4,
+    color: colors.text.primary,
+  },
+  adminBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  adminBadgeText: {
+    ...typography.caption,
+    color: colors.text.onPrimary,
+    fontWeight: '700',
+  },
+  subtitle: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+  signOutButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.error,
+    borderRadius: 8,
+  },
+  signOutText: {
+    ...typography.bodySmall,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: colors.primary,
+  },
+  tabText: {
+    ...typography.body,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  activeTabText: {
+    color: colors.primary,
+  },
+  listContent: {
+    padding: spacing.lg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xxl * 2,
+  },
+  emptyText: {
+    ...typography.h5,
+    color: colors.text.secondary,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    ...typography.body,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+  adminCardWrapper: {
+    position: 'relative',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 10,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.sm,
+  },
+  statusBadgeText: {
+    ...typography.caption,
+    color: colors.text.onPrimary,
+    fontWeight: '700',
+  },
+});

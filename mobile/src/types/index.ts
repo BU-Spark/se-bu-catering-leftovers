@@ -1,3 +1,4 @@
+// src/types/index.ts
 // Core data types matching Firestore schema
 
 export type UserRole = 'User' | 'Admin';
