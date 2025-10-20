@@ -20,11 +20,15 @@ export default function WelcomeScreen() {
   // If already signed in, redirect based on role
   if (isSignedIn) {
     const userRole = user?.publicMetadata?.role as string | undefined;
+    console.log('Welcome screen - User role:', userRole);
+    console.log('Welcome screen - User metadata:', user?.publicMetadata);
     
     if (userRole === 'admin') {
+      console.log('Welcome screen - Redirecting to admin route');
       return <Redirect href='/(admin)' />;
     }
     
+    console.log('Welcome screen - Redirecting to student route, role was:', userRole);
     // Default to student route
     return <Redirect href='/(student)' />;
   }
