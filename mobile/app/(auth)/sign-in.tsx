@@ -5,10 +5,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   View,
+  Pressable,
 } from 'react-native';
 import CustomInput from '../../src/components/CustomInput';
 import CustomButton from '../../src/components/CustomButton';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -91,6 +92,14 @@ export default function SignInScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      {/* Back Button */}
+      <Pressable 
+        style={styles.backButton}
+        onPress={() => router.push('/welcome')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </Pressable>
+
       <Text style={styles.title}>Sign in</Text>
       <Text style={styles.subtitle}>Sign in with your @bu.edu email</Text>
 
@@ -183,5 +192,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: spacing.lg,
+    zIndex: 10,
+  },
+  backButtonText: {
+    ...typography.bodySmall,
+    color: colors.primary,
+    fontWeight: '600',
   },
 });
