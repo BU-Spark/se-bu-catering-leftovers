@@ -19,15 +19,16 @@ import { Timestamp } from 'firebase/firestore';
 
 interface EventEditorModalProps {
   visible: boolean;
-  event: Event | null;
+  event: Event | null;  // null = create mode, Event = edit mode
   onClose: () => void;
-  onSave: (event: Partial<Event>) => Promise<void>;
+  onSave?: (event: Partial<Event>) => Promise<void>;  // Make optional
+  onCreate?: (event: Partial<Event>) => Promise<void>;  // Add create handler
 }
 
 const MAX_FOOD_DURATION_HOURS = 4;
 const MAX_FOOD_DURATION_MINUTES = MAX_FOOD_DURATION_HOURS * 60;
 
-export function EventEditorModal({ visible, event, onClose, onSave }: EventEditorModalProps) {
+export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: EventEditorModalProps) {
   const [name, setName] = useState('');
   const [host, setHost] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -144,8 +145,13 @@ export function EventEditorModal({ visible, event, onClose, onSave }: EventEdito
         foodAvailable: Timestamp.fromDate(foodAvailable),
       };
 
-      if (event?.id) {
+      // Handle create vs edit
+      if (event?.id && onSave) {
+        // Edit mode
         await onSave({ ...updates, id: event.id });
+      } else if (onCreate) {
+        // Create mode
+        await onCreate(updates);
       }
 
       onClose();
@@ -245,7 +251,9 @@ export function EventEditorModal({ visible, event, onClose, onSave }: EventEdito
         style={styles.container}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Edit Event</Text>
+          <Text style={styles.headerTitle}>
+            {event?.id ? 'Edit Event' : 'Create Event'}
+          </Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>✕</Text>
           </Pressable>

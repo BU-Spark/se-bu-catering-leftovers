@@ -51,7 +51,7 @@ export default function AdminLayout() {
       }}
     >
       <Tabs.Screen
-        name="dashboard/index"
+        name="index"
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
