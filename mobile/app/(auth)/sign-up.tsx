@@ -6,6 +6,7 @@ import {
   Platform,
   View,
   Animated,
+  Pressable,
 } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import CustomInput from '../../src/components/CustomInput';
@@ -14,7 +15,7 @@ import CustomButton from '../../src/components/CustomButton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { isClerkAPIResponseError, useSignUp } from '@clerk/clerk-expo';
 import SignInWith from '../../src/components/SignInWith';
@@ -161,6 +162,14 @@ export default function SignUpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      {/* Back Button */}
+      <Pressable 
+        style={styles.backButton}
+        onPress={() => router.push('/welcome')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </Pressable>
+
       <Text style={styles.title}>
         {pendingVerification ? 'Verify your email' : 'Create an account'}
       </Text>
@@ -321,6 +330,17 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   resendLink: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: spacing.lg,
+    zIndex: 10,
+  },
+  backButtonText: {
+    ...typography.bodySmall,
     color: colors.primary,
     fontWeight: '600',
   },
