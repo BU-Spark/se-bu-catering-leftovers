@@ -1,5 +1,8 @@
 // src/components/EventEditorModal.tsx
+import * as ImagePicker from "expo-image-picker";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
+import {storage} from "../lib/firebase/config";
 import {
   View,
   Text,
@@ -11,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Image
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, typography, spacing, borderRadius } from '../lib/theme';
@@ -197,10 +201,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     if (Platform.OS === 'android') {
       setShowArrivedPicker(false);
     }
-    
+
     if (selectedDate) {
       setFoodArrived(selectedDate);
-      
+
       // Auto-adjust available time if it exceeds 4 hours from new arrival time
       const maxAvailable = new Date(selectedDate.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
       if (foodAvailable > maxAvailable) {
@@ -222,14 +226,14 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     if (Platform.OS === 'android') {
       setShowAvailablePicker(false);
     }
-    
+
     if (selectedDate) {
       // Ensure pickup is after arrival
       if (selectedDate < foodArrived) {
         Alert.alert('Invalid Time', 'Pickup time must be after arrival time');
         return;
       }
-      
+
       // Ensure pickup is within 4 hours of arrival
       const maxAvailable = new Date(foodArrived.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
       if (selectedDate > maxAvailable) {
@@ -239,10 +243,37 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         );
         return;
       }
-      
+
       setFoodAvailable(selectedDate);
     }
   };
+  const handleAddImage = async () => {
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled) return;
+    const uri = result.assets[0].uri;
+
+    // Convert to blob and upload
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const fileName = `event_${Date.now()}.jpg`;
+    const storageRef = ref(storage, `events/${fileName}`);
+
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    setImages((prev) => [...prev, downloadURL]);
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    Alert.alert("Upload Failed", "Could not upload image. Please try again.");
+  }
+};
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -262,7 +293,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           {/* Basic Info */}
           <Text style={styles.sectionTitle}>Basic Information</Text>
-          
+
           <Text style={styles.label}>Event Name *</Text>
           <TextInput
             style={styles.input}
@@ -346,7 +377,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             Duration (minutes) - Max: {maxDuration} min
           </Text>
           <Text style={styles.helperText}>
-            Food must be closed within {MAX_FOOD_DURATION_HOURS} hours of arrival. 
+            Food must be closed within {MAX_FOOD_DURATION_HOURS} hours of arrival.
             Current gap between arrival and pickup: {Math.floor((foodAvailable.getTime() - foodArrived.getTime()) / 60000)} minutes
           </Text>
           <TextInput
@@ -360,7 +391,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
 
           {/* Location */}
           <Text style={styles.sectionTitle}>Location</Text>
-          
+
           <Text style={styles.label}>Location Name</Text>
           <TextInput
             style={styles.input}
@@ -401,7 +432,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
 
           {/* Status & Notes */}
           <Text style={styles.sectionTitle}>Status & Notes</Text>
-          
+
           <Text style={styles.label}>Status</Text>
           <View style={styles.statusContainer}>
             {(['drafted', 'saved', 'open', 'closed'] as EventStatus[]).map((s) => (
@@ -473,15 +504,12 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           </Pressable>
 
           {/* Images */}
-          <Text style={styles.sectionTitle}>Event Images (URLs)</Text>
+          <Text style={styles.sectionTitle}>Event Images</Text>
           {images.map((img, index) => (
             <View key={index} style={styles.imageUrlRow}>
-              <TextInput
-                style={[styles.input, { flex: 1 }]}
-                value={img}
-                onChangeText={(text) => updateImageUrl(index, text)}
-                placeholder="https://..."
-                placeholderTextColor={colors.text.secondary}
+              <Image
+                source={{ uri: img }}
+                style={{ width: 100, height: 100, borderRadius: 8 }}
               />
               <Pressable
                 style={styles.removeButton}
@@ -491,9 +519,11 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
               </Pressable>
             </View>
           ))}
-          <Pressable style={styles.addButton} onPress={addImageUrl}>
-            <Text style={styles.addButtonText}>+ Add Image URL</Text>
+
+          <Pressable style={styles.addButton} onPress={handleAddImage}>
+            <Text style={styles.addButtonText}>Upload Photo</Text>
           </Pressable>
+
         </ScrollView>
 
         <View style={styles.footer}>

@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage";
 import type { FirebaseOptions, FirebaseApp } from 'firebase/app';
 import { getApps, initializeApp } from 'firebase/app';
 import {
@@ -27,6 +28,9 @@ export const auth: Auth = getAuth(app);
 export const firestore: Firestore = initializeFirestore(app, {
   experimentalForceLongPolling: true,
 });
+
+export const storage: FirebaseStorage = getStorage(app);
+
 
 // Connect to emulator in development
 if (__DEV__) {
