@@ -1,5 +1,8 @@
 // src/components/EventEditorModal.tsx
+import * as ImagePicker from "expo-image-picker";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import React, { useState, useEffect } from 'react';
+import { storage } from "../lib/firebase/config";
 import {
   View,
   Text,
@@ -11,11 +14,22 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Image
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, typography, spacing, borderRadius } from '../lib/theme';
 import type { Event, EventStatus, FoodItem } from '../types';
 import { Timestamp } from 'firebase/firestore';
+
+const DEFAULT_IMAGES = [
+  require('../../assets/defaultEventFoodPics/dummypic1.jpg'),
+  require('../../assets/defaultEventFoodPics/dummypic2.jpg'),
+  require('../../assets/defaultEventFoodPics/dummypic3.jpeg'),
+  require('../../assets/defaultEventFoodPics/dummypic4.jpeg'),
+  require('../../assets/defaultEventFoodPics/dummypic5.jpeg'),
+  require('../../assets/defaultEventFoodPics/dummypic6.jpeg'),
+];
+
 
 interface EventEditorModalProps {
   visible: boolean;
@@ -40,6 +54,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
   const [status, setStatus] = useState<EventStatus>('drafted');
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [images, setImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Date picker states
@@ -74,7 +89,15 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       setDuration(String(event.duration || 30));
       setStatus(event.status || 'drafted');
       setFoods(event.foods || []);
-      setImages(event.images || []);
+      
+      // Separate default images from uploaded images
+      const eventImages = event.images || [];
+      const defaultImageUris = DEFAULT_IMAGES.map(img => Image.resolveAssetSource(img).uri);
+      const defaultSelected = eventImages.filter(img => defaultImageUris.includes(img));
+      const uploadedSelected = eventImages.filter(img => !defaultImageUris.includes(img));
+      
+      setImages(defaultSelected);
+      setUploadedImages(uploadedSelected);
 
       // Set dates from event
       if (event.foodArrived) {
@@ -140,7 +163,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         duration: durationNum,
         status,
         foods: foods.filter(f => f.item?.trim()),
-        images: images.filter(img => img.trim()),
+        images: [...images, ...uploadedImages].filter(img => img.trim()),
         foodArrived: Timestamp.fromDate(foodArrived),
         foodAvailable: Timestamp.fromDate(foodAvailable),
       };
@@ -177,18 +200,25 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     setFoods(foods.filter((_, i) => i !== index));
   };
 
-  const addImageUrl = () => {
-    setImages([...images, '']);
+  // Helper functions for image management
+  const getTotalSelectedImages = () => images.length + uploadedImages.length;
+  
+  const canSelectMoreImages = () => getTotalSelectedImages() < 2;
+  
+  const toggleDefaultImage = (imgUri: string) => {
+    if (images.includes(imgUri)) {
+      setImages(images.filter(img => img !== imgUri));
+    } else {
+      if (!canSelectMoreImages()) {
+        Alert.alert("Limit Reached", "You can only select up to 2 images total.");
+        return;
+      }
+      setImages([...images, imgUri]);
+    }
   };
-
-  const updateImageUrl = (index: number, value: string) => {
-    const updated = [...images];
-    updated[index] = value;
-    setImages(updated);
-  };
-
-  const removeImageUrl = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
+  
+  const removeUploadedImage = (index: number) => {
+    setUploadedImages(uploadedImages.filter((_, i) => i !== index));
   };
 
   // Handler for Food Arrived date picker
@@ -197,10 +227,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     if (Platform.OS === 'android') {
       setShowArrivedPicker(false);
     }
-    
+
     if (selectedDate) {
       setFoodArrived(selectedDate);
-      
+
       // Auto-adjust available time if it exceeds 4 hours from new arrival time
       const maxAvailable = new Date(selectedDate.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
       if (foodAvailable > maxAvailable) {
@@ -222,14 +252,14 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     if (Platform.OS === 'android') {
       setShowAvailablePicker(false);
     }
-    
+
     if (selectedDate) {
       // Ensure pickup is after arrival
       if (selectedDate < foodArrived) {
         Alert.alert('Invalid Time', 'Pickup time must be after arrival time');
         return;
       }
-      
+
       // Ensure pickup is within 4 hours of arrival
       const maxAvailable = new Date(foodArrived.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
       if (selectedDate > maxAvailable) {
@@ -239,10 +269,54 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         );
         return;
       }
-      
+
       setFoodAvailable(selectedDate);
     }
   };
+  const handleAddImage = async () => {
+    if (!canSelectMoreImages()) {
+      Alert.alert("Limit Reached", "You can only select up to 2 images total.");
+      return;
+    }
+
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permission.status !== "granted") {
+        Alert.alert("Permission Required", "We need access to your photos to upload images.");
+        return;
+      }
+
+      const remainingSlots = 2 - getTotalSelectedImages();
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+        selectionLimit: remainingSlots,
+      });
+
+      if (result.canceled) return;
+      const uploadedUrls: string[] = [];
+
+      for (const asset of result.assets) {
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+
+        const fileName = `event_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+        const storageRef = ref(storage, `events/${fileName}`);
+
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
+        uploadedUrls.push(downloadURL);
+      }
+
+      setUploadedImages((prev) => [...prev, ...uploadedUrls]);
+    } catch (error) {
+      console.error("Error uploading image(s):", error);
+      Alert.alert("Upload Failed", "Could not upload one or more images. Please try again.");
+    }
+  };
+
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -253,7 +327,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
             {event?.id ? 'Edit Event' : 'Create Event'}
-          </Text>
+            </Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>✕</Text>
           </Pressable>
@@ -262,9 +336,9 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           {/* Basic Info */}
           <Text style={styles.sectionTitle}>Basic Information</Text>
-          
+
           <Text style={styles.label}>Event Name *</Text>
-          <TextInput
+            <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
@@ -273,7 +347,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Host</Text>
-          <TextInput
+            <TextInput
             style={styles.input}
             value={host}
             onChangeText={setHost}
@@ -346,7 +420,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             Duration (minutes) - Max: {maxDuration} min
           </Text>
           <Text style={styles.helperText}>
-            Food must be closed within {MAX_FOOD_DURATION_HOURS} hours of arrival. 
+            Food must be closed within {MAX_FOOD_DURATION_HOURS} hours of arrival.
             Current gap between arrival and pickup: {Math.floor((foodAvailable.getTime() - foodArrived.getTime()) / 60000)} minutes
           </Text>
           <TextInput
@@ -360,9 +434,9 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
 
           {/* Location */}
           <Text style={styles.sectionTitle}>Location</Text>
-          
+
           <Text style={styles.label}>Location Name</Text>
-          <TextInput
+            <TextInput
             style={styles.input}
             value={locationName}
             onChangeText={setLocationName}
@@ -371,7 +445,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Address</Text>
-          <TextInput
+            <TextInput
             style={styles.input}
             value={locationAddress}
             onChangeText={setLocationAddress}
@@ -380,7 +454,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Campus Section</Text>
-          <TextInput
+            <TextInput
             style={styles.input}
             value={campusSection}
             onChangeText={setCampusSection}
@@ -389,19 +463,19 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Location Details</Text>
-          <TextInput
+            <TextInput
             style={[styles.input, styles.textArea]}
             value={locationDetails}
             onChangeText={setLocationDetails}
             placeholder="e.g., Room 101, First floor"
             placeholderTextColor={colors.text.secondary}
-            multiline
+              multiline
             numberOfLines={2}
           />
 
           {/* Status & Notes */}
           <Text style={styles.sectionTitle}>Status & Notes</Text>
-          
+
           <Text style={styles.label}>Status</Text>
           <View style={styles.statusContainer}>
             {(['drafted', 'saved', 'open', 'closed'] as EventStatus[]).map((s) => (
@@ -417,10 +491,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                   ]}
                 >
                   {s}
-                </Text>
+            </Text>
               </Pressable>
-            ))}
-          </View>
+              ))}
+            </View>
 
           <Text style={styles.label}>Notes</Text>
           <TextInput
@@ -437,24 +511,24 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <Text style={styles.sectionTitle}>Food Items</Text>
           {foods.map((food, index) => (
             <View key={food.id} style={styles.foodItemContainer}>
-              <TextInput
+                  <TextInput
                 style={[styles.input, { flex: 1 }]}
-                value={food.item}
+                    value={food.item}
                 onChangeText={(text) => updateFoodItem(index, 'item', text)}
                 placeholder="Food item"
                 placeholderTextColor={colors.text.secondary}
-              />
+                  />
               <View style={styles.foodItemRow}>
-                <TextInput
+                    <TextInput
                   style={[styles.input, { flex: 1 }]}
-                  value={food.quantity}
+                      value={food.quantity}
                   onChangeText={(text) => updateFoodItem(index, 'quantity', text)}
                   placeholder="Qty"
                   placeholderTextColor={colors.text.secondary}
-                />
-                <TextInput
+                    />
+                    <TextInput
                   style={[styles.input, { flex: 1 }]}
-                  value={food.unit}
+                      value={food.unit}
                   onChangeText={(text) => updateFoodItem(index, 'unit', text)}
                   placeholder="Unit"
                   placeholderTextColor={colors.text.secondary}
@@ -473,28 +547,114 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           </Pressable>
 
           {/* Images */}
-          <Text style={styles.sectionTitle}>Event Images (URLs)</Text>
-          {images.map((img, index) => (
-            <View key={index} style={styles.imageUrlRow}>
-              <TextInput
-                style={[styles.input, { flex: 1 }]}
-                value={img}
-                onChangeText={(text) => updateImageUrl(index, text)}
-                placeholder="https://..."
-                placeholderTextColor={colors.text.secondary}
-              />
-              <Pressable
-                style={styles.removeButton}
-                onPress={() => removeImageUrl(index)}
+          <Text style={styles.sectionTitle}>Images</Text>
+          <Text style={styles.helperText}>
+            Select up to 2 images total (default + uploaded). Current: {getTotalSelectedImages()}/2
+          </Text>
+
+          {/* Selected Images Preview */}
+          {(images.length > 0 || uploadedImages.length > 0) && (
+            <View style={styles.selectedImagesContainer}>
+              <Text style={styles.subsectionTitle}>Selected Images</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.imageRow}
               >
-                <Text style={styles.removeButtonText}>✕</Text>
-              </Pressable>
+                {/* Default selected images */}
+                {images.map((uri, index) => (
+                  <View key={`default-${index}`} style={styles.imageItem}>
+                    <Image
+                      source={{ uri }}
+                      style={styles.imagePreview}
+                    />
+                    <View style={styles.imageLabel}>
+                      <Text style={styles.imageLabelText}>Default</Text>
+                    </View>
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={() => setImages(images.filter((_, i) => i !== index))}
+                    >
+                      <Text style={styles.deleteText}>✕</Text>
+                    </Pressable>
+                  </View>
+                ))}
+                
+                {/* Uploaded selected images */}
+                {uploadedImages.map((uri, index) => (
+                  <View key={`uploaded-${index}`} style={styles.imageItem}>
+                    <Image
+                      source={{ uri }}
+                      style={styles.imagePreview}
+                    />
+                    <View style={styles.imageLabel}>
+                      <Text style={styles.imageLabelText}>Uploaded</Text>
+                    </View>
+                    <Pressable
+                      style={styles.deleteButton}
+                      onPress={() => removeUploadedImage(index)}
+                    >
+                      <Text style={styles.deleteText}>✕</Text>
+                    </Pressable>
+                  </View>
+                ))}
+              </ScrollView>
             </View>
-          ))}
-          <Pressable style={styles.addButton} onPress={addImageUrl}>
-            <Text style={styles.addButtonText}>+ Add Image URL</Text>
-          </Pressable>
-        </ScrollView>
+          )}
+
+          {/* Default Images Section */}
+          <View style={styles.imageSection}>
+            <Text style={styles.subsectionTitle}>Default Images</Text>
+            <Text style={styles.helperText}>Tap to select from default options</Text>
+            <View style={styles.defaultImageGrid}>
+              {DEFAULT_IMAGES.map((img, index) => {
+                const imgUri = Image.resolveAssetSource(img).uri;
+                const isSelected = images.includes(imgUri);
+                return (
+                  <Pressable
+                    key={index}
+                    style={[
+                      styles.defaultImageWrapper,
+                      isSelected && styles.selectedDefaultImage,
+                    ]}
+                    onPress={() => toggleDefaultImage(imgUri)}
+                  >
+                    <Image source={img} style={styles.defaultImage} />
+                    {isSelected && (
+                      <View style={styles.selectedOverlay}>
+                        <Text style={styles.selectedCheckmark}>✓</Text>
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Upload Section */}
+          <View style={styles.imageSection}>
+            <Text style={styles.subsectionTitle}>Upload Your Own</Text>
+            <Text style={styles.helperText}>
+              Upload up to {2 - getTotalSelectedImages()} more image(s)
+            </Text>
+            <Pressable 
+              style={[
+                styles.addButton, 
+                !canSelectMoreImages() && styles.addButtonDisabled
+              ]} 
+              onPress={handleAddImage}
+              disabled={!canSelectMoreImages()}
+            >
+              <Text style={[
+                styles.addButtonText,
+                !canSelectMoreImages() && styles.addButtonTextDisabled
+              ]}>
+                {canSelectMoreImages() ? 'Upload Photo' : 'Limit Reached'}
+              </Text>
+            </Pressable>
+          </View>
+
+          </ScrollView>
 
         <View style={styles.footer}>
           <Pressable
@@ -513,8 +673,8 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             </Text>
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+        </KeyboardAvoidingView>
+    </Modal >
   );
 }
 
@@ -658,11 +818,35 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     alignItems: 'center',
   },
-  imageUrlRow: {
+  imageRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    gap: spacing.md,             // spacing between images
+    paddingVertical: spacing.sm, // little padding top/bottom
+  },
+  imageItem: {
+    position: 'relative',
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: borderRadius.md,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: colors.error,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteText: {
+    color: colors.text.onPrimary,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   removeButton: {
     padding: spacing.sm,
@@ -723,4 +907,81 @@ const styles = StyleSheet.create({
     color: colors.text.onPrimary,
     fontWeight: '600',
   },
-});
+  defaultImageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  defaultImageWrapper: {
+    width: '30%',
+    aspectRatio: 1,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.sm,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedDefaultImage: {
+    borderColor: colors.primary,
+  },
+  defaultImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  selectedImagesContainer: {
+    marginBottom: spacing.lg,
+  },
+  imageSection: {
+    marginBottom: spacing.lg,
+  },
+  subsectionTitle: {
+    ...typography.body,
+    color: colors.text.primary,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+  },
+  imageLabel: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  imageLabelText: {
+    ...typography.caption,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+    fontSize: 10,
+  },
+  selectedOverlay: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedCheckmark: {
+    color: colors.text.onPrimary,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  addButtonDisabled: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border.light,
+    opacity: 0.5,
+  },
+  addButtonTextDisabled: {
+    color: colors.text.secondary,
+  },
+
+}
+
+);

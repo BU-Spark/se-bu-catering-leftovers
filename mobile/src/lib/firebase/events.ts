@@ -18,6 +18,7 @@ import {
   type DocumentData,
   arrayUnion,
   arrayRemove,
+  setDoc
 } from 'firebase/firestore';
 import { firestore } from './config';
 import type { Event, EventStatus } from '../../types';
@@ -227,10 +228,10 @@ export async function createEvent(
   // Mirror ID in the doc for convenience
   batch.set(ref, { ...payload, id: ref.id });
 
-  if (eventData.creatorUid) {
-    const userRef = doc(firestore, 'Users', eventData.creatorUid);
-    batch.update(userRef, { events: arrayUnion(ref.id) });
-  }
+if (eventData.creatorUid) {
+  const userRef = doc(firestore, 'Users', eventData.creatorUid);
+  batch.set(userRef, { uid: eventData.creatorUid, events: [ref.id] }, { merge: true });
+}
 
   await batch.commit();
   return ref.id;
