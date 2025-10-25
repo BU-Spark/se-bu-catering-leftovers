@@ -27,7 +27,7 @@ export default function AdminLayout() {
   const userRole = user?.publicMetadata?.role as string | undefined;
   console.log('Admin layout - User role:', userRole);
   console.log('Admin layout - User metadata:', user?.publicMetadata);
-  
+
   if (userRole !== 'admin') {
     console.log('Admin layout - Redirecting to student route, role was:', userRole);
     // Redirect non-admin users to student route
@@ -41,12 +41,13 @@ export default function AdminLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.text.secondary,
         tabBarStyle: {
-          backgroundColor: colors.secondary,
-          borderTopColor: colors.secondaryLight,
+          backgroundColor: colors.surface, 
+          borderTopColor: colors.border.default, 
           height: 70,
           paddingBottom: 8,
           paddingTop: 8,
         },
+
         headerShown: false,
       }}
     >
