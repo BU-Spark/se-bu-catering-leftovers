@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, typography, spacing } from '../../../src/lib/theme';
-import TotalTraysSaved from '../../../src/components/TotalTraysSaved';
+import CoreImpactMetrics from '../../../src/components/CoreImpactMetrics';
 
 export default function AnalyticsScreen() {
   return (
@@ -11,7 +11,7 @@ export default function AnalyticsScreen() {
       <Text style={styles.subtitle}>View event statistics and insights</Text>
 
       {/* Metric card component */}
-      <TotalTraysSaved />
+      <CoreImpactMetrics />
     </View>
   );
 }
