@@ -2,18 +2,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, typography, spacing } from '../../../src/lib/theme';
+import CoreImpactMetrics from '../../../src/components/CoreImpactMetrics';
 
 export default function AnalyticsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Analytics</Text>
       <Text style={styles.subtitle}>View event statistics and insights</Text>
-      
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>
-          Analytics functionality will be implemented here
-        </Text>
-      </View>
+
+      {/* Metric card component */}
+      <CoreImpactMetrics />
     </View>
   );
 }
@@ -34,15 +32,5 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.text.secondary,
     marginBottom: spacing.xl,
-  },
-  placeholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    ...typography.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
   },
 });
