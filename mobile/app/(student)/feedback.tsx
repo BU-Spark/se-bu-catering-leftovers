@@ -7,19 +7,18 @@ import {
     ScrollView,
     Image,
     Alert,
+    Switch,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { addDoc, collection, updateDoc, doc, arrayUnion, serverTimestamp, getDoc, setDoc } from "firebase/firestore";
 import { firestore, storage } from "../../src/lib/firebase/config";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { useUser } from "@clerk/clerk-expo";
 import { colors, typography, spacing, borderRadius } from "../../src/lib/theme";
 import { useEffect, useState } from "react";
 import BUlogo from "../../assets/boston-university-logo.png";
 import { Ionicons } from "@expo/vector-icons";
-
-
 
 export default function FeedbackPage() {
     const router = useRouter();
@@ -31,6 +30,7 @@ export default function FeedbackPage() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const [eventName, setEventName] = useState("Loading...");
+    const [shareContact, setShareContact] = useState(false);
 
     useEffect(() => {
         const fetchEventName = async () => {
@@ -103,8 +103,8 @@ export default function FeedbackPage() {
 
     // 📨 Submit feedback
     const handleSubmit = async () => {
-        if (!comment.trim() || rating === 0) {
-            Alert.alert("Incomplete", "Please provide both a rating and feedback.");
+        if (rating === 0) {
+            Alert.alert("Rating Required", "Please provide a rating for the food.");
             return;
         }
 
@@ -117,6 +117,7 @@ export default function FeedbackPage() {
                 date: serverTimestamp(),
                 name: user?.fullName || "",
                 email: user?.primaryEmailAddress?.emailAddress || "",
+                shareContact,
             });
             await updateDoc(docRef, { id: docRef.id });
 
@@ -136,7 +137,6 @@ export default function FeedbackPage() {
             console.error(err);
             Alert.alert("Error", "Failed to submit feedback.");
         }
-
     };
 
     return (
@@ -146,22 +146,18 @@ export default function FeedbackPage() {
                 <Text style={styles.backIconText}>←</Text>
             </Pressable>
 
-
             {/* BU Logo */}
             <View style={styles.logoContainer}>
                 <Image source={BUlogo} style={styles.logoImage} resizeMode="contain" />
             </View>
-
-
-
 
             {/* Dropdown*/}
             <View style={styles.dropdown}>
                 <Text style={styles.dropdownText}>{eventName}</Text>
             </View>
 
-
             {/* Upload Photo */}
+            <Text style={styles.sectionLabel}>Upload Photo (Optional)</Text>
             <Pressable style={styles.uploadBox} onPress={handleUploadPhoto}>
                 {uploadedImage ? (
                     <Image source={{ uri: uploadedImage }} style={styles.uploadPreview} />
@@ -175,13 +171,12 @@ export default function FeedbackPage() {
                 )}
             </Pressable>
 
-
             {/* Rating */}
-            <Text style={styles.ratingLabel}>How would you rate the food?</Text>
+            <Text style={styles.ratingLabel}>How would you rate the food? *</Text>
             <View style={styles.starContainer}>{renderStars()}</View>
 
             {/* Feedback */}
-            <Text style={styles.feedbackLabel}>Feedback</Text>
+            <Text style={styles.feedbackLabel}>Feedback (Optional)</Text>
             <TextInput
                 style={styles.textArea}
                 multiline
@@ -191,6 +186,22 @@ export default function FeedbackPage() {
                 placeholder="Tell us what you think..."
                 placeholderTextColor={colors.text.secondary}
             />
+
+            {/* Share Contact Toggle */}
+            <View style={styles.toggleContainer}>
+                <View style={styles.toggleTextContainer}>
+                    <Text style={styles.toggleLabel}>Share my contact info with organizers</Text>
+                    <Text style={styles.toggleSubtext}>
+                        Let event hosts know who you are
+                    </Text>
+                </View>
+                <Switch
+                    value={shareContact}
+                    onValueChange={setShareContact}
+                    trackColor={{ false: colors.border.default, true: colors.primary }}
+                    thumbColor={colors.surface}
+                />
+            </View>
 
             {/* Submit Button */}
             <Pressable style={styles.sendButton} onPress={handleSubmit}>
@@ -207,7 +218,7 @@ const styles = StyleSheet.create({
     },
     backIcon: {
         position: "absolute",
-        top: 60, // adjust for iOS safe area
+        top: 60,
         left: 20,
         zIndex: 10,
     },
@@ -221,7 +232,6 @@ const styles = StyleSheet.create({
         marginBottom: spacing.xl,
         marginTop: spacing.xxl + 20,
     },
-
     logoImage: {
         width: 220,
         height: 60,
@@ -237,6 +247,11 @@ const styles = StyleSheet.create({
     dropdownText: {
         color: colors.secondary,
         ...typography.body,
+    },
+    sectionLabel: {
+        ...typography.bodySmall,
+        color: colors.text.secondary,
+        marginBottom: spacing.xs,
     },
     uploadBox: {
         borderWidth: 1.5,
@@ -289,9 +304,34 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         padding: spacing.md,
         minHeight: 100,
-        marginBottom: spacing.xl,
+        marginBottom: spacing.lg,
         ...typography.body,
         color: colors.text.primary,
+    },
+    toggleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: colors.surface,
+        padding: spacing.md,
+        borderRadius: borderRadius.sm,
+        marginBottom: spacing.xl,
+        borderWidth: 1,
+        borderColor: colors.border.light,
+    },
+    toggleTextContainer: {
+        flex: 1,
+        marginRight: spacing.md,
+    },
+    toggleLabel: {
+        ...typography.body,
+        color: colors.text.primary,
+        fontWeight: "600",
+        marginBottom: spacing.xs / 2,
+    },
+    toggleSubtext: {
+        ...typography.caption,
+        color: colors.text.secondary,
     },
     sendButton: {
         backgroundColor: colors.primary,
@@ -301,6 +341,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.md,
         width: 100,
         alignSelf: "center",
+        marginBottom: spacing.xl,
     },
     sendText: {
         color: colors.text.onPrimary,
