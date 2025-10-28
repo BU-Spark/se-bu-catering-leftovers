@@ -33,13 +33,34 @@ interface Review {
   name?: string;
   email?: string;
   shareContact?: boolean;
+  rating?: number;
 }
 
+const StarRating = ({ rating }: { rating: number }) => {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    const fillPercentage = Math.min(Math.max(rating - (i - 1), 0), 1);
+    stars.push(
+      <View key={i} style={styles.starContainer}>
+        <Text style={styles.starEmpty}>★</Text>
+        <View style={[styles.starFillContainer, { width: `${fillPercentage * 100}%` }]}>
+          <Text style={styles.starFilled}>★</Text>
+        </View>
+      </View>
+    );
+  }
+  return <View style={styles.starsRow}>{stars}</View>;
+};
+
 export default function AdminEventReviewsPage() {
-  const { eventId } = useLocalSearchParams<{ eventId: string }>();
+  const { eventId, eventName } = useLocalSearchParams<{ eventId: string; eventName?: string }>();
   const router = useRouter();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+    : 0;
 
   const fetchReviews = useCallback(async () => {
     if (!eventId) return;
@@ -97,10 +118,28 @@ export default function AdminEventReviewsPage() {
           <Text style={styles.backArrow}>←</Text>
         </Pressable>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Feedback</Text>
-          <Text style={styles.headerSubtitle}>
-            {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-          </Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.headerTitle}>Feedback</Text>
+          </View>
+          {eventName && (
+            <Text style={styles.eventName} numberOfLines={1}>{eventName}</Text>
+          )}
+          <View style={styles.headerSubtitleRow}>
+            <Text style={styles.headerSubtitle}>
+              {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+            </Text>
+            {reviews.length > 0 && (
+              <>
+                <Text style={styles.headerDot}>•</Text>
+                <View style={styles.headerRatingContainer}>
+                  <Text style={styles.headerRatingText}>
+                    {averageRating.toFixed(1)}
+                  </Text>
+                  <StarRating rating={averageRating} />
+                </View>
+              </>
+            )}
+          </View>
         </View>
       </View>
 
@@ -129,13 +168,15 @@ export default function AdminEventReviewsPage() {
               <View style={styles.reviewHeader}>
                 <View style={styles.avatarContainer}>
                   <Text style={styles.avatarText}>
-                    {review.name ? review.name.charAt(0).toUpperCase() : "?"}
+                    {review.shareContact && review.email
+                      ? review.email.charAt(0).toUpperCase()
+                      : "?"}
                   </Text>
                 </View>
                 <View style={styles.reviewHeaderText}>
                   {review.shareContact ? (
                     <>
-                      <Text style={styles.reviewerName}>{review.name}</Text>
+                      {review.name && <Text style={styles.reviewerName}>{review.name}</Text>}
                       <Text style={styles.reviewerEmail}>{review.email}</Text>
                     </>
                   ) : (
@@ -146,10 +187,24 @@ export default function AdminEventReviewsPage() {
               </View>
 
               {/* Comment */}
-              <Text style={styles.comment}>{review.comment}</Text>
+              {review.comment ? (
+                <Text style={styles.comment}>{review.comment}</Text>
+              ) : (
+                <Text style={styles.noComment}>(No written feedback)</Text>
+              )}
+
+              {/* Rating */}
+              {review.rating !== undefined && (
+                <View style={styles.reviewRatingContainer}>
+                  <StarRating rating={review.rating} />
+                  <Text style={styles.reviewRatingText}>
+                    {review.rating.toFixed(1)}
+                  </Text>
+                </View>
+              )}
 
               {/* Uploaded Images */}
-              {review.images && review.images.length > 0 && (
+              {review.images && review.images.length > 0 ? (
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -165,6 +220,8 @@ export default function AdminEventReviewsPage() {
                     />
                   ))}
                 </ScrollView>
+              ) : (
+                <Text style={styles.noPhotos}>(No photos submitted)</Text>
               )}
             </View>
           ))
@@ -200,15 +257,44 @@ const styles = StyleSheet.create({
   headerContent: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   headerTitle: {
     ...typography.h3,
     color: colors.text.primary,
     fontWeight: "700",
   },
+  eventName: {
+    ...typography.body,
+    color: colors.text.secondary,
+    marginTop: 4,
+    marginBottom: 2,
+  },
   headerSubtitle: {
     ...typography.bodySmall,
     color: colors.text.secondary,
+  },
+  headerSubtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 2,
+  },
+  headerDot: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    marginHorizontal: spacing.xs,
+  },
+  headerRatingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  headerRatingText: {
+    ...typography.bodySmall,
+    color: colors.text.primary,
+    fontWeight: "600",
   },
   container: {
     flex: 1,
@@ -297,6 +383,55 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.text.primary,
     lineHeight: 22,
+    marginBottom: spacing.sm,
+  },
+  noComment: {
+    ...typography.body,
+    color: colors.text.secondary,
+    fontStyle: "italic",
+    lineHeight: 22,
+    marginBottom: spacing.sm,
+  },
+  reviewRatingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  reviewRatingText: {
+    ...typography.bodySmall,
+    color: colors.text.primary,
+    fontWeight: "600",
+    marginLeft: spacing.xs,
+  },
+  starsRow: {
+    flexDirection: "row",
+    gap: 2,
+  },
+  starContainer: {
+    position: "relative",
+    width: 16,
+    height: 16,
+  },
+  starEmpty: {
+    fontSize: 16,
+    color: colors.border.light,
+    position: "absolute",
+  },
+  starFillContainer: {
+    overflow: "hidden",
+    position: "absolute",
+    height: 16,
+  },
+  starFilled: {
+    fontSize: 16,
+    color: "#FFB800",
+  },
+  noPhotos: {
+    ...typography.bodySmall,
+    color: colors.text.secondary,
+    fontStyle: "italic",
+    marginTop: spacing.xs,
   },
   imageScroll: {
     marginTop: spacing.md,

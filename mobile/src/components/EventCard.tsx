@@ -149,7 +149,7 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
                     onPress={() => {
                       console.log('Navigating to event:', event.id);
                       console.log('Full pathname:', `/(admin)/reviews/${event.id}`);
-                      router.push(`/(admin)/reviews/${event.id}`);
+                      router.push(`/(admin)/reviews/${event.id}?eventName=${encodeURIComponent(event.name)}`);
                     }}
                   >
                     <Text style={styles.editButtonText}>💬 View Feedback</Text>
