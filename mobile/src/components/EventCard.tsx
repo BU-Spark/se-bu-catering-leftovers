@@ -7,6 +7,7 @@ import { formatTimestamp } from '../lib/utils';
 import { tsToMs } from '../lib/time';
 import { useCountdown } from '../hooks/useCountdown';
 import type { Event } from '../types';
+import { useRouter } from "expo-router";
 
 interface EventCardProps {
   event: Event;
@@ -17,15 +18,16 @@ interface EventCardProps {
 
 export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const router = useRouter();
 
   // Timer should ONLY show for open events and ONLY depend on duration
   const shouldShowCountdown = event.status === 'open';
-  
+
   // Calculate expiry based ONLY on duration (in minutes)
   const durationMs = (event.duration ?? 30) * 60 * 1000;
   const startMs = tsToMs(event.foodAvailable);
   const expiryMs = startMs ? startMs + durationMs : null;
-  
+
   // Pass null if shouldn't show countdown to ensure hook resets
   const { remainingMs, hours, minutes, seconds, isElapsed } = useCountdown(
     shouldShowCountdown && expiryMs ? expiryMs : null
@@ -36,22 +38,17 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
     onPress?.();
   };
 
-  // Calculate progress for countdown bar (based on duration)
-  // Use React.useMemo to ensure it recalculates when remainingMs changes
+  // Calculate progress for countdown bar
   const progress = React.useMemo(() => {
-    if (!shouldShowCountdown || !expiryMs || !startMs || !(remainingMs > 0)) {
-      return 0;
-    }
+    if (!shouldShowCountdown || !expiryMs || !startMs || !(remainingMs > 0)) return 0;
     const totalDurationMs = (event.duration ?? 30) * 60 * 1000;
     if (totalDurationMs <= 0) return 0;
-    const calculatedProgress = Math.max(0, Math.min(1, remainingMs / totalDurationMs));
-return calculatedProgress;
+    return Math.max(0, Math.min(1, remainingMs / totalDurationMs));
   }, [shouldShowCountdown, remainingMs, expiryMs, startMs, event.duration, event.name]);
 
-  // Auto-close event when timer expires (admin only to avoid multiple updates)
+  // Auto-close event when timer expires (admin only)
   React.useEffect(() => {
     if (isAdmin && isElapsed && event.status === 'open' && event.id && shouldShowCountdown) {
-      // Import dynamically to avoid circular deps
       import('../lib/firebase/events').then(({ updateEventStatus }) => {
         updateEventStatus(event.id, 'closed').catch(console.error);
       });
@@ -64,7 +61,7 @@ return calculatedProgress;
   return (
     <Pressable onPress={toggleExpand} style={styles.card}>
       {/* Event Image */}
-      {event.images && event.images.length > 0 && event.images[0] && (
+      {event.images?.[0] && (
         <Image source={{ uri: event.images[0] }} style={styles.image} />
       )}
 
@@ -79,7 +76,7 @@ return calculatedProgress;
           📍 {event.Location?.name || event.host} • {formatTimestamp(event.foodAvailable)}
         </Text>
 
-        {/* Countdown Bar - ONLY shows for open events */}
+        {/* Countdown Bar */}
         {shouldShowCountdown && !!expiryMs && !isElapsed && (
           <View style={styles.countdownContainer}>
             <Text style={styles.countdownText}>
@@ -89,10 +86,7 @@ return calculatedProgress;
               <View
                 style={[
                   styles.progressBarFill,
-                  {
-                    width: `${progress * 100}%`,
-                    backgroundColor: colors.error,
-                  },
+                  { width: `${progress * 100}%`, backgroundColor: colors.error },
                 ]}
               />
             </View>
@@ -102,14 +96,14 @@ return calculatedProgress;
         {/* Food Items Preview */}
         {event.foods && event.foods.length > 0 && !expanded && (
           <View style={styles.foodPreview}>
-            {event.foods.slice(0, 2).filter(f => f.item?.trim()).map((food, index) => (
-              <Text key={index} style={styles.foodItem} numberOfLines={1}>
+            {event.foods.slice(0, 2).filter(f => f.item?.trim()).map((food, i) => (
+              <Text key={i} style={styles.foodItem} numberOfLines={1}>
                 • {food.item} ({food.quantity} {food.unit})
               </Text>
             ))}
-            {event.foods.filter(f => f.item?.trim()).length > 2 && (
+            {event.foods.length > 2 && (
               <Text style={styles.moreItems}>
-                +{event.foods.filter(f => f.item?.trim()).length - 2} more
+                +{event.foods.length - 2} more
               </Text>
             )}
           </View>
@@ -132,22 +126,36 @@ return calculatedProgress;
             {event.foods && event.foods.length > 0 && (
               <View style={styles.foodList}>
                 <Text style={styles.sectionLabel}>Available Food:</Text>
-                {event.foods.filter(f => f.item?.trim()).map((food, index) => (
-                  <Text key={index} style={styles.foodDetailItem}>
+                {event.foods.filter(f => f.item?.trim()).map((food, i) => (
+                  <Text key={i} style={styles.foodDetailItem}>
                     • {food.item} ({food.quantity} {food.unit})
                   </Text>
                 ))}
               </View>
             )}
 
-            {/* Admin Edit Button */}
-            {isAdmin && onEdit && (
-              <Pressable
-                style={styles.editButton}
-                onPress={() => onEdit(event)}
-              >
-                <Text style={styles.editButtonText}>✏️ Edit Event</Text>
-              </Pressable>
+            {/* Admin Buttons */}
+            {isAdmin && (
+              <>
+                {onEdit && (
+                  <Pressable style={styles.editButton} onPress={() => onEdit(event)}>
+                    <Text style={styles.editButtonText}>✏️ Edit Event</Text>
+                  </Pressable>
+                )}
+
+                {event.status === "closed" && (
+                  <Pressable
+                    style={[styles.editButton, { backgroundColor: colors.secondary }]}
+                    onPress={() => {
+                      console.log('Navigating to event:', event.id);
+                      console.log('Full pathname:', `/(admin)/reviews/${event.id}`);
+                      router.push(`/(admin)/reviews/${event.id}`);
+                    }}
+                  >
+                    <Text style={styles.editButtonText}>💬 View Feedback</Text>
+                  </Pressable>
+                )}
+              </>
             )}
           </View>
         )}
@@ -169,6 +177,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   card: {
