@@ -58,8 +58,6 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
   // Don't show expired open events to students
   if (isElapsed && !isAdmin && event.status === 'open') return null;
   
-  const router = useRouter();
-
   return (
     <Pressable onPress={toggleExpand} style={styles.card}>
       {/* Event Image */}
