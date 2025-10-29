@@ -16,7 +16,7 @@ import {
   Alert,
   Image
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { colors, typography, spacing, borderRadius } from '../lib/theme';
 import type { Event, EventStatus, FoodItem } from '../types';
 import { Timestamp } from 'firebase/firestore';
@@ -30,13 +30,12 @@ const DEFAULT_IMAGES = [
   require('../../assets/defaultEventFoodPics/dummypic6.jpeg'),
 ];
 
-
 interface EventEditorModalProps {
   visible: boolean;
-  event: Event | null;  // null = create mode, Event = edit mode
+  event: Event | null;
   onClose: () => void;
-  onSave?: (event: Partial<Event>) => Promise<void>;  // Make optional
-  onCreate?: (event: Partial<Event>) => Promise<void>;  // Add create handler
+  onSave?: (event: Partial<Event>) => Promise<void>;
+  onCreate?: (event: Partial<Event>) => Promise<void>;
 }
 
 const MAX_FOOD_DURATION_HOURS = 4;
@@ -89,17 +88,15 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       setDuration(String(event.duration || 30));
       setStatus(event.status || 'drafted');
       setFoods(event.foods || []);
-      
-      // Separate default images from uploaded images
+
       const eventImages = event.images || [];
       const defaultImageUris = DEFAULT_IMAGES.map(img => Image.resolveAssetSource(img).uri);
       const defaultSelected = eventImages.filter(img => defaultImageUris.includes(img));
       const uploadedSelected = eventImages.filter(img => !defaultImageUris.includes(img));
-      
+
       setImages(defaultSelected);
       setUploadedImages(uploadedSelected);
 
-      // Set dates from event
       if (event.foodArrived) {
         const arrived = timestampToDate(event.foodArrived);
         setFoodArrived(arrived);
@@ -116,7 +113,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     }
   }, [event, visible]);
 
-  // Validate and adjust duration when it changes
   const handleDurationChange = (value: string) => {
     const durationNum = parseInt(value) || 0;
     if (durationNum > maxDuration) {
@@ -168,18 +164,14 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         foodAvailable: Timestamp.fromDate(foodAvailable),
       };
 
-      // Handle create vs edit
       if (event?.id && onSave) {
-        // Edit mode
         await onSave({ ...updates, id: event.id });
       } else if (onCreate) {
-        // Create mode
         await onCreate(updates);
       }
 
       onClose();
     } catch (error) {
-
       Alert.alert('Error', 'Failed to save event');
     } finally {
       setSaving(false);
@@ -200,11 +192,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     setFoods(foods.filter((_, i) => i !== index));
   };
 
-  // Helper functions for image management
   const getTotalSelectedImages = () => images.length + uploadedImages.length;
-  
+
   const canSelectMoreImages = () => getTotalSelectedImages() < 2;
-  
+
   const toggleDefaultImage = (imgUri: string) => {
     if (images.includes(imgUri)) {
       setImages(images.filter(img => img !== imgUri));
@@ -216,63 +207,69 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       setImages([...images, imgUri]);
     }
   };
-  
+
   const removeUploadedImage = (index: number) => {
     setUploadedImages(uploadedImages.filter((_, i) => i !== index));
   };
 
-  // Handler for Food Arrived date picker
   const handleArrivedDateChange = (event: any, selectedDate?: Date) => {
-    // Always close picker on Android after selection
-    if (Platform.OS === 'android') {
-      setShowArrivedPicker(false);
+    if (Platform.OS === 'ios') {
+      if (event.type === 'dismissed' || !selectedDate) {
+        setShowArrivedPicker(false);
+        return;
+      }
     }
 
-    if (selectedDate) {
-      setFoodArrived(selectedDate);
+    if (!selectedDate) return;
 
-      // Auto-adjust available time if it exceeds 4 hours from new arrival time
-      const maxAvailable = new Date(selectedDate.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
-      if (foodAvailable > maxAvailable) {
-        setFoodAvailable(maxAvailable);
+    const maxAvailable = new Date(selectedDate.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
+
+    setFoodArrived(selectedDate);
+
+    if (foodAvailable > maxAvailable) {
+      setFoodAvailable(maxAvailable);
+      setTimeout(() => {
         Alert.alert(
           'Pickup Time Adjusted',
           `Pickup time was adjusted to ${MAX_FOOD_DURATION_HOURS} hours after arrival (food safety limit)`
         );
-      } else if (foodAvailable < selectedDate) {
-        // If available time is before arrival, set it to arrival time
-        setFoodAvailable(selectedDate);
-      }
+      }, 100);
+    } else if (foodAvailable < selectedDate) {
+      setFoodAvailable(selectedDate);
     }
   };
 
-  // Handler for Available for Pickup date picker
   const handleAvailableDateChange = (event: any, selectedDate?: Date) => {
-    // Always close picker on Android after selection
-    if (Platform.OS === 'android') {
-      setShowAvailablePicker(false);
-    }
-
-    if (selectedDate) {
-      // Ensure pickup is after arrival
-      if (selectedDate < foodArrived) {
-        Alert.alert('Invalid Time', 'Pickup time must be after arrival time');
+    if (Platform.OS === 'ios') {
+      if (event.type === 'dismissed' || !selectedDate) {
+        setShowAvailablePicker(false);
         return;
       }
+    }
 
-      // Ensure pickup is within 4 hours of arrival
-      const maxAvailable = new Date(foodArrived.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
-      if (selectedDate > maxAvailable) {
+    if (!selectedDate) return;
+
+    if (selectedDate < foodArrived) {
+      setTimeout(() => {
+        Alert.alert('Invalid Time', 'Pickup time must be after arrival time');
+      }, 100);
+      return;
+    }
+
+    const maxAvailable = new Date(foodArrived.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
+    if (selectedDate > maxAvailable) {
+      setTimeout(() => {
         Alert.alert(
           'Time Limit Exceeded',
           `Pickup time cannot be more than ${MAX_FOOD_DURATION_HOURS} hours after arrival (food safety limit)`
         );
-        return;
-      }
-
-      setFoodAvailable(selectedDate);
+      }, 100);
+      return;
     }
+
+    setFoodAvailable(selectedDate);
   };
+
   const handleAddImage = async () => {
     if (!canSelectMoreImages()) {
       Alert.alert("Limit Reached", "You can only select up to 2 images total.");
@@ -317,7 +314,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     }
   };
 
-
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -327,7 +323,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
             {event?.id ? 'Edit Event' : 'Create Event'}
-            </Text>
+          </Text>
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>✕</Text>
           </Pressable>
@@ -338,7 +334,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <Text style={styles.sectionTitle}>Basic Information</Text>
 
           <Text style={styles.label}>Event Name *</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
@@ -347,7 +343,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Host</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={host}
             onChangeText={setHost}
@@ -361,28 +357,51 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <Text style={styles.label}>Food Arrived</Text>
           <Pressable
             style={styles.dateButton}
-            onPress={() => setShowArrivedPicker(true)}
+            onPress={() => {
+              if (Platform.OS === 'android') {
+                DateTimePickerAndroid.open({
+                  value: foodArrived,
+                  mode: 'date',
+                  minimumDate: new Date(),
+                  onChange: (event, date) => {
+                    if (event.type === 'set' && date) {
+                      DateTimePickerAndroid.open({
+                        value: date,
+                        mode: 'time',
+                        onChange: (timeEvent, time) => {
+                          if (timeEvent.type === 'set' && time) {
+                            handleArrivedDateChange(timeEvent, time);
+                          }
+                        },
+                      });
+                    }
+                  },
+                });
+              } else {
+                setShowArrivedPicker(true);
+              }
+            }}
           >
             <Text style={styles.dateButtonText}>
               📅 {formatDate(foodArrived)}
             </Text>
           </Pressable>
-          {showArrivedPicker && (
-            <DateTimePicker
-              value={foodArrived}
-              mode="datetime"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleArrivedDateChange}
-              minimumDate={new Date()}
-            />
-          )}
           {Platform.OS === 'ios' && showArrivedPicker && (
-            <Pressable
-              style={styles.doneButton}
-              onPress={() => setShowArrivedPicker(false)}
-            >
-              <Text style={styles.doneButtonText}>Done</Text>
-            </Pressable>
+            <>
+              <DateTimePicker
+                value={foodArrived}
+                mode="datetime"
+                display="spinner"
+                onChange={handleArrivedDateChange}
+                minimumDate={new Date()}
+              />
+              <Pressable
+                style={styles.doneButton}
+                onPress={() => setShowArrivedPicker(false)}
+              >
+                <Text style={styles.doneButtonText}>Done</Text>
+              </Pressable>
+            </>
           )}
 
           <Text style={styles.label}>Available for Pickup</Text>
@@ -391,29 +410,53 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           </Text>
           <Pressable
             style={styles.dateButton}
-            onPress={() => setShowAvailablePicker(true)}
+            onPress={() => {
+              if (Platform.OS === 'android') {
+                DateTimePickerAndroid.open({
+                  value: foodAvailable,
+                  mode: 'date',
+                  minimumDate: foodArrived,
+                  maximumDate: maxAvailableTime,
+                  onChange: (event, date) => {
+                    if (event.type === 'set' && date) {
+                      DateTimePickerAndroid.open({
+                        value: date,
+                        mode: 'time',
+                        onChange: (timeEvent, time) => {
+                          if (timeEvent.type === 'set' && time) {
+                            handleAvailableDateChange(timeEvent, time);
+                          }
+                        },
+                      });
+                    }
+                  },
+                });
+              } else {
+                setShowAvailablePicker(true);
+              }
+            }}
           >
             <Text style={styles.dateButtonText}>
               📅 {formatDate(foodAvailable)}
             </Text>
           </Pressable>
-          {showAvailablePicker && (
-            <DateTimePicker
-              value={foodAvailable}
-              mode="datetime"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleAvailableDateChange}
-              minimumDate={foodArrived}
-              maximumDate={maxAvailableTime}
-            />
-          )}
           {Platform.OS === 'ios' && showAvailablePicker && (
-            <Pressable
-              style={styles.doneButton}
-              onPress={() => setShowAvailablePicker(false)}
-            >
-              <Text style={styles.doneButtonText}>Done</Text>
-            </Pressable>
+            <>
+              <DateTimePicker
+                value={foodAvailable}
+                mode="datetime"
+                display="spinner"
+                onChange={handleAvailableDateChange}
+                minimumDate={foodArrived}
+                maximumDate={maxAvailableTime}
+              />
+              <Pressable
+                style={styles.doneButton}
+                onPress={() => setShowAvailablePicker(false)}
+              >
+                <Text style={styles.doneButtonText}>Done</Text>
+              </Pressable>
+            </>
           )}
 
           <Text style={styles.label}>
@@ -436,7 +479,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <Text style={styles.sectionTitle}>Location</Text>
 
           <Text style={styles.label}>Location Name</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={locationName}
             onChangeText={setLocationName}
@@ -445,7 +488,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Address</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={locationAddress}
             onChangeText={setLocationAddress}
@@ -454,7 +497,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Campus Section</Text>
-            <TextInput
+          <TextInput
             style={styles.input}
             value={campusSection}
             onChangeText={setCampusSection}
@@ -463,13 +506,13 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           />
 
           <Text style={styles.label}>Location Details</Text>
-            <TextInput
+          <TextInput
             style={[styles.input, styles.textArea]}
             value={locationDetails}
             onChangeText={setLocationDetails}
             placeholder="e.g., Room 101, First floor"
             placeholderTextColor={colors.text.secondary}
-              multiline
+            multiline
             numberOfLines={2}
           />
 
@@ -491,10 +534,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                   ]}
                 >
                   {s}
-            </Text>
+                </Text>
               </Pressable>
-              ))}
-            </View>
+            ))}
+          </View>
 
           <Text style={styles.label}>Notes</Text>
           <TextInput
@@ -511,24 +554,24 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <Text style={styles.sectionTitle}>Food Items</Text>
           {foods.map((food, index) => (
             <View key={food.id} style={styles.foodItemContainer}>
-                  <TextInput
+              <TextInput
                 style={[styles.input, { flex: 1 }]}
-                    value={food.item}
+                value={food.item}
                 onChangeText={(text) => updateFoodItem(index, 'item', text)}
                 placeholder="Food item"
                 placeholderTextColor={colors.text.secondary}
-                  />
+              />
               <View style={styles.foodItemRow}>
-                    <TextInput
+                <TextInput
                   style={[styles.input, { flex: 1 }]}
-                      value={food.quantity}
+                  value={food.quantity}
                   onChangeText={(text) => updateFoodItem(index, 'quantity', text)}
                   placeholder="Qty"
                   placeholderTextColor={colors.text.secondary}
-                    />
-                    <TextInput
+                />
+                <TextInput
                   style={[styles.input, { flex: 1 }]}
-                      value={food.unit}
+                  value={food.unit}
                   onChangeText={(text) => updateFoodItem(index, 'unit', text)}
                   placeholder="Unit"
                   placeholderTextColor={colors.text.secondary}
@@ -579,7 +622,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                     </Pressable>
                   </View>
                 ))}
-                
+
                 {/* Uploaded selected images */}
                 {uploadedImages.map((uri, index) => (
                   <View key={`uploaded-${index}`} style={styles.imageItem}>
@@ -637,11 +680,11 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             <Text style={styles.helperText}>
               Upload up to {2 - getTotalSelectedImages()} more image(s)
             </Text>
-            <Pressable 
+            <Pressable
               style={[
-                styles.addButton, 
+                styles.addButton,
                 !canSelectMoreImages() && styles.addButtonDisabled
-              ]} 
+              ]}
               onPress={handleAddImage}
               disabled={!canSelectMoreImages()}
             >
@@ -653,8 +696,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
               </Text>
             </Pressable>
           </View>
-
-          </ScrollView>
+        </ScrollView>
 
         <View style={styles.footer}>
           <Pressable
@@ -673,8 +715,8 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             </Text>
           </Pressable>
         </View>
-        </KeyboardAvoidingView>
-    </Modal >
+      </KeyboardAvoidingView>
+    </Modal>
   );
 }
 
