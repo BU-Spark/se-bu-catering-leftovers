@@ -5,16 +5,31 @@ import { colors, typography, spacing } from '../../src/lib/theme';
 import { useOpenEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
 import { router } from 'expo-router';
+import React from 'react';
+import SortDropdown, { SortOption } from '../../src/components/SortDropdown';
+import { getExpiryMs } from '../../src/lib/time';
 
 export default function StudentHomeScreen() {
   const { user } = useUser();
   const { signOut } = useAuth();
   const { events, loading, refresh } = useOpenEvents();
+  const [sort, setSort] = React.useState<SortOption>('expiry-asc');
 
   const handleSignOut = async () => {
     await signOut();
     router.replace('/sign-in');
   };
+
+  const sortedEvents = React.useMemo(() => {
+    const withExpiry = events.map(e => ({ e, expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }) }));
+    const filtered = withExpiry.filter(x => typeof x.expiry === 'number' && x.expiry !== null);
+    filtered.sort((a, b) => {
+      if (sort === 'expiry-asc') return (a.expiry as number) - (b.expiry as number);
+      return (b.expiry as number) - (a.expiry as number);
+    });
+    const missing = withExpiry.filter(x => x.expiry === null);
+    return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
+  }, [events, sort]);
 
   return (
     <View style={styles.container}>
@@ -31,9 +46,14 @@ export default function StudentHomeScreen() {
         </Pressable>
       </View>
 
+      {/* Sort control under header */}
+      <View style={styles.sortRow}>
+        <SortDropdown currentSort={sort} onSortChange={setSort} />
+      </View>
+
       {/* Events List */}
       <FlatList
-        data={events}
+        data={sortedEvents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <EventCard event={item} />}
         contentContainerStyle={styles.listContent}
@@ -82,6 +102,12 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: colors.text.secondary,
     marginTop: spacing.xs,
+  },
+  sortRow: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    alignItems: 'flex-end',
   },
   signOutButton: {
     paddingHorizontal: spacing.md,

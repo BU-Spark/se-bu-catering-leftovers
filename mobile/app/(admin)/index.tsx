@@ -9,6 +9,8 @@ import { EventEditorModal } from '../../src/components/EventEditorModal';
 import { router } from 'expo-router';
 import type { Event } from '../../src/types';
 import { updateEvent } from '../../src/lib/firebase/events';
+import SortDropdown, { SortOption } from '../../src/components/SortDropdown';
+import { getExpiryMs } from '../../src/lib/time';
 
 type TabType = 'open' | 'previous';
 
@@ -19,6 +21,7 @@ export default function AdminHomeScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('open');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [selectedSort, setSelectedSort] = useState<SortOption | null>(null);
 
   const handleSignOut = async () => {
     await signOut();
@@ -46,7 +49,7 @@ export default function AdminHomeScreen() {
   };
 
   // Filter events based on active tab
-  const filteredEvents = events.filter((event) => {
+  const filteredEventsBase = events.filter((event) => {
     if (activeTab === 'open') {
       return event.status === 'open';
     } else {
@@ -54,6 +57,18 @@ export default function AdminHomeScreen() {
       return event.status === 'closed' || event.status === 'drafted' || event.status === 'saved';
     }
   });
+
+  const filteredEvents = React.useMemo(() => {
+    if (!selectedSort) return filteredEventsBase;
+    const withExpiry = filteredEventsBase.map(e => ({ e, expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }) }));
+    const filtered = withExpiry.filter(x => typeof x.expiry === 'number' && x.expiry !== null);
+    filtered.sort((a, b) => {
+      if (selectedSort === 'expiry-asc') return (a.expiry as number) - (b.expiry as number);
+      return (b.expiry as number) - (a.expiry as number);
+    });
+    const missing = withExpiry.filter(x => x.expiry === null);
+    return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
+  }, [filteredEventsBase, selectedSort]);
 
   return (
     <View style={styles.container}>
@@ -75,34 +90,43 @@ export default function AdminHomeScreen() {
         </Pressable>
       </View>
 
-      {/* Tabs */}
+      {/* Tabs + Sort */}
       <View style={styles.tabContainer}>
-        <Pressable
-          style={[styles.tab, activeTab === 'open' && styles.activeTab]}
-          onPress={() => setActiveTab('open')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'open' && styles.activeTabText,
-            ]}
+        <View style={styles.tabsLeft}>
+          <Pressable
+            style={[styles.tab, activeTab === 'open' && styles.activeTab]}
+            onPress={() => setActiveTab('open')}
           >
-            Open Events
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, activeTab === 'previous' && styles.activeTab]}
-          onPress={() => setActiveTab('previous')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'previous' && styles.activeTabText,
-            ]}
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'open' && styles.activeTabText,
+              ]}
+            >
+              Open Events
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tab, activeTab === 'previous' && styles.activeTab]}
+            onPress={() => setActiveTab('previous')}
           >
-            Previous Events
-          </Text>
-        </Pressable>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'previous' && styles.activeTabText,
+              ]}
+            >
+              Previous Events
+            </Text>
+          </Pressable>
+        </View>
+        <View style={styles.sortRight}>
+          <SortDropdown
+            currentSort={selectedSort ?? 'expiry-asc'}
+            onSortChange={(s) => setSelectedSort(s)}
+            buttonSize={28}
+          />
+        </View>
       </View>
 
       {/* Events List */}
@@ -222,9 +246,16 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
+    paddingRight: spacing.lg,
+  },
+  tabsLeft: {
+    flexDirection: 'row',
+    flex: 1,
   },
   tab: {
     flex: 1,
@@ -232,6 +263,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+  },
+  sortRight: {
+    paddingLeft: spacing.md,
   },
   activeTab: {
     borderBottomColor: colors.primary,
