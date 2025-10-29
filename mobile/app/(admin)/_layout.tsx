@@ -60,6 +60,13 @@ export default function AdminLayout() {
           ),
         }}
       />
+      {/** Hidden segment for admin reviews stack. Enables navigation without showing a tab. */}
+      <Tabs.Screen
+        name="reviews"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen
         name="create/page"
         options={{
