@@ -57,6 +57,8 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
 
   // Don't show expired open events to students
   if (isElapsed && !isAdmin && event.status === 'open') return null;
+  
+  const router = useRouter();
 
   return (
     <Pressable onPress={toggleExpand} style={styles.card}>
@@ -159,6 +161,17 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
             )}
           </View>
         )}
+
+        {/* Leave a Review Button - Student only */}
+        {!isAdmin && (
+          <Pressable
+            style={styles.reviewButton}
+            onPress={() => router.push(`/feedback?eventId=${event.id}`)}
+          >
+            <Text style={styles.reviewButtonText}>Leave a Review</Text>
+          </Pressable>
+        )}
+
 
         {/* Expand Indicator */}
         <Text style={styles.expandIndicator}>
@@ -292,4 +305,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.md,
   },
-});
+  reviewButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  reviewButtonText: {
+    ...typography.body,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+  },
+
+}
+
+);
