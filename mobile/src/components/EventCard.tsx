@@ -7,6 +7,8 @@ import { formatTimestamp } from '../lib/utils';
 import { tsToMs } from '../lib/time';
 import { useCountdown } from '../hooks/useCountdown';
 import type { Event } from '../types';
+import { useRouter } from "expo-router";
+
 
 interface EventCardProps {
   event: Event;
@@ -20,12 +22,12 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
 
   // Timer should ONLY show for open events and ONLY depend on duration
   const shouldShowCountdown = event.status === 'open';
-  
+
   // Calculate expiry based ONLY on duration (in minutes)
   const durationMs = (event.duration ?? 30) * 60 * 1000;
   const startMs = tsToMs(event.foodAvailable);
   const expiryMs = startMs ? startMs + durationMs : null;
-  
+
   // Pass null if shouldn't show countdown to ensure hook resets
   const { remainingMs, hours, minutes, seconds, isElapsed } = useCountdown(
     shouldShowCountdown && expiryMs ? expiryMs : null
@@ -45,7 +47,7 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
     const totalDurationMs = (event.duration ?? 30) * 60 * 1000;
     if (totalDurationMs <= 0) return 0;
     const calculatedProgress = Math.max(0, Math.min(1, remainingMs / totalDurationMs));
-return calculatedProgress;
+    return calculatedProgress;
   }, [shouldShowCountdown, remainingMs, expiryMs, startMs, event.duration, event.name]);
 
   // Auto-close event when timer expires (admin only to avoid multiple updates)
@@ -60,6 +62,8 @@ return calculatedProgress;
 
   // Don't show expired open events to students
   if (isElapsed && !isAdmin && event.status === 'open') return null;
+  
+  const router = useRouter();
 
   return (
     <Pressable onPress={toggleExpand} style={styles.card}>
@@ -151,6 +155,17 @@ return calculatedProgress;
             )}
           </View>
         )}
+
+        {/* Leave a Review Button - Student only */}
+        {!isAdmin && (
+          <Pressable
+            style={styles.reviewButton}
+            onPress={() => router.push(`/feedback?eventId=${event.id}`)}
+          >
+            <Text style={styles.reviewButtonText}>Leave a Review</Text>
+          </Pressable>
+        )}
+
 
         {/* Expand Indicator */}
         <Text style={styles.expandIndicator}>
@@ -283,4 +298,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.md,
   },
-});
+  reviewButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  reviewButtonText: {
+    ...typography.body,
+    color: colors.text.onPrimary,
+    fontWeight: '600',
+  },
+
+}
+
+);
