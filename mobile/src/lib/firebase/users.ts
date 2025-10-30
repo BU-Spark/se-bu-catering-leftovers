@@ -17,6 +17,11 @@ import {
   limit,
 } from 'firebase/firestore';
 import { firestore } from './config';
+import {
+  validateEnsureUser,
+  validateUpdatePreferences,
+  validateUserEventOp,
+} from '../schemas/users.schema';
 
 export type Role = 'User' | 'Admin';
 export type UserDoc = {
@@ -95,14 +100,16 @@ export async function getUserByEmail(email: string): Promise<UserDoc | null> {
  * Initializes with seed data or defaults
  */
 export async function ensureUser(uid: string, seed: Partial<UserDoc> = {}) {
+  const validated = validateEnsureUser(uid, seed);
+  
   const ref = userRef(uid);
   const snap = await getDoc(ref);
   if (!snap.exists()) {
     const full: UserDoc = {
-      uid,
-      email: (seed.email ?? '').trim().toLowerCase(),
-      name: seed.name ?? '',
-      role: (seed.role ?? 'User') as Role,
+      uid: validated.uid,
+      email: (validated.email ?? '').trim().toLowerCase(),
+      name: validated.name ?? '',
+      role: (validated.role ?? 'User') as Role,
       events: [],
       reviews: [],
       locPref: [],
@@ -122,7 +129,8 @@ export async function updateUserPreferences(
   uid: string,
   prefs: Partial<Pick<UserDoc, 'locPref' | 'timePref' | 'foodPref'>>,
 ) {
-  await updateDoc(userRef(uid), stripUndef(prefs));
+  const validated = validateUpdatePreferences(prefs);
+  await updateDoc(userRef(uid), stripUndef(validated));
 }
 
 /**
@@ -137,6 +145,7 @@ export async function acceptTerms(uid: string) {
  * Uses arrayUnion to avoid duplicates
  */
 export async function addEventToUser(uid: string, eventId: string) {
+  validateUserEventOp(uid, eventId);
   const batch = writeBatch(firestore);
   batch.update(userRef(uid), { events: arrayUnion(eventId) });
   await batch.commit();
@@ -146,6 +155,7 @@ export async function addEventToUser(uid: string, eventId: string) {
  * UPDATE: Remove event from user's events array
  */
 export async function removeEventFromUser(uid: string, eventId: string) {
+  validateUserEventOp(uid, eventId);
   const batch = writeBatch(firestore);
   batch.update(userRef(uid), { events: arrayRemove(eventId) });
   await batch.commit();
