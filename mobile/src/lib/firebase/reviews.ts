@@ -11,6 +11,10 @@ import {
   SnapshotOptions,
 } from 'firebase/firestore';
 import { firestore } from './config';
+import {
+  validateCreateReview,
+  validateFetchReviewsOpts,
+} from '../schemas/reviews.schema';
 
 export type Review = {
   id: string;
@@ -56,7 +60,12 @@ const subcol = (eventId: string) =>
  * @returns Reviews ordered by date, newest first
  */
 export async function fetchReviews(eventId: string, pageSize = 20) {
-  const q = query(subcol(eventId), orderBy('date', 'desc'), limit(pageSize));
+  const validated = validateFetchReviewsOpts({ eventId, pageSize });
+  const q = query(
+    subcol(validated.eventId),
+    orderBy('date', 'desc'),
+    limit(validated.pageSize),
+  );
   const snap = await getDocs(q);
   return snap.docs.map((d) => d.data());
 }
@@ -79,6 +88,8 @@ export async function createReview(
     email?: string;
   },
 ) {
+  const validated = validateCreateReview(input);
+
   const batch = writeBatch(firestore);
 
   // Create review doc with auto-generated ID
@@ -86,12 +97,12 @@ export async function createReview(
   const reviewRef = doc(reviewsCol);
   const payload = {
     id: reviewRef.id,
-    comment: input.comment,
+    comment: validated.comment,
     date: serverTimestamp(),
-    images: input.images ?? [],
-    shareContact: !!input.shareContact,
-    name: input.shareContact ? (input.name ?? null) : null,
-    email: input.shareContact ? (input.email ?? null) : null,
+    images: validated.images ?? [],
+    shareContact: !!validated.shareContact,
+    name: validated.shareContact ? (validated.name ?? null) : null,
+    email: validated.shareContact ? (validated.email ?? null) : null,
   };
 
   batch.set(reviewRef, payload);

@@ -16,12 +16,18 @@ import {
   type SnapshotOptions,
   type FirestoreDataConverter,
   type DocumentData,
-  arrayUnion,
   arrayRemove,
-  setDoc
 } from 'firebase/firestore';
 import { firestore } from './config';
 import type { Event, EventStatus } from '../../types';
+import {
+  validateCreateEvent,
+  validateUpdateEvent,
+  validateEventIds,
+  PaginationOptsSchema,
+  OpenEventsPaginationSchema,
+  DeleteOptsSchema,
+} from '../schemas/events.schema';
 
 const EVENTS = 'Events';
 
@@ -110,9 +116,10 @@ export async function fetchEventsPage(opts?: {
   events: Event[];
   lastDoc: QueryDocumentSnapshot<Event> | null;
 }> {
-  const pageSize = opts?.pageSize ?? 20;
-  const field = opts?.order ?? 'foodAvailable';
-  const dir = opts?.direction ?? 'desc';
+  const validated = PaginationOptsSchema.parse(opts ?? {});
+  const pageSize = validated.pageSize ?? 20;
+  const field = validated.order ?? 'foodAvailable';
+  const dir = validated.direction ?? 'desc';
 
   const base = [orderBy(field, dir), limit(pageSize)];
   const q = opts?.after
@@ -141,7 +148,9 @@ export async function fetchOpenEventsPage(opts?: {
   events: Event[];
   lastDoc: QueryDocumentSnapshot<Event> | null;
 }> {
-  const pageSize = opts?.pageSize ?? 20;
+  const validated = OpenEventsPaginationSchema.parse(opts ?? {});
+  const pageSize = validated.pageSize ?? 20;
+
   const base = [
     where('status', '==', 'open'),
     orderBy('foodAvailable', 'desc'),
@@ -176,10 +185,12 @@ export async function getEvent(eventId: string): Promise<Event | null> {
  * @returns Array of events (may be fewer than requested if some don't exist)
  */
 export async function fetchEventsByIds(eventIds: string[]): Promise<Event[]> {
-  if (!eventIds.length) return [];
+  const validated = validateEventIds(eventIds);
+  if (!validated.length) return [];
+
   const chunks: string[][] = [];
-  for (let i = 0; i < eventIds.length; i += 10)
-    chunks.push(eventIds.slice(i, i + 10));
+  for (let i = 0; i < validated.length; i += 10)
+    chunks.push(validated.slice(i, i + 10));
 
   const results: Event[] = [];
   for (const ids of chunks) {
@@ -202,23 +213,25 @@ export async function fetchEventsByIds(eventIds: string[]): Promise<Event[]> {
 export async function createEvent(
   eventData: Partial<Event> & { creatorUid?: string },
 ): Promise<string> {
+  const validated = validateCreateEvent(eventData);
+
   const payload = stripUndef({
-    host: eventData.host ?? 'Unknown',
-    name: eventData.name ?? 'Untitled',
-    status: (eventData.status ?? 'drafted') as EventStatus,
-    Location: eventData.Location,
-    locationDetails: eventData.locationDetails ?? '',
-    notes: eventData.notes ?? '',
+    host: validated.host ?? 'Unknown',
+    name: validated.name ?? 'Untitled',
+    status: (validated.status ?? 'drafted') as EventStatus,
+    Location: validated.Location,
+    locationDetails: validated.locationDetails ?? '',
+    notes: validated.notes ?? '',
     duration:
-      typeof eventData.duration === 'number'
-        ? eventData.duration
-        : Number(eventData.duration ?? 30),
-    foodArrived: toTimestampOrUndef(eventData.foodArrived),
-    foodAvailable: toTimestampOrUndef(eventData.foodAvailable),
-    foods: Array.isArray(eventData.foods)
-      ? eventData.foods.filter((f: any) => f?.item?.trim?.())
+      typeof validated.duration === 'number'
+        ? validated.duration
+        : Number(validated.duration ?? 30),
+    foodArrived: toTimestampOrUndef(validated.foodArrived),
+    foodAvailable: toTimestampOrUndef(validated.foodAvailable),
+    foods: Array.isArray(validated.foods)
+      ? validated.foods.filter((f: any) => f?.item?.trim?.())
       : undefined,
-    images: eventData.images ?? undefined,
+    images: validated.images ?? undefined,
     reviewedBy: [] as string[],
   });
 
@@ -228,10 +241,14 @@ export async function createEvent(
   // Mirror ID in the doc for convenience
   batch.set(ref, { ...payload, id: ref.id });
 
-if (eventData.creatorUid) {
-  const userRef = doc(firestore, 'Users', eventData.creatorUid);
-  batch.set(userRef, { uid: eventData.creatorUid, events: [ref.id] }, { merge: true });
-}
+  if (validated.creatorUid) {
+    const userRef = doc(firestore, 'Users', validated.creatorUid);
+    batch.set(
+      userRef,
+      { uid: validated.creatorUid, events: [ref.id] },
+      { merge: true }
+    );
+  }
 
   await batch.commit();
   return ref.id;
@@ -247,18 +264,20 @@ export async function updateEvent(
   eventId: string,
   updates: Partial<Event>,
 ): Promise<void> {
+  const validated = validateUpdateEvent(updates);
+
   const data: Record<string, any> = stripUndef({
-    host: updates.host,
-    name: updates.name,
-    status: updates.status,
-    Location: updates.Location,
-    locationDetails: updates.locationDetails,
-    notes: updates.notes,
-    duration: updates.duration,
-    foods: updates.foods,
-    images: updates.images,
-    foodArrived: toTimestampOrUndef(updates.foodArrived),
-    foodAvailable: toTimestampOrUndef(updates.foodAvailable),
+    host: validated.host,
+    name: validated.name,
+    status: validated.status,
+    Location: validated.Location,
+    locationDetails: validated.locationDetails,
+    notes: validated.notes,
+    duration: validated.duration,
+    foods: validated.foods,
+    images: validated.images,
+    foodArrived: toTimestampOrUndef(validated.foodArrived),
+    foodAvailable: toTimestampOrUndef(validated.foodAvailable),
   });
 
   const ref = doc(firestore, EVENTS, eventId);
@@ -288,6 +307,8 @@ export async function deleteEvent(
   eventId: string,
   opts?: { ownerUid?: string },
 ): Promise<void> {
+  DeleteOptsSchema.parse(opts);
+
   const batch = writeBatch(firestore);
   const eventRef = doc(firestore, EVENTS, eventId);
   batch.delete(eventRef);
