@@ -1,5 +1,6 @@
+// src/lib/firebase/config.ts
 import { Platform } from 'react-native';
-import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage";
+import * as Device from 'expo-device';
 import type { FirebaseOptions, FirebaseApp } from 'firebase/app';
 import { getApps, initializeApp } from 'firebase/app';
 import {
@@ -10,47 +11,47 @@ import {
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
 import Constants from 'expo-constants';
 
-// Extract Firebase config from Expo constants
-const extra = (Constants.expoConfig?.extra ?? {}) as {
+type Extra = {
   firebase?: FirebaseOptions;
+  useEmulators?: boolean;
 };
 
-if (!extra.firebase) {
-  throw new Error('Missing firebase config in app.config.ts extra');
-}
+const extra = (Constants.expoConfig?.extra ?? {}) as Extra;
+if (!extra.firebase) throw new Error('Missing firebase config in app.config.ts extra');
 
-// Initialize Firebase app (singleton pattern)
+console.log(
+  '🔥 Firebase init',
+  JSON.stringify({
+    projectId: extra.firebase.projectId,
+    isDevice: Device.isDevice,
+    __DEV__,
+    useEmulatorsFlag: extra.useEmulators === true,
+  })
+);
+
 const app: FirebaseApp = getApps()[0] ?? initializeApp(extra.firebase);
 
-// Initialize Auth
+// Long-polling helps on some networks
+export const firestore: Firestore = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+});
 export const auth: Auth = getAuth(app);
 
-export const firestore: Firestore = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-});
+const USE_EMULATORS =
+  __DEV__ && !Device.isDevice && extra.useEmulators === true;
 
-export const storage: FirebaseStorage = getStorage(app);
+console.log('🔌 Emulator decision ->', { USE_EMULATORS });
 
-
-// Connect to emulator in development
-if (__DEV__) {
+if (USE_EMULATORS) {
   const HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
-  const PORT = 8080;
-
   try {
-    connectFirestoreEmulator(firestore, HOST, PORT);
+    connectFirestoreEmulator(firestore, HOST, 8080);
     connectAuthEmulator(auth, `http://${HOST}:9099`, { disableWarnings: true });
-    console.log(`🔧 Connected to Firestore Emulator at ${HOST}:${PORT}`);
-    console.log(`🔧 Connected to Auth Emulator at ${HOST}:9099`);
-  } catch (error) {
-    console.warn(
-      'Emulator connection failed (may already be connected):',
-      error,
-    );
+    console.log(`🧪 Emulators: Firestore http://${HOST}:8080, Auth http://${HOST}:9099`);
+  } catch (e) {
+    console.warn('Emulator connection failed:', e);
   }
 }
 
-// Helper to check if we're using emulator
-export const isUsingEmulator = () => __DEV__;
-
+export const isUsingEmulator = () => USE_EMULATORS;
 export default app;

@@ -9,6 +9,7 @@ import { EventEditorModal } from '../../src/components/EventEditorModal';
 import { router } from 'expo-router';
 import type { Event } from '../../src/types';
 import { updateEvent } from '../../src/lib/firebase/events';
+import { notifyStudents } from '../../src/lib/notifications';
 
 type TabType = 'open' | 'previous';
 
@@ -32,32 +33,43 @@ export default function AdminHomeScreen() {
 
   const handleSave = async (updates: Partial<Event>) => {
     if (!editingEvent?.id) return;
+    const prevStatus = editingEvent.status;
+    const nextStatus = (updates.status ?? editingEvent.status);
+    const becameOpen = prevStatus !== 'open' && nextStatus === 'open';
 
     try {
       await updateEvent(editingEvent.id, updates);
+
+      if (becameOpen) {
+        const name = (updates.name ?? editingEvent.name) || 'Event';
+        const locBits = [
+          updates.Location?.name ?? editingEvent.Location?.name,
+          updates.Location?.address ?? editingEvent.Location?.address,
+          updates.locationDetails ?? editingEvent.locationDetails,
+        ].filter(Boolean) as string[];
+        const loc = locBits.join(' • ') || 'BU Campus';
+        await notifyStudents('New food available', `${name} • ${loc}`, { eventId: editingEvent.id });
+      }
+
       Alert.alert('Success', 'Event updated successfully');
       refresh();
       setShowEditor(false);
       setEditingEvent(null);
-    } catch (error) {
-      console.error('Error updating event:', error);
+    } catch {
       Alert.alert('Error', 'Failed to update event');
     }
   };
 
-  // Filter events based on active tab
   const filteredEvents = events.filter((event) => {
     if (activeTab === 'open') {
       return event.status === 'open';
     } else {
-      // Previous events: closed, drafted, or saved
       return event.status === 'closed' || event.status === 'drafted' || event.status === 'saved';
     }
   });
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <View style={styles.titleRow}>
@@ -75,7 +87,6 @@ export default function AdminHomeScreen() {
         </Pressable>
       </View>
 
-      {/* Tabs */}
       <View style={styles.tabContainer}>
         <Pressable
           style={[styles.tab, activeTab === 'open' && styles.activeTab]}
@@ -105,7 +116,6 @@ export default function AdminHomeScreen() {
         </Pressable>
       </View>
 
-      {/* Events List */}
       <FlatList
         data={filteredEvents}
         keyExtractor={(item) => item.id}
@@ -134,7 +144,6 @@ export default function AdminHomeScreen() {
         }
       />
 
-      {/* Event Editor Modal */}
       <EventEditorModal
         visible={showEditor}
         event={editingEvent}
@@ -148,7 +157,6 @@ export default function AdminHomeScreen() {
   );
 }
 
-// Admin Event Card with status badge
 function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event) => void }) {
   const statusColor =
     event.status === 'open'

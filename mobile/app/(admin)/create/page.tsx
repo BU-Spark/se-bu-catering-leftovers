@@ -6,6 +6,8 @@ import { colors, typography, spacing } from '../../../src/lib/theme';
 import { EventEditorModal } from '../../../src/components/EventEditorModal';
 import { createEvent } from '../../../src/lib/firebase/events';
 import type { Event } from '../../../src/types';
+import { getUser } from '../../../src/lib/firebase/users';
+import { sendPush, notifyStudents } from '../../../src/lib/notifications';
 
 export default function CreateEventScreen() {
   const { user } = useUser();
@@ -13,15 +15,40 @@ export default function CreateEventScreen() {
 
   const handleCreateEvent = async (eventData: Partial<Event>) => {
     try {
-      const eventId = await createEvent({
-        ...eventData,
-        creatorUid: user?.id,
-      });
-      
+      const eventId = await createEvent({ ...eventData, creatorUid: user?.id });
+
+      const locationBits = [
+        eventData?.Location?.name,
+        eventData?.Location?.address,
+        eventData?.locationDetails,
+      ].filter(Boolean);
+      const loc = locationBits.join(' • ') || 'BU Campus';
+
+      const creatorUid = user?.id ?? '';
+      if (creatorUid) {
+        const adminUser = await getUser(creatorUid);
+        const token = adminUser?.pushToken ? [adminUser.pushToken] : [];
+        if (token.length) {
+          await sendPush(
+            token,
+            'Catering Leftovers',
+            `${eventData.name ?? 'Event'} created at ${loc}`,
+            { eventId }
+          );
+        }
+      }
+
+      if ((eventData.status ?? 'drafted') === 'open') {
+        await notifyStudents(
+          'Catering Leftovers',
+          `${eventData.name ?? 'An event'} • ${loc} • Tap for details.`,
+          { eventId }
+        );
+      }
+
       Alert.alert('Success', 'Event created successfully!');
       setShowModal(false);
     } catch (error) {
-      console.error('Error creating event:', error);
       Alert.alert('Error', 'Failed to create event');
     }
   };
@@ -30,26 +57,19 @@ export default function CreateEventScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Create Event</Text>
       <Text style={styles.subtitle}>Create a new food event for students</Text>
-      
       <View style={styles.content}>
         <View style={styles.instructionBox}>
           <Text style={styles.instructionText}>
             Tap the button below to create a new event with all the details like location, food items, and timing.
           </Text>
         </View>
-        
-        <Pressable 
-          style={styles.createButton}
-          onPress={() => setShowModal(true)}
-        >
+        <Pressable style={styles.createButton} onPress={() => setShowModal(true)}>
           <Text style={styles.createButtonText}>+ Create New Event</Text>
         </Pressable>
       </View>
-
-      {/* Event Editor Modal */}
       <EventEditorModal
         visible={showModal}
-        event={null}  // null = create mode
+        event={null}
         onClose={() => setShowModal(false)}
         onCreate={handleCreateEvent}
       />

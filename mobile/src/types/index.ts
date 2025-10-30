@@ -2,7 +2,6 @@
 // Core data types matching Firestore schema
 
 export type UserRole = 'User' | 'Admin';
-
 export type EventStatus = 'drafted' | 'saved' | 'open' | 'closed';
 
 export interface User {
@@ -16,6 +15,9 @@ export interface User {
   timePref: string[];
   foodPref: string[];
   agreedToTerms: boolean;
+  pushToken?: string;
+  devicePlatform?: string;
+  notificationsEnabled?: boolean;
 }
 
 export interface Location {
@@ -43,8 +45,8 @@ export interface Event {
   locationDetails: string;
   notes: string;
   duration: number;
-  foodArrived: any; // Firestore Timestamp
-  foodAvailable: any; // Firestore Timestamp
+  foodArrived: any;
+  foodAvailable: any;
   foods: FoodItem[];
   status: EventStatus;
   images: string[];
@@ -54,7 +56,7 @@ export interface Event {
 export interface Review {
   id: string;
   comment: string;
-  date: any; // Firestore Timestamp
+  date: any;
   images: string[];
   shareContact: boolean;
   name?: string;
