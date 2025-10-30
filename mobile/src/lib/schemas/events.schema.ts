@@ -33,8 +33,8 @@ export const EventSchema = z.object({
   locationDetails: z.string(),
   notes: z.string(),
   duration: z.number().int().positive(),
-  foodArrived: z.any(), // TODO: Timestamp validation 
-  foodAvailable: z.any(), // TODO: Timestamp validation
+  foodArrived: z.any(), // TODO: Timestamp Validation 
+  foodAvailable: z.any(), // TODO: Timestamp Validation
   foods: z.array(FoodItemSchema),
   images: z.array(z.string().url()),
   reviewedBy: z.array(z.string()),
