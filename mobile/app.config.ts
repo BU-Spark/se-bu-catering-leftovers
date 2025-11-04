@@ -1,31 +1,49 @@
 // mobile/app.config.ts
-import 'dotenv/config';
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import * as dotenv from 'dotenv';
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
-  name: config.name ?? 'mobile',
-  slug: config.slug ?? 'mobile',
-  scheme: 'leftovers',
-  extra: {
-    firebase: {
-      apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',
-      authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? '',
-      projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? '',
-      storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
-      messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? '',
-      appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
+// Local-only fallback. On EAS, set Secrets instead of committing .env.local.
+dotenv.config({ path: '.env.local' });
+
+const required = (key: string) => {
+  const v = process.env[key];
+  if (!v) throw new Error(`Missing environment variable: ${key}`);
+  return v;
+};
+
+export default ({ config }: ConfigContext): ExpoConfig => {
+  return {
+    name: config.name ?? 'mobile',
+    slug: config.slug ?? 'mobile',
+    scheme: 'leftovers',
+    extra: {
+      firebase: {
+        apiKey: required('NEXT_PUBLIC_FIREBASE_API_KEY'),
+        authDomain: required('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'),
+        projectId: required('NEXT_PUBLIC_FIREBASE_PROJECT_ID'),
+        storageBucket: required('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'),
+        ...(process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL
+          ? { databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL }
+          : {}),
+      },
+      clerk: {
+        publishableKey: required('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY'),
+      },
+      eas: {
+        projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',
+      },
+      useEmulators: false,
     },
-    clerk: {
-      publishableKey: process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '',
+    plugins: [
+      'expo-router',
+      'expo-notifications', // add plugin options here if needed
+    ],
+    ios: {
+      supportsTablet: true,
     },
-    // ✅ Add your EAS project ID here (set via .env as EXPO_PUBLIC_EAS_PROJECT_ID)
-    eas: {
-      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',
+    android: {
+      // Correct permission for Android 13+ notifications
+      permissions: ['android.permission.POST_NOTIFICATIONS'],
     },
-    // Keep emulator toggle if you added it earlier; default false
-    useEmulators: false,
-  },
-  plugins: ['expo-router', 'expo-notifications'],
-  ios: { supportsTablet: true },
-  android: { permissions: ['NOTIFICATIONS'] },
-});
+  };
+};

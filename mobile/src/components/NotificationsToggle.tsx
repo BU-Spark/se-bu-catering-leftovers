@@ -16,7 +16,7 @@ export default function NotificationsToggle() {
     if (!uid) return;
     setLoading(true);
     const doc = await getUser(uid);
-    setEnabled(doc?.notificationsEnabled !== false); // default true
+    setEnabled(doc?.notificationsEnabled !== false);
     setLoading(false);
   }, [uid]);
 
