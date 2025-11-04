@@ -4,10 +4,16 @@ import { View, Text, Switch, ActivityIndicator } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { registerForPushNotificationsAsync } from '../lib/notifications';
 import { getUser, setNotificationsEnabled } from '../lib/firebase/users';
-import { colors, spacing, typography } from '../lib/theme';
+import { useTheme } from '../lib/ThemeProvider';
+import { spacing, typography } from '../lib/theme';
 
-export default function NotificationsToggle() {
+interface NotificationsToggleProps {
+  showLabel?: boolean;
+}
+
+export default function NotificationsToggle({ showLabel = true }: NotificationsToggleProps) {
   const { user, isLoaded } = useUser();
+  const { colors } = useTheme();
   const [enabled, setEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const uid = user?.id;
@@ -38,8 +44,19 @@ export default function NotificationsToggle() {
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-      <Text style={[typography.body, { color: colors.text.primary }]}>Notifications</Text>
-      {loading ? <ActivityIndicator /> : <Switch value={enabled} onValueChange={onToggle} />}
+      {showLabel && (
+        <Text style={[typography.body, { color: colors.text.primary }]}>Notifications</Text>
+      )}
+      {loading ? (
+        <ActivityIndicator color={colors.primary} />
+      ) : (
+        <Switch
+          value={enabled}
+          onValueChange={onToggle}
+          trackColor={{ false: colors.border.default, true: colors.primary }}
+          thumbColor={colors.surface}
+        />
+      )}
     </View>
   );
 }

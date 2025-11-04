@@ -1,6 +1,6 @@
 // Unified color scheme matching web app theme
 
-export const colors = {
+export const lightColors = {
   primary: '#ab0101',
   primaryDark: '#8a0000',
   primaryLight: '#cc0101',
@@ -26,6 +26,36 @@ export const colors = {
   success: '#0b8457',
   warning: '#f59e0b',
 };
+
+export const darkColors = {
+  primary: '#ab0101',
+  primaryDark: '#8a0000',
+  primaryLight: '#cc0101',
+  secondary: '#4A5568',
+  secondaryLight: '#718096',
+
+  background: '#1a1a1a',
+  surface: '#2d2d2d',
+
+  text: {
+    primary: '#ffffff',
+    secondary: '#a0a0a0',
+    onPrimary: '#ffffff',
+  },
+
+  border: {
+    light: '#404040',
+    default: '#4a4a4a',
+  },
+
+  error: '#ef4444',
+  errorBg: '#7f1d1d',
+  success: '#10b981',
+  warning: '#f59e0b',
+};
+
+// Legacy export for backward compatibility (defaults to light)
+export const colors = lightColors;
 
 export const status = {
   open: '#0b8457',

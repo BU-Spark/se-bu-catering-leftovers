@@ -1,24 +1,17 @@
 // app/(student)/index.tsx
-import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable } from 'react-native';
-import { useAuth, useUser } from '@clerk/clerk-expo';
+import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { useUser } from '@clerk/clerk-expo';
 import { colors, typography, spacing } from '../../src/lib/theme';
 import { useOpenEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
-import { router } from 'expo-router';
 import React from 'react';
 import SortDropdown, { SortOption } from '../../src/components/SortDropdown';
 import { getExpiryMs } from '../../src/lib/time';
 
 export default function StudentHomeScreen() {
   const { user } = useUser();
-  const { signOut } = useAuth();
   const { events, loading, refresh } = useOpenEvents();
   const [sort, setSort] = React.useState<SortOption>('expiry-asc');
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/sign-in');
-  };
 
   const sortedEvents = React.useMemo(() => {
     const withExpiry = events.map(e => ({ e, expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }) }));
@@ -41,9 +34,6 @@ export default function StudentHomeScreen() {
           </Text>
           <Text style={styles.subtitle}>Browse available food events</Text>
         </View>
-        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
       </View>
 
       {/* Sort control under header */}
@@ -85,9 +75,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     padding: spacing.lg,
     paddingTop: spacing.xxl + 20,
     backgroundColor: colors.surface,
@@ -108,17 +95,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: spacing.xs,
     alignItems: 'flex-end',
-  },
-  signOutButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.error,
-    borderRadius: 8,
-  },
-  signOutText: {
-    ...typography.bodySmall,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
   },
   listContent: {
     padding: spacing.lg,

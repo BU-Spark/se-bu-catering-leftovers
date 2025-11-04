@@ -1,4 +1,4 @@
-// app/(admin)/settings/page.tsx
+// app/(student)/settings/page.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
 import { useAuth } from '@clerk/clerk-expo';
@@ -23,7 +23,7 @@ export default function SettingsScreen() {
     >
       <Text style={[styles.title, { color: colors.text.primary }]}>Settings</Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-        Manage admin settings and preferences
+        Manage your settings and preferences
       </Text>
 
       {/* Theme Toggle */}
@@ -114,3 +114,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+

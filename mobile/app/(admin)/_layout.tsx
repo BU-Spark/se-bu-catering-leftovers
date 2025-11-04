@@ -3,13 +3,14 @@ import { Tabs, Redirect } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../src/lib/theme';
+import { useTheme } from '../../src/lib/ThemeProvider';
 
 export default function AdminLayout() {
   console.log('Admin layout');
 
   const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
+  const { colors } = useTheme();
 
   if (!authLoaded || !userLoaded) {
     return (
