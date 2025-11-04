@@ -26,12 +26,13 @@ touch mobile/.env.local
 ```
 
 **File content:** Copy these keys (same as web app):
+```bash
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id_here
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket_here
 NEXT_PUBLIC_FIREBASE_DATABASE_URL=your_database_url_here
-
+```
 
 ⚠️ **Do not commit real values to Git**
 
