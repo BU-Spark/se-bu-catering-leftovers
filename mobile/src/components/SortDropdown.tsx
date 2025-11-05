@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing, borderRadius } from '../lib/theme';
+import { useTheme } from '../lib/ThemeProvider';
+import { typography, spacing, borderRadius } from '../lib/theme';
 
 export type SortOption = 'expiry-asc' | 'expiry-desc';
 
@@ -12,12 +13,71 @@ type SortDropdownProps = {
 };
 
 export default function SortDropdown({ currentSort, onSortChange, buttonSize = 32 }: SortDropdownProps) {
+  const { colors } = useTheme();
   const [isOpen, setIsOpen] = React.useState(false);
 
   const options: { value: SortOption; label: string }[] = [
     { value: 'expiry-desc', label: 'Just Started' },
     { value: 'expiry-asc', label: 'Ending Soon' },
   ];
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      position: 'relative',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    button: {
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.border.light,
+      borderRadius: borderRadius.sm,
+    },
+    dropdown: {
+      position: 'absolute',
+      top: '100%',
+      right: 0,
+      backgroundColor: colors.surface,
+      borderRadius: borderRadius.md,
+      paddingVertical: spacing.xs,
+      minWidth: 180,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 5,
+      zIndex: 1000,
+      marginTop: spacing.xs,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    optionSelected: {
+      backgroundColor: colors.primary + '11',
+    },
+    optionText: {
+      ...typography.body,
+      color: colors.text.primary,
+    },
+    optionTextSelected: {
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 999,
+    },
+  }), [colors]);
 
   return (
     <>
@@ -64,63 +124,4 @@ export default function SortDropdown({ currentSort, onSortChange, buttonSize = 3
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    borderRadius: borderRadius.sm,
-  },
-  dropdown: {
-    position: 'absolute',
-    top: '100%',
-    right: 0,
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.xs,
-    minWidth: 180,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 1000,
-    marginTop: spacing.xs,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  optionSelected: {
-    backgroundColor: '#ab010111',
-  },
-  optionText: {
-    ...typography.body,
-    color: colors.text.primary,
-  },
-  optionTextSelected: {
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 999,
-  },
-});
-
 

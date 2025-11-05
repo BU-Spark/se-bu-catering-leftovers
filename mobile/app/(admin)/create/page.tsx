@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
-import { colors, typography, spacing } from '../../../src/lib/theme';
+import { useTheme } from '../../../src/lib/ThemeProvider';
+import { typography, spacing } from '../../../src/lib/theme';
 import { EventEditorModal } from '../../../src/components/EventEditorModal';
 import { createEvent } from '../../../src/lib/firebase/events';
 import type { Event } from '../../../src/types';
@@ -11,6 +12,7 @@ import { sendPush, notifyStudents } from '../../../src/lib/notifications';
 
 export default function CreateEventScreen() {
   const { user } = useUser();
+  const { colors } = useTheme();
   const [showModal, setShowModal] = useState(false);
 
   const handleCreateEvent = async (eventData: Partial<Event>) => {
@@ -53,6 +55,61 @@ export default function CreateEventScreen() {
     }
   };
 
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: spacing.lg,
+      paddingTop: spacing.xxl + 20,
+    },
+    title: {
+      ...typography.h3,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.xl,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: spacing.xl,
+    },
+    instructionBox: {
+      backgroundColor: colors.surface,
+      padding: spacing.lg,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border.light,
+      maxWidth: 300,
+    },
+    instructionText: {
+      ...typography.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    createButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
+      borderRadius: 12,
+      elevation: 2,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+    },
+    createButtonText: {
+      ...typography.h5,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Event</Text>
@@ -76,58 +133,3 @@ export default function CreateEventScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-  },
-  title: {
-    ...typography.h3,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.xl,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.xl,
-  },
-  instructionBox: {
-    backgroundColor: colors.surface,
-    padding: spacing.lg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    maxWidth: 300,
-  },
-  instructionText: {
-    ...typography.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  createButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  createButtonText: {
-    ...typography.h5,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-});

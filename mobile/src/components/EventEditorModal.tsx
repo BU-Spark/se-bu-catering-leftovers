@@ -17,7 +17,8 @@ import {
   Image
 } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { colors, typography, spacing, borderRadius } from '../lib/theme';
+import { useTheme } from '../lib/ThemeProvider';
+import { typography, spacing, borderRadius } from '../lib/theme';
 import type { Event, EventStatus, FoodItem } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
@@ -42,6 +43,7 @@ const MAX_FOOD_DURATION_HOURS = 4;
 const MAX_FOOD_DURATION_MINUTES = MAX_FOOD_DURATION_HOURS * 60;
 
 export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: EventEditorModalProps) {
+  const { colors } = useTheme();
   const [name, setName] = useState('');
   const [host, setHost] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -313,6 +315,293 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       Alert.alert("Upload Failed", "Could not upload one or more images. Please try again.");
     }
   };
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: spacing.lg,
+      paddingTop: spacing.xxl + 20,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+    },
+    headerTitle: {
+      ...typography.h4,
+      color: colors.text.primary,
+    },
+    closeButton: {
+      padding: spacing.sm,
+    },
+    closeButtonText: {
+      ...typography.h4,
+      color: colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: spacing.lg,
+    },
+    sectionTitle: {
+      ...typography.h6,
+      color: colors.text.primary,
+      marginTop: spacing.lg,
+      marginBottom: spacing.md,
+    },
+    label: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      fontWeight: '600',
+      marginBottom: spacing.xs,
+    },
+    helperText: {
+      ...typography.caption,
+      color: colors.text.secondary,
+      marginBottom: spacing.xs,
+      fontStyle: 'italic',
+    },
+    input: {
+      ...typography.body,
+      color: colors.text.primary,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    dateButton: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    dateButtonText: {
+      ...typography.body,
+      color: colors.text.primary,
+    },
+    doneButton: {
+      backgroundColor: colors.primary,
+      padding: spacing.sm,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    doneButtonText: {
+      ...typography.body,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+    statusContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+      marginBottom: spacing.md,
+    },
+    statusChip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.sm,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      backgroundColor: colors.surface,
+    },
+    statusChipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    statusChipText: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+    },
+    statusChipTextActive: {
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+    foodItemContainer: {
+      marginBottom: spacing.md,
+    },
+    foodItemRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      alignItems: 'center',
+    },
+    imageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    imageItem: {
+      position: 'relative',
+    },
+    imagePreview: {
+      width: 120,
+      height: 120,
+      borderRadius: borderRadius.md,
+    },
+    deleteButton: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      backgroundColor: colors.error,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    deleteText: {
+      color: colors.text.onPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    removeButton: {
+      padding: spacing.sm,
+      backgroundColor: colors.error,
+      borderRadius: borderRadius.sm,
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 40,
+      height: 40,
+    },
+    removeButtonText: {
+      color: colors.text.onPrimary,
+      fontSize: 20,
+    },
+    addButton: {
+      padding: spacing.md,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    addButtonText: {
+      ...typography.body,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      padding: spacing.lg,
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.border.light,
+    },
+    footerButton: {
+      flex: 1,
+      padding: spacing.lg,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+    },
+    cancelButton: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+    },
+    cancelButtonText: {
+      ...typography.body,
+      color: colors.text.secondary,
+      fontWeight: '600',
+    },
+    saveButton: {
+      backgroundColor: colors.primary,
+    },
+    saveButtonText: {
+      ...typography.body,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+    defaultImageGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      marginBottom: spacing.md,
+    },
+    defaultImageWrapper: {
+      width: '30%',
+      aspectRatio: 1,
+      marginBottom: spacing.sm,
+      borderRadius: borderRadius.sm,
+      overflow: 'hidden',
+      borderWidth: 2,
+      borderColor: 'transparent',
+    },
+    selectedDefaultImage: {
+      borderColor: colors.primary,
+    },
+    defaultImage: {
+      width: '100%',
+      height: '100%',
+      resizeMode: 'cover',
+    },
+    selectedImagesContainer: {
+      marginBottom: spacing.lg,
+    },
+    imageSection: {
+      marginBottom: spacing.lg,
+    },
+    subsectionTitle: {
+      ...typography.body,
+      color: colors.text.primary,
+      fontWeight: '600',
+      marginBottom: spacing.sm,
+    },
+    imageLabel: {
+      position: 'absolute',
+      bottom: 4,
+      left: 4,
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.sm,
+    },
+    imageLabelText: {
+      ...typography.caption,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+      fontSize: 10,
+    },
+    selectedOverlay: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    selectedCheckmark: {
+      color: colors.text.onPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    addButtonDisabled: {
+      backgroundColor: colors.surface,
+      borderColor: colors.border.light,
+      opacity: 0.5,
+    },
+    addButtonTextDisabled: {
+      color: colors.text.secondary,
+    },
+  }), [colors]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -737,293 +1026,3 @@ function formatDate(date: Date): string {
     hour12: true,
   });
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  headerTitle: {
-    ...typography.h4,
-    color: colors.text.primary,
-  },
-  closeButton: {
-    padding: spacing.sm,
-  },
-  closeButtonText: {
-    ...typography.h4,
-    color: colors.text.secondary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-  },
-  sectionTitle: {
-    ...typography.h6,
-    color: colors.text.primary,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  label: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  helperText: {
-    ...typography.caption,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-    fontStyle: 'italic',
-  },
-  input: {
-    ...typography.body,
-    color: colors.text.primary,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  dateButton: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    borderRadius: borderRadius.sm,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  dateButtonText: {
-    ...typography.body,
-    color: colors.text.primary,
-  },
-  doneButton: {
-    backgroundColor: colors.primary,
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  doneButtonText: {
-    ...typography.body,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  statusChip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.surface,
-  },
-  statusChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  statusChipText: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-  },
-  statusChipTextActive: {
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-  foodItemContainer: {
-    marginBottom: spacing.md,
-  },
-  foodItemRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  imageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,             // spacing between images
-    paddingVertical: spacing.sm, // little padding top/bottom
-  },
-  imageItem: {
-    position: 'relative',
-  },
-  imagePreview: {
-    width: 120,
-    height: 120,
-    borderRadius: borderRadius.md,
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: colors.error,
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteText: {
-    color: colors.text.onPrimary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  removeButton: {
-    padding: spacing.sm,
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 40,
-    height: 40,
-  },
-  removeButtonText: {
-    color: colors.text.onPrimary,
-    fontSize: 20,
-  },
-  addButton: {
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  addButtonText: {
-    ...typography.body,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    padding: spacing.lg,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-  footerButton: {
-    flex: 1,
-    padding: spacing.lg,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border.default,
-  },
-  cancelButtonText: {
-    ...typography.body,
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  saveButton: {
-    backgroundColor: colors.primary,
-  },
-  saveButtonText: {
-    ...typography.body,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-  defaultImageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  defaultImageWrapper: {
-    width: '30%',
-    aspectRatio: 1,
-    marginBottom: spacing.sm,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  selectedDefaultImage: {
-    borderColor: colors.primary,
-  },
-  defaultImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  selectedImagesContainer: {
-    marginBottom: spacing.lg,
-  },
-  imageSection: {
-    marginBottom: spacing.lg,
-  },
-  subsectionTitle: {
-    ...typography.body,
-    color: colors.text.primary,
-    fontWeight: '600',
-    marginBottom: spacing.sm,
-  },
-  imageLabel: {
-    position: 'absolute',
-    bottom: 4,
-    left: 4,
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.sm,
-  },
-  imageLabelText: {
-    ...typography.caption,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-    fontSize: 10,
-  },
-  selectedOverlay: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedCheckmark: {
-    color: colors.text.onPrimary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  addButtonDisabled: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border.light,
-    opacity: 0.5,
-  },
-  addButtonTextDisabled: {
-    color: colors.text.secondary,
-  },
-
-}
-
-);

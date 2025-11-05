@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import { Text } from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../lib/theme';
+import { useTheme } from '../lib/ThemeProvider';
+import { typography, spacing, borderRadius } from '../lib/theme';
 import { formatTimestamp } from '../lib/utils';
 import { tsToMs } from '../lib/time';
 import { useCountdown } from '../hooks/useCountdown';
@@ -17,6 +18,7 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCardProps) {
+  const { colors } = useTheme();
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
 
@@ -58,6 +60,133 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
   // Don't show expired open events to students
   if (isElapsed && !isAdmin && event.status === 'open') return null;
   
+  const styles = React.useMemo(() => StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadius.md,
+      marginBottom: spacing.md,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.border.light,
+    },
+    image: {
+      width: '100%',
+      height: 200,
+      resizeMode: 'cover',
+    },
+    content: {
+      padding: spacing.lg,
+    },
+    title: {
+      ...typography.h5,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      marginBottom: spacing.sm,
+    },
+    countdownContainer: {
+      marginBottom: spacing.sm,
+    },
+    countdownText: {
+      ...typography.bodySmall,
+      color: colors.error,
+      fontWeight: '600',
+      marginBottom: spacing.xs,
+    },
+    progressBarBg: {
+      height: 8,
+      backgroundColor: colors.border.light,
+      borderRadius: borderRadius.sm,
+      overflow: 'hidden',
+    },
+    progressBarFill: {
+      height: '100%',
+      borderRadius: borderRadius.sm,
+    },
+    foodPreview: {
+      marginTop: spacing.sm,
+    },
+    foodItem: {
+      ...typography.body,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    moreItems: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      fontStyle: 'italic',
+    },
+    expandedContent: {
+      marginTop: spacing.md,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.border.light,
+      marginBottom: spacing.md,
+    },
+    infoRow: {
+      marginBottom: spacing.sm,
+    },
+    infoLabel: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      fontWeight: '600',
+    },
+    infoValue: {
+      ...typography.body,
+      color: colors.text.primary,
+      marginTop: spacing.xs / 2,
+    },
+    foodList: {
+      marginTop: spacing.md,
+    },
+    sectionLabel: {
+      ...typography.body,
+      color: colors.text.secondary,
+      fontWeight: '600',
+      marginBottom: spacing.xs,
+    },
+    foodDetailItem: {
+      ...typography.body,
+      color: colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    editButton: {
+      marginTop: spacing.lg,
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+    },
+    editButtonText: {
+      ...typography.body,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+    expandIndicator: {
+      ...typography.caption,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginTop: spacing.md,
+    },
+    reviewButton: {
+      marginTop: spacing.md,
+      backgroundColor: colors.primary,
+      paddingVertical: spacing.md,
+      borderRadius: borderRadius.sm,
+      alignItems: 'center',
+    },
+    reviewButtonText: {
+      ...typography.body,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+  }), [colors]);
+
   return (
     <Pressable onPress={toggleExpand} style={styles.card}>
       {/* Event Image */}
@@ -181,6 +310,23 @@ export function EventCard({ event, onPress, isAdmin = false, onEdit }: EventCard
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
+  const styles = React.useMemo(() => StyleSheet.create({
+    infoRow: {
+      marginBottom: spacing.sm,
+    },
+    infoLabel: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      fontWeight: '600',
+    },
+    infoValue: {
+      ...typography.body,
+      color: colors.text.primary,
+      marginTop: spacing.xs / 2,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}:</Text>
@@ -188,134 +334,3 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border.light,
-  },
-  image: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  title: {
-    ...typography.h5,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
-  },
-  countdownContainer: {
-    marginBottom: spacing.sm,
-  },
-  countdownText: {
-    ...typography.bodySmall,
-    color: colors.error,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  progressBarBg: {
-    height: 8,
-    backgroundColor: colors.border.light,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: borderRadius.sm,
-  },
-  foodPreview: {
-    marginTop: spacing.sm,
-  },
-  foodItem: {
-    ...typography.body,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  moreItems: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    fontStyle: 'italic',
-  },
-  expandedContent: {
-    marginTop: spacing.md,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border.light,
-    marginBottom: spacing.md,
-  },
-  infoRow: {
-    marginBottom: spacing.sm,
-  },
-  infoLabel: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  infoValue: {
-    ...typography.body,
-    color: colors.text.primary,
-    marginTop: spacing.xs / 2,
-  },
-  foodList: {
-    marginTop: spacing.md,
-  },
-  sectionLabel: {
-    ...typography.body,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  foodDetailItem: {
-    ...typography.body,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  editButton: {
-    marginTop: spacing.lg,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-  },
-  editButtonText: {
-    ...typography.body,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-  expandIndicator: {
-    ...typography.caption,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
-  reviewButton: {
-    marginTop: spacing.md,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-  },
-  reviewButtonText: {
-    ...typography.body,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-
-}
-
-);

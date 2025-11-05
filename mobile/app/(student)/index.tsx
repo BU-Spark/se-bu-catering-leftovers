@@ -1,7 +1,8 @@
 // app/(student)/index.tsx
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
-import { colors, typography, spacing } from '../../src/lib/theme';
+import { useTheme } from '../../src/lib/ThemeProvider';
+import { typography, spacing } from '../../src/lib/theme';
 import { useOpenEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
 import React from 'react';
@@ -10,6 +11,7 @@ import { getExpiryMs } from '../../src/lib/time';
 
 export default function StudentHomeScreen() {
   const { user } = useUser();
+  const { colors } = useTheme();
   const { events, loading, refresh } = useOpenEvents();
   const [sort, setSort] = React.useState<SortOption>('expiry-asc');
 
@@ -23,6 +25,54 @@ export default function StudentHomeScreen() {
     const missing = withExpiry.filter(x => x.expiry === null);
     return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
   }, [events, sort]);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    header: {
+      padding: spacing.lg,
+      paddingTop: spacing.xxl + 20,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+    },
+    greeting: {
+      ...typography.h4,
+      color: colors.text.primary,
+    },
+    subtitle: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+    },
+    sortRow: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xs,
+      alignItems: 'flex-end',
+    },
+    listContent: {
+      padding: spacing.lg,
+    },
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.xxl * 2,
+    },
+    emptyText: {
+      ...typography.h5,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+    emptySubtext: {
+      ...typography.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginTop: spacing.sm,
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -68,51 +118,3 @@ export default function StudentHomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  greeting: {
-    ...typography.h4,
-    color: colors.text.primary,
-  },
-  subtitle: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-  sortRow: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
-    alignItems: 'flex-end',
-  },
-  listContent: {
-    padding: spacing.lg,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xxl * 2,
-  },
-  emptyText: {
-    ...typography.h5,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    ...typography.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-});
