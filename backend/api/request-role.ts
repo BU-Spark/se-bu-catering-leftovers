@@ -2,6 +2,19 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { requireUserFromHeaders, clerk } from "../src/lib/clerk";
 
+/**
+ * Allows an authenticated user to request a new role ("staff").
+ *
+ * @param req - VercelRequest object containing method, headers, and body data.
+ * @param res - VercelResponse object used to send back JSON responses.
+ * @returns Responds with JSON:
+ *  - On success: { ok: true, requestedRole, status: "pending" }
+ *  - On failure: { error: string }
+ *
+ * Requirements:
+ *  - Method: POST
+ *  - Body must include `requestedRole` ("student" or "staff").
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
