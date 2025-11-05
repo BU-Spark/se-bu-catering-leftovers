@@ -1,0 +1,19 @@
+{
+  "name": "rbac-api",
+  "version": "1.0.0",
+  "engines": { "node": "20.x" },
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@clerk/backend": "^1.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vercel": "^33.0.0",
+    "vitest": "^1.0.0"
+  }
+}
