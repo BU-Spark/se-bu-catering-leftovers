@@ -1,8 +1,9 @@
 // app/(admin)/index.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert } from 'react-native';
-import { useAuth, useUser } from '@clerk/clerk-expo';
-import { colors, typography, spacing, borderRadius } from '../../src/lib/theme';
+import { useUser } from '@clerk/clerk-expo';
+import { useTheme } from '../../src/lib/ThemeProvider';
+import { typography, spacing, borderRadius } from '../../src/lib/theme';
 import { useAllEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
 import { EventEditorModal } from '../../src/components/EventEditorModal';
@@ -17,17 +18,12 @@ type TabType = 'open' | 'previous';
 
 export default function AdminHomeScreen() {
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { colors } = useTheme();
   const { events, loading, refresh } = useAllEvents();
   const [activeTab, setActiveTab] = useState<TabType>('open');
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [selectedSort, setSelectedSort] = useState<SortOption | null>(null);
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.replace('/sign-in');
-  };
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
@@ -84,6 +80,115 @@ export default function AdminHomeScreen() {
     return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
   }, [filteredEventsBase, selectedSort]);
 
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+  header: {
+    padding: spacing.lg,
+    paddingTop: spacing.xxl + 20,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    greeting: {
+      ...typography.h4,
+      color: colors.text.primary,
+    },
+    adminBadge: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    adminBadgeText: {
+      ...typography.caption,
+      color: colors.text.onPrimary,
+      fontWeight: '700',
+    },
+    subtitle: {
+      ...typography.bodySmall,
+      color: colors.text.secondary,
+      marginTop: spacing.xs,
+    },
+    tabContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+      paddingRight: spacing.lg,
+    },
+    tabsLeft: {
+      flexDirection: 'row',
+      flex: 1,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    sortRight: {
+      paddingLeft: spacing.md,
+    },
+    activeTab: {
+      borderBottomColor: colors.primary,
+    },
+    tabText: {
+      ...typography.body,
+      color: colors.text.secondary,
+      fontWeight: '600',
+    },
+    activeTabText: {
+      color: colors.primary,
+    },
+    listContent: {
+      padding: spacing.lg,
+    },
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.xxl * 2,
+    },
+    emptyText: {
+      ...typography.h5,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+    emptySubtext: {
+      ...typography.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      marginTop: spacing.sm,
+    },
+    adminCardWrapper: {
+      position: 'relative',
+    },
+    statusBadge: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      zIndex: 10,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: borderRadius.sm,
+    },
+    statusBadgeText: {
+      ...typography.caption,
+      color: colors.text.onPrimary,
+      fontWeight: '700',
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -98,9 +203,6 @@ export default function AdminHomeScreen() {
           </View>
           <Text style={styles.subtitle}>Manage all events</Text>
         </View>
-        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
       </View>
 
       {/* Tabs + Sort */}
@@ -184,6 +286,7 @@ export default function AdminHomeScreen() {
 }
 
 function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event) => void }) {
+  const { colors } = useTheme();
   const statusColor =
     event.status === 'open'
       ? colors.success
@@ -192,6 +295,26 @@ function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event
       : event.status === 'drafted'
       ? colors.warning
       : colors.primary;
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    adminCardWrapper: {
+      position: 'relative',
+    },
+    statusBadge: {
+      position: 'absolute',
+      top: spacing.sm,
+      right: spacing.sm,
+      zIndex: 10,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 4,
+      borderRadius: borderRadius.sm,
+    },
+    statusBadgeText: {
+      ...typography.caption,
+      color: colors.text.onPrimary,
+      fontWeight: '700',
+    },
+  }), [colors]);
 
   return (
     <View style={styles.adminCardWrapper}>
@@ -202,126 +325,3 @@ function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  greeting: {
-    ...typography.h4,
-    color: colors.text.primary,
-  },
-  adminBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  adminBadgeText: {
-    ...typography.caption,
-    color: colors.text.onPrimary,
-    fontWeight: '700',
-  },
-  subtitle: {
-    ...typography.bodySmall,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
-  },
-  signOutButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.error,
-    borderRadius: 8,
-  },
-  signOutText: {
-    ...typography.bodySmall,
-    color: colors.text.onPrimary,
-    fontWeight: '600',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-    paddingRight: spacing.lg,
-  },
-  tabsLeft: {
-    flexDirection: 'row',
-    flex: 1,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  sortRight: {
-    paddingLeft: spacing.md,
-  },
-  activeTab: {
-    borderBottomColor: colors.primary,
-  },
-  tabText: {
-    ...typography.body,
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  activeTabText: {
-    color: colors.primary,
-  },
-  listContent: {
-    padding: spacing.lg,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xxl * 2,
-  },
-  emptyText: {
-    ...typography.h5,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    ...typography.body,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-  adminCardWrapper: {
-    position: 'relative',
-  },
-  statusBadge: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    zIndex: 10,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: borderRadius.sm,
-  },
-  statusBadgeText: {
-    ...typography.caption,
-    color: colors.text.onPrimary,
-    fontWeight: '700',
-  },
-});

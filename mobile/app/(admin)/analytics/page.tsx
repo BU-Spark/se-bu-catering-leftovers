@@ -1,10 +1,32 @@
 // app/(admin)/analytics/page.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../../../src/lib/theme';
+import { useTheme } from '../../../src/lib/ThemeProvider';
+import { typography, spacing } from '../../../src/lib/theme';
 import CoreImpactMetrics from '../../../src/components/CoreImpactMetrics';
 
 export default function AnalyticsScreen() {
+  const { colors } = useTheme();
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: spacing.lg,
+      paddingTop: spacing.xxl + 20,
+    },
+    title: {
+      ...typography.h3,
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.text.secondary,
+      marginBottom: spacing.xl,
+    },
+  }), [colors]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Analytics</Text>
@@ -15,22 +37,3 @@ export default function AnalyticsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-  },
-  title: {
-    ...typography.h3,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.text.secondary,
-    marginBottom: spacing.xl,
-  },
-});
