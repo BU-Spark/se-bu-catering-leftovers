@@ -21,6 +21,7 @@ BOLD="\033[1m"; RESET="\033[0m"
 GREEN="\033[32m"; YELLOW="\033[33m"; RED="\033[31m"; CYAN="\033[36m"
 ok()   { echo -e "${GREEN}[OK]${RESET} $1"; }
 info() { echo -e "${CYAN}[INFO]${RESET} $1"; }
+warn() { echo -e "${YELLOW}[WARN]${RESET} $1"; }
 fail() { echo -e "${RED}[ERR]${RESET} $1"; exit 1; }
 
 # Deps
@@ -46,11 +47,11 @@ ensure_admin() {
   ok "Admin metadata set"
 }
 
-ensure_student() {
-  info "Ensuring STUDENT has status=active"
+reset_student() {
+  info "Resetting STUDENT to role=student,status=active"
   api GET "/v1/users/$STUDENT_ID" >/dev/null || fail "Student user not found"
-  api PATCH "/v1/users/$STUDENT_ID" -d '{"public_metadata":{"status":"active"}}' >/dev/null
-  ok "Student status ensured"
+  api PATCH "/v1/users/$STUDENT_ID" -d '{"public_metadata":{"role":"student","status":"active"}}' >/dev/null
+  ok "Student reset to baseline"
 }
 
 make_token() {
@@ -65,7 +66,7 @@ assert_code() { [[ "$1" == "$2" ]] || fail "Expected HTTP $2, got $1"; }
 
 test() {
   local name="$1"; shift
-  info "$name"
+  info "Testing: $name"
   "$@" && ok "$name"
 }
 
@@ -77,21 +78,26 @@ test_ping() {
 }
 
 test_me_user() {
-  local resp code
+  local resp code body
   resp=$(curl -s -w '|%{http_code}' -H "Authorization: Bearer $USER_JWT" "$BASE/api/me")
   code="${resp##*|}"
+  body="${resp%|*}"
   assert_code "$code" "200"
+  local role=$(echo "$body" | jq -r '.rbac.role')
+  [[ "$role" == "student" ]] || fail "Expected role=student, got $role"
 }
 
 test_request_role() {
-  local resp code
+  local resp code body
   resp=$(curl -s -w '|%{http_code}' \
+    -X POST \
     -H "Authorization: Bearer $USER_JWT" \
-    -H "Content-Type: application/json" \
-    -d '{"requestedRole":"staff"}' \
     "$BASE/api/request-role")
   code="${resp##*|}"
+  body="${resp%|*}"
   assert_code "$code" "200"
+  local status=$(echo "$body" | jq -r '.status')
+  [[ "$status" == "pending" ]] || fail "Expected status=pending, got $status"
 }
 
 test_pending() {
@@ -100,36 +106,76 @@ test_pending() {
   code="${resp##*|}"
   body="${resp%|*}"
   assert_code "$code" "200"
-  USER_TO_APPROVE=$(echo "$body" | jq -r '.pending[0].userId // empty')
-  [[ -n "$USER_TO_APPROVE" ]] || fail "No pending users found"
+  USER_TO_APPROVE=$(echo "$body" | jq -r ".pending[] | select(.userId == \"$STUDENT_ID\") | .userId")
+  [[ -n "$USER_TO_APPROVE" ]] || fail "Student not found in pending list"
 }
 
 test_approve() {
-  local resp code
+  local resp code body
   resp=$(curl -s -w '|%{http_code}' \
     -X POST -H "Authorization: Bearer $ADMIN_JWT" \
     "$BASE/api/admin/approve/$USER_TO_APPROVE")
   code="${resp##*|}"
+  body="${resp%|*}"
   assert_code "$code" "200"
+  
+  # Verify user is now staff
+  sleep 1
+  resp=$(curl -s -w '|%{http_code}' -H "Authorization: Bearer $USER_JWT" "$BASE/api/me")
+  body="${resp%|*}"
+  local role=$(echo "$body" | jq -r '.rbac.role')
+  [[ "$role" == "staff" ]] || fail "Expected role=staff after approval, got $role"
 }
 
+test_revoke() {
+  local resp code body
+  resp=$(curl -s -w '|%{http_code}' \
+    -X POST -H "Authorization: Bearer $ADMIN_JWT" \
+    "$BASE/api/admin/revoke/$STUDENT_ID")
+  code="${resp##*|}"
+  body="${resp%|*}"
+  assert_code "$code" "200"
+  
+  # Verify user is back to student
+  sleep 1
+  resp=$(curl -s -w '|%{http_code}' -H "Authorization: Bearer $USER_JWT" "$BASE/api/me")
+  body="${resp%|*}"
+  local role=$(echo "$body" | jq -r '.rbac.role')
+  [[ "$role" == "student" ]] || fail "Expected role=student after revoke, got $role"
+}
+
+# Cleanup trap
+cleanup() {
+  warn "Cleaning up: Resetting student to baseline state"
+  reset_student 2>/dev/null || true
+}
+trap cleanup EXIT
+
 # Run
-echo -e "${BOLD}RBAC API TEST — $BASE${RESET}"
+echo -e "${BOLD}═══════════════════════════════════════${RESET}"
+echo -e "${BOLD}  RBAC API TEST SUITE${RESET}"
+echo -e "${BOLD}  Endpoint: $BASE${RESET}"
+echo -e "${BOLD}═══════════════════════════════════════${RESET}"
+echo
 
 ensure_admin
-ensure_student
+reset_student
 
+info "Generating JWT tokens..."
 USER_JWT=$(make_token "$STUDENT_ID")
 ADMIN_JWT=$(make_token "$ADMIN_ID")
+ok "Tokens generated"
+echo
 
-test "ping" test_ping
-test "me (user)" test_me_user
-test "request-role" test_request_role
-test "admin pending" test_pending
-test "admin approve" test_approve
+test "Ping endpoint" test_ping
+test "Get current user info" test_me_user
+test "Request staff role" test_request_role
+test "Admin: List pending users" test_pending
+test "Admin: Approve user" test_approve
+test "Admin: Revoke staff access" test_revoke
 
-ok "ALL TESTS PASSED"
-# echo
-# echo "export USER_JWT=\"$USER_JWT\""
-# echo "export ADMIN_JWT=\"$ADMIN_JWT\""
-# echo
+echo
+echo -e "${BOLD}${GREEN}═══════════════════════════════════════${RESET}"
+echo -e "${BOLD}${GREEN}  ✓ ALL TESTS PASSED${RESET}"
+echo -e "${BOLD}${GREEN}═══════════════════════════════════════${RESET}"
+echo
