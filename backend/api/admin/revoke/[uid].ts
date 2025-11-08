@@ -24,12 +24,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const uid = req.query.uid as string | undefined;
   if (!uid) return res.status(400).json({ error: "uid missing" });
 
-  const target = await clerk.users.getUser(uid);
+  // Prevent self-revocation
+  if (uid === auth.userId) {
+    return res.status(400).json({ error: "Cannot revoke your own privileges" });
+  }
+
+  let target;
+  try {
+    target = await clerk.users.getUser(uid);
+  } catch (error) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
   const md = (target.publicMetadata ?? {}) as Record<string, any>;
 
-  await clerk.users.updateUserMetadata(uid, {
-    publicMetadata: { ...md, role: "student", status: "active" }
-  });
+  try {
+    await clerk.users.updateUserMetadata(uid, {
+      publicMetadata: { ...md, role: "student", status: "active" }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to update user metadata" });
+  }
 
   res.status(200).json({ ok: true, userId: uid });
 }

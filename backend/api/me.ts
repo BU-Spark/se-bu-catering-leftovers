@@ -9,7 +9,7 @@ import { readRbacFromUser } from "../src/lib/rbac";
  * Response: { userId, rbac: { role, status } }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const auth = await requireUserFromHeaders(req.headers as any);
+  const auth = await requireUserFromHeaders(req.headers as Record<string, string | string[] | undefined>);
   if (!auth.ok) return res.status(401).json({ error: auth.error });
 
   const rbac = readRbacFromUser(auth.user);

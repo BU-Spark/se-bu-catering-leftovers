@@ -24,12 +24,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const uid = req.query.uid as string | undefined;
   if (!uid) return res.status(400).json({ error: "uid missing" });
 
-  const target = await clerk.users.getUser(uid);
+  let target;
+  try {
+    target = await clerk.users.getUser(uid);
+  } catch (error) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
   const md = (target.publicMetadata ?? {}) as Record<string, any>;
 
-  await clerk.users.updateUserMetadata(uid, {
-    publicMetadata: { ...md, role: "staff", status: "active" }
-  });
+  // Validate user is actually pending approval
+  if (md.status !== "pending") {
+    return res.status(400).json({ 
+      error: "User is not pending approval",
+      currentStatus: md.status ?? "active"
+    });
+  }
+
+  try {
+    await clerk.users.updateUserMetadata(uid, {
+      publicMetadata: { ...md, role: "staff", status: "active" }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to update user metadata" });
+  }
 
   res.status(200).json({ ok: true, userId: uid });
 }

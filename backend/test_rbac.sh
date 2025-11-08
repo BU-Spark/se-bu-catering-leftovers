@@ -3,7 +3,9 @@ set -euo pipefail
 
 # Load .env
 if [[ -f ".env" ]]; then
-  export $(grep -v '^#' .env | xargs)
+  set -a
+  source .env
+  set +a
 else
   echo "No .env file found. Please create one."
   exit 1
