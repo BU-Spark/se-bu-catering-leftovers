@@ -6,11 +6,7 @@ export const clerk = createClerkClient({
 
 /**
  * Extracts and verifies a Clerk user from HTTP request headers.
- * 
- * @param headers - The request headers (should include an Authorization header with a Bearer token)
- * @returns An object indicating success or failure:
- *  - On success: { ok: true, user, userId }
- *  - On failure: { ok: false, error }
+ * Returns the authenticated user object and userId.
  */
 export async function requireUserFromHeaders(headers: Record<string, string | string[] | undefined>) {
   const auth = (headers["authorization"] || headers["Authorization"]) as string | undefined;
