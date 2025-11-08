@@ -6,6 +6,10 @@ import { isAdmin } from "../../src/lib/rbac";
  * GET /api/admin/pending
  * Returns all users with status="pending" (awaiting approval).
  * Only accessible by admins.
+ * 
+ * Clerk Metadata: READS publicMetadata from all users
+ * - Filters users where status === "pending"
+ * 
  * Response: { pending: [{ userId, email, role, status }] }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

@@ -6,7 +6,7 @@ import { readRbacFromUser } from "../src/lib/rbac";
 /**
  * GET /api/me
  * Returns information about the currently authenticated user.
- * Response: { userId, rbac: { role, status, requestedRole } }
+ * Response: { userId, rbac: { role, status } }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const auth = await requireUserFromHeaders(req.headers as any);

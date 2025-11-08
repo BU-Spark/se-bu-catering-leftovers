@@ -7,6 +7,11 @@ import { isAdmin } from "../../../src/lib/rbac";
  * POST /api/admin/approve/[uid]
  * Approves a pending user, promoting them to staff.
  * Only accessible by admins.
+ * 
+ * Clerk Metadata: UPDATES publicMetadata of target user
+ * - Sets role to "staff" (promoted)
+ * - Sets status to "active" (approved)
+ * 
  * Response: { ok: true, userId }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

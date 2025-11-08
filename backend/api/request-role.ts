@@ -5,6 +5,11 @@ import { requireUserFromHeaders, clerk } from "../src/lib/clerk";
 /**
  * POST /api/request-role
  * Allows a student to request staff access.
+ * 
+ * Clerk Metadata: UPDATES publicMetadata
+ * - Sets status to "pending" (awaiting admin approval)
+ * - Role stays "student" until admin approves
+ * 
  * Response: { ok: true, status: "pending" }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

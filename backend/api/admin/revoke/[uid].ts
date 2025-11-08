@@ -7,6 +7,11 @@ import { isAdmin } from "../../../src/lib/rbac";
  * POST /api/admin/revoke/[uid]
  * Revokes a user's staff access, demoting them back to student.
  * Only accessible by admins.
+ * 
+ * Clerk Metadata: UPDATES publicMetadata of target user
+ * - Sets role to "student" (demoted)
+ * - Sets status to "active" (still active, just not staff)
+ * 
  * Response: { ok: true, userId }
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
