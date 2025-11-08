@@ -4,7 +4,6 @@ export type Status = "active" | "pending" | "disabled";
 export interface RbacData {
   role: Role;
   status: Status;
-  requestedRole: Role | null;
 }
 
 /**
@@ -15,7 +14,6 @@ export function readRbacFromUser(user: any): RbacData {
   return {
     role: (md.role ?? "student") as Role,
     status: (md.status ?? "active") as Status,
-    requestedRole: (md.requestedRole ?? null) as Role | null,
   };
 }
 
