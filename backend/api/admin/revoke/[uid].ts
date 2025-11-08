@@ -1,11 +1,11 @@
-// backend/api/admin/approve/[uid].ts
+// backend/api/admin/revoke/[uid].ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { requireUserFromHeaders, clerk } from "../../../src/lib/clerk";
 import { isAdmin } from "../../../src/lib/rbac";
 
 /**
- * POST /api/admin/approve/[uid]
- * Approves a pending user, promoting them to staff.
+ * POST /api/admin/revoke/[uid]
+ * Revokes a user's staff access, demoting them back to student.
  * Only accessible by admins.
  * Response: { ok: true, userId }
  */
@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const md = (target.publicMetadata ?? {}) as Record<string, any>;
 
   await clerk.users.updateUserMetadata(uid, {
-    publicMetadata: { ...md, role: "staff", status: "active" }
+    publicMetadata: { ...md, role: "student", status: "active" }
   });
 
   res.status(200).json({ ok: true, userId: uid });
