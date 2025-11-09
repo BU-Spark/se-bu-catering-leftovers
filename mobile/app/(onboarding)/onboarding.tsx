@@ -158,21 +158,7 @@ const handleGetStarted = async () => {
             
             <ScrollView style={styles.termsScroll} showsVerticalScrollIndicator={true}>
               <Text style={styles.termsText}>
-                By using BU Catering, you agree to the following terms:{'\n\n'}
-                
-                1. Events are subject to availability and may be cancelled without notice.{'\n\n'}
-                
-                2. Food allergies and dietary restrictions are your responsibility. Always verify ingredients before consuming.{'\n\n'}
-                
-                3. Event hosts reserve the right to limit quantities and refuse service.{'\n\n'}
-                
-                4. You agree to provide accurate information and use the app respectfully.{'\n\n'}
-                
-                5. BU Catering is not liable for any health issues arising from food consumption.{'\n\n'}
-                
-                6. We may collect usage data to improve the service.{'\n\n'}
-                
-                7. These terms may be updated at any time.
+                {TERMS_AND_CONDITIONS}
               </Text>
             </ScrollView>
 
