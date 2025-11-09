@@ -9,6 +9,7 @@ import {
   Firestore,
 } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
 import Constants from 'expo-constants';
 
 type Extra = {
@@ -37,6 +38,9 @@ export const firestore: Firestore = initializeFirestore(app, {
 });
 export const auth: Auth = getAuth(app);
 
+// Initialize Firebase Storage
+export const storage: FirebaseStorage = getStorage(app);
+
 const USE_EMULATORS =
   __DEV__ && !Device.isDevice && extra.useEmulators === true;
 
@@ -47,7 +51,8 @@ if (USE_EMULATORS) {
   try {
     connectFirestoreEmulator(firestore, HOST, 8080);
     connectAuthEmulator(auth, `http://${HOST}:9099`, { disableWarnings: true });
-    console.log(`🧪 Emulators: Firestore http://${HOST}:8080, Auth http://${HOST}:9099`);
+    connectStorageEmulator(storage, HOST, 9199); 
+    console.log(`🧪 Emulators: Firestore http://${HOST}:8080, Auth http://${HOST}:9099, Storage http://${HOST}:9199`);
   } catch (e) {
     console.warn('Emulator connection failed:', e);
   }
