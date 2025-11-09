@@ -51,7 +51,6 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
     router.replace('/sign-in');
   };
 
-  // Shared routes - no longer need role-based routing
   const editNameRoute = '/settings/edit-name';
   const editLocationsRoute = '/settings/edit-location';
 

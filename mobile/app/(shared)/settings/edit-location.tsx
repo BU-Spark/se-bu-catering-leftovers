@@ -58,7 +58,6 @@ export default function EditLocationScreen() {
         locPref: selectedLocations,
       });
       
-      // Navigate back to settings page based on user role
       const role = user.publicMetadata?.role as string;
       if (role === 'admin') {
         router.replace('/(admin)/settings/page');
