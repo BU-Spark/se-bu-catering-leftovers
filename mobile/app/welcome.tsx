@@ -1,7 +1,7 @@
 // app/welcome.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { firestore } from '../src/lib/firebase/config';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { Text, StyleSheet, View, ActivityIndicator, Pressable, Image } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
@@ -10,8 +10,61 @@ import { colors, typography, spacing } from '../src/lib/theme';
 export default function WelcomeScreen() {
   const { isSignedIn, isLoaded: authLoaded } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
+  const [shouldRedirect, setShouldRedirect] = useState<{
+    path: string;
+    ready: boolean;
+  }>({ path: '', ready: false });
 
-  // Wait for both auth and user data to load
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!userLoaded || !isSignedIn || !user) return;
+
+      try {
+        const userRef = doc(firestore, 'Users', user.id);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            uid: user.id,
+            email: user.primaryEmailAddress?.emailAddress || '',
+            name: user.fullName || '',
+            role: user.publicMetadata?.role || 'User',
+            agreedToTerms: false,
+            events: [],
+            reviews: [],
+            locPref: [],
+            timePref: [],
+            foodPref: [],
+          });
+          console.log('✅ New user document created');
+          setShouldRedirect({ path: '/(onboarding)/onboarding', ready: true });
+          return;
+        }
+
+        const userData = userSnap.data();
+        console.log(userData.agreedToTerms)
+        if (userData.agreedToTerms !== true) {
+          console.log('📋 User needs to complete onboarding');
+          setShouldRedirect({ path: '/(onboarding)/onboarding', ready: true });
+          return;
+        }
+
+        const userRole = user.publicMetadata?.role as string | undefined;
+        if (userRole === 'admin') {
+          console.log('✅ Redirecting to admin route');
+          setShouldRedirect({ path: '/(admin)', ready: true });
+        } else {
+          console.log('✅ Redirecting to student route');
+          setShouldRedirect({ path: '/(student)', ready: true });
+        }
+      } catch (error) {
+        console.error('🔥 Failed to check onboarding status:', error);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [isSignedIn, userLoaded, user]);
+
   if (!authLoaded || !userLoaded) {
     return (
       <View style={styles.loadingContainer}>
@@ -19,53 +72,22 @@ export default function WelcomeScreen() {
       </View>
     );
   }
-  useEffect(() => {
-    const ensureUserDoc = async () => {
-      if (!userLoaded || !isSignedIn || !user) return;
 
-      try {
-        const userRef = doc(firestore, 'Users', user.id);
-        await setDoc(
-          userRef,
-          {
-            uid: user.id,
-            email: user.primaryEmailAddress?.emailAddress || '',
-            name: user.fullName || '',
-            role: user.publicMetadata?.role || 'User', // keep consistent with Clerk role
-            agreedToTerms: false,
-          },
-          { merge: true } // ✅ create if missing, update if exists
-        );
-        console.log('✅ Firestore user document ensured');
-      } catch (error) {
-        console.error('🔥 Failed to create Firestore user doc:', error);
-      }
-    };
-
-    ensureUserDoc();
-  }, [isSignedIn, userLoaded, user]);
-
-  // If already signed in, redirect based on role
-  if (isSignedIn) {
-    const userRole = user?.publicMetadata?.role as string | undefined;
-    console.log('Welcome screen - User role:', userRole);
-    console.log('Welcome screen - User metadata:', user?.publicMetadata);
-
-    if (userRole === 'admin') {
-      console.log('Welcome screen - Redirecting to admin route');
-      return <Redirect href='/(admin)' />;
-    }
-
-    console.log('Welcome screen - Redirecting to student route, role was:', userRole);
-    // Default to student route
-    return <Redirect href='/(student)' />;
+  if (shouldRedirect.ready && shouldRedirect.path) {
+    return <Redirect href={shouldRedirect.path as any} />;
   }
 
-  // Show welcome screen with login/signup options
+  if (isSignedIn) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* BU Logo */}
         <Image
           source={require('../assets/boston-university-logo.png')}
           style={styles.logo}
