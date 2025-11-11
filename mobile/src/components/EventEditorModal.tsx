@@ -14,7 +14,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  Image
+  Image,
+  Dimensions
 } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useTheme } from '../lib/ThemeProvider';
@@ -23,12 +24,10 @@ import type { Event, EventStatus, FoodItem } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
 const DEFAULT_IMAGES = [
-  require('../../assets/defaultEventFoodPics/dummypic1.jpg'),
-  require('../../assets/defaultEventFoodPics/dummypic2.jpg'),
-  require('../../assets/defaultEventFoodPics/dummypic3.jpeg'),
-  require('../../assets/defaultEventFoodPics/dummypic4.jpeg'),
-  require('../../assets/defaultEventFoodPics/dummypic5.jpeg'),
-  require('../../assets/defaultEventFoodPics/dummypic6.jpeg'),
+  require('../../assets/defaultEventFoodPics/Breakfast.jpg'),
+  require('../../assets/defaultEventFoodPics/Lunch.jpg'),
+  require('../../assets/defaultEventFoodPics/Snacks.jpg'),
+  require('../../assets/defaultEventFoodPics/Dinner.jpg'),
 ];
 
 interface EventEditorModalProps {
@@ -530,17 +529,17 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     defaultImageGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      justifyContent: 'space-between',
+      gap: spacing.sm,
       marginBottom: spacing.md,
     },
     defaultImageWrapper: {
-      width: '30%',
+      width: '48%',
       aspectRatio: 1,
-      marginBottom: spacing.sm,
-      borderRadius: borderRadius.sm,
+      borderRadius: borderRadius.md,
       overflow: 'hidden',
-      borderWidth: 2,
+      borderWidth: 3,
       borderColor: 'transparent',
+      backgroundColor: colors.surface,
     },
     selectedDefaultImage: {
       borderColor: colors.primary,
