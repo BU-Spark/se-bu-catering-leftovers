@@ -15,7 +15,6 @@ import {
   Platform,
   Alert,
   Image,
-  Dimensions
 } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useTheme } from '../lib/ThemeProvider';
@@ -28,6 +27,58 @@ const DEFAULT_IMAGES = [
   require('../../assets/defaultEventFoodPics/Lunch.jpg'),
   require('../../assets/defaultEventFoodPics/Snacks.jpg'),
   require('../../assets/defaultEventFoodPics/Dinner.jpg'),
+];
+
+const PRESET_LOCATIONS: Array<{
+  label: string;
+  name: string;
+  address: string;
+  campus_section: string;
+}> = [
+  // Verified: BU School of Law, 765 Commonwealth Ave, 02215
+  {
+    label: 'BU School of Law (LAW Tower)',
+    name: 'Boston University School of Law',
+    address: '765 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'Central',
+  },
+  // Verified: BU Hillel, 213 Bay State Rd, 02215
+  {
+    label: 'BU Hillel House',
+    name: 'Florence & Chafetz Hillel House',
+    address: '213 Bay State Road, Boston, MA 02215',
+    campus_section: 'Central',
+  },
+  {
+    label: 'GSU – Metcalf Ballroom',
+    name: 'George Sherman Union (Metcalf Ballroom)',
+    address: '775 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'Central',
+  },
+  {
+    label: 'GSU – Food Court',
+    name: 'George Sherman Union (Food Court)',
+    address: '775 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'Central',
+  },
+  {
+    label: 'Questrom School of Business',
+    name: 'Questrom School of Business',
+    address: '595 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'Central',
+  },
+  {
+    label: 'EPIC (Engineering Product Innovation Center)',
+    name: 'Engineering Product Innovation Center',
+    address: '750 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'East',
+  },
+  {
+    label: 'Warren Towers Lobby',
+    name: 'Warren Towers',
+    address: '700 Commonwealth Avenue, Boston, MA 02215',
+    campus_section: 'West',
+  },
 ];
 
 interface EventEditorModalProps {
@@ -62,6 +113,10 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
   const [foodAvailable, setFoodAvailable] = useState<Date>(new Date());
   const [showArrivedPicker, setShowArrivedPicker] = useState(false);
   const [showAvailablePicker, setShowAvailablePicker] = useState(false);
+
+  // Location preset picker
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [selectedPresetIndex, setSelectedPresetIndex] = useState<number | null>(null);
 
   // Calculate max available time (4 hours after arrival)
   const maxAvailableTime = React.useMemo(() => {
@@ -111,6 +166,14 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       } else {
         setFoodAvailable(new Date());
       }
+
+      // Infer preset from incoming event (if exact match)
+      const matched = PRESET_LOCATIONS.findIndex(p =>
+        p.name === (event.Location?.name || '') &&
+        p.address === (event.Location?.address || '') &&
+        p.campus_section === (event.Location?.campus_section || '')
+      );
+      setSelectedPresetIndex(matched >= 0 ? matched : null);
     }
   }, [event, visible]);
 
@@ -213,6 +276,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     setUploadedImages(uploadedImages.filter((_, i) => i !== index));
   };
 
+  // ----- Date pickers (iOS text forced to black via textColor) -----
   const handleArrivedDateChange = (event: any, selectedDate?: Date) => {
     if (Platform.OS === 'ios') {
       if (event.type === 'dismissed' || !selectedDate) {
@@ -220,11 +284,9 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         return;
       }
     }
-
     if (!selectedDate) return;
 
     const maxAvailable = new Date(selectedDate.getTime() + MAX_FOOD_DURATION_HOURS * 60 * 60 * 1000);
-
     setFoodArrived(selectedDate);
 
     if (foodAvailable > maxAvailable) {
@@ -247,7 +309,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         return;
       }
     }
-
     if (!selectedDate) return;
 
     if (selectedDate < foodArrived) {
@@ -267,7 +328,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       }, 100);
       return;
     }
-
     setFoodAvailable(selectedDate);
   };
 
@@ -276,7 +336,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       Alert.alert("Limit Reached", "You can only select up to 2 images total.");
       return;
     }
-
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (permission.status !== "granted") {
@@ -307,12 +366,41 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
         const downloadURL = await getDownloadURL(storageRef);
         uploadedUrls.push(downloadURL);
       }
-
       setUploadedImages((prev) => [...prev, ...uploadedUrls]);
     } catch (error) {
       console.error("Error uploading image(s):", error);
       Alert.alert("Upload Failed", "Could not upload one or more images. Please try again.");
     }
+  };
+
+  // Preset picker helpers
+  const openPresetPicker = () => setShowLocationDropdown(true);
+  const closePresetPicker = () => setShowLocationDropdown(false);
+  const applyPreset = (index: number) => {
+    const p = PRESET_LOCATIONS[index];
+    setSelectedPresetIndex(index);
+    setLocationName(p.name);
+    setLocationAddress(p.address);
+    setCampusSection(p.campus_section);
+    closePresetPicker();
+  };
+  const clearPreset = () => {
+    setSelectedPresetIndex(null);
+    closePresetPicker();
+  };
+
+  // If user edits location fields manually, clear preset selection
+  const onChangeLocationName = (v: string) => {
+    if (selectedPresetIndex !== null) setSelectedPresetIndex(null);
+    setLocationName(v);
+  };
+  const onChangeLocationAddress = (v: string) => {
+    if (selectedPresetIndex !== null) setSelectedPresetIndex(null);
+    setLocationAddress(v);
+  };
+  const onChangeCampusSection = (v: string) => {
+    if (selectedPresetIndex !== null) setSelectedPresetIndex(null);
+    setCampusSection(v);
   };
 
   const styles = React.useMemo(() => StyleSheet.create({
@@ -474,7 +562,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
       justifyContent: 'center',
       alignItems: 'center',
       width: 40,
-      height: 40,
     },
     removeButtonText: {
       color: colors.text.onPrimary,
@@ -600,6 +687,95 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
     addButtonTextDisabled: {
       color: colors.text.secondary,
     },
+
+    // Preset UI
+    presetButtonRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    presetButton: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: borderRadius.sm,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+    },
+    presetButtonText: {
+      ...typography.bodySmall,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    presetBadge: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.sm,
+    },
+    presetBadgeText: {
+      ...typography.caption,
+      color: colors.text.onPrimary,
+      fontWeight: '600',
+    },
+    presetModalBackdrop: {
+      flex: 1,
+      backgroundColor: '#00000066',
+    },
+    presetModalSheet: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      maxHeight: '70%',
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: borderRadius.md,
+      borderTopRightRadius: borderRadius.md,
+      padding: spacing.lg,
+      borderTopWidth: 1,
+      borderColor: colors.border.light,
+    },
+    presetModalTitle: {
+      ...typography.h6,
+      color: colors.text.primary,
+      marginBottom: spacing.md,
+    },
+    presetList: {
+      marginBottom: spacing.md,
+    },
+    presetOption: {
+      borderWidth: 1,
+      borderColor: colors.border.default,
+      borderRadius: borderRadius.sm,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      backgroundColor: colors.surface,
+    },
+    presetOptionSelected: {
+      borderColor: colors.primary,
+    },
+    presetOptionLabel: {
+      ...typography.body,
+      color: colors.text.primary,
+      fontWeight: '600',
+      marginBottom: 2,
+    },
+    presetOptionSub: {
+      ...typography.caption,
+      color: colors.text.secondary,
+      marginBottom: 2,
+    },
+    presetOptionMeta: {
+      ...typography.caption,
+      color: colors.text.secondary,
+      fontStyle: 'italic',
+    },
+    presetActions: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
   }), [colors]);
 
   return (
@@ -682,6 +858,8 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                 display="spinner"
                 onChange={handleArrivedDateChange}
                 minimumDate={new Date()}
+                /* Force black text on iOS pickers */
+                textColor="black"
               />
               <Pressable
                 style={styles.doneButton}
@@ -737,6 +915,8 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                 onChange={handleAvailableDateChange}
                 minimumDate={foodArrived}
                 maximumDate={maxAvailableTime}
+                /* Force black text on iOS pickers */
+                textColor="black"
               />
               <Pressable
                 style={styles.doneButton}
@@ -766,11 +946,30 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           {/* Location */}
           <Text style={styles.sectionTitle}>Location</Text>
 
+          {/* Preset trigger row with selected label shown beside the button */}
+          <View style={styles.presetButtonRow}>
+            <Pressable style={styles.presetButton} onPress={openPresetPicker}>
+              <Text style={styles.presetButtonText}>
+                {selectedPresetIndex !== null ? 'Change preset' : 'Choose from presets (optional)'}
+              </Text>
+            </Pressable>
+            {selectedPresetIndex !== null && (
+              <View style={styles.presetBadge}>
+                <Text style={styles.presetBadgeText}>
+                  {PRESET_LOCATIONS[selectedPresetIndex].label}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.helperText}>
+            You can still type a custom location below even after choosing a preset.
+          </Text>
+
           <Text style={styles.label}>Location Name</Text>
           <TextInput
             style={styles.input}
             value={locationName}
-            onChangeText={setLocationName}
+            onChangeText={onChangeLocationName}
             placeholder="e.g., Engineering Building"
             placeholderTextColor={colors.text.secondary}
           />
@@ -779,7 +978,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <TextInput
             style={styles.input}
             value={locationAddress}
-            onChangeText={setLocationAddress}
+            onChangeText={onChangeLocationAddress}
             placeholder="e.g., 8 St. Mary's St"
             placeholderTextColor={colors.text.secondary}
           />
@@ -788,7 +987,7 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           <TextInput
             style={styles.input}
             value={campusSection}
-            onChangeText={setCampusSection}
+            onChangeText={onChangeCampusSection}
             placeholder="e.g., Central, East, West"
             placeholderTextColor={colors.text.secondary}
           />
@@ -883,7 +1082,6 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
             Select up to 2 images total (default + uploaded). Current: {getTotalSelectedImages()}/2
           </Text>
 
-          {/* Selected Images Preview */}
           {(images.length > 0 || uploadedImages.length > 0) && (
             <View style={styles.selectedImagesContainer}>
               <Text style={styles.subsectionTitle}>Selected Images</Text>
@@ -892,13 +1090,9 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.imageRow}
               >
-                {/* Default selected images */}
                 {images.map((uri, index) => (
                   <View key={`default-${index}`} style={styles.imageItem}>
-                    <Image
-                      source={{ uri }}
-                      style={styles.imagePreview}
-                    />
+                    <Image source={{ uri }} style={styles.imagePreview} />
                     <View style={styles.imageLabel}>
                       <Text style={styles.imageLabelText}>Default</Text>
                     </View>
@@ -910,14 +1104,9 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
                     </Pressable>
                   </View>
                 ))}
-
-                {/* Uploaded selected images */}
                 {uploadedImages.map((uri, index) => (
                   <View key={`uploaded-${index}`} style={styles.imageItem}>
-                    <Image
-                      source={{ uri }}
-                      style={styles.imagePreview}
-                    />
+                    <Image source={{ uri }} style={styles.imagePreview} />
                     <View style={styles.imageLabel}>
                       <Text style={styles.imageLabelText}>Uploaded</Text>
                     </View>
@@ -1004,6 +1193,45 @@ export function EventEditorModal({ visible, event, onClose, onSave, onCreate }: 
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Preset Location Modal */}
+      <Modal
+        visible={showLocationDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={closePresetPicker}
+      >
+        <Pressable style={styles.presetModalBackdrop} onPress={closePresetPicker}>
+          <View />
+        </Pressable>
+        <View style={styles.presetModalSheet}>
+          <Text style={styles.presetModalTitle}>Pick a location</Text>
+          <ScrollView style={styles.presetList}>
+            {PRESET_LOCATIONS.map((p, idx) => (
+              <Pressable
+                key={p.label}
+                style={[
+                  styles.presetOption,
+                  selectedPresetIndex === idx && styles.presetOptionSelected
+                ]}
+                onPress={() => applyPreset(idx)}
+              >
+                <Text style={styles.presetOptionLabel}>{p.label}</Text>
+                <Text style={styles.presetOptionSub}>{p.address}</Text>
+                <Text style={styles.presetOptionMeta}>Section: {p.campus_section}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <View style={styles.presetActions}>
+            <Pressable style={[styles.footerButton, styles.cancelButton]} onPress={clearPreset}>
+              <Text style={styles.cancelButtonText}>Clear</Text>
+            </Pressable>
+            <Pressable style={[styles.footerButton, styles.saveButton]} onPress={closePresetPicker}>
+              <Text style={styles.saveButtonText}>Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 }

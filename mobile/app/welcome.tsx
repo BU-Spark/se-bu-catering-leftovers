@@ -94,7 +94,7 @@ export default function WelcomeScreen() {
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>Welcome to BU Catering</Text>
+        <Text style={styles.title}>Welcome to FreeBites</Text>
         <Text style={styles.subtitle}>Connect with your community through food</Text>
 
         <View style={styles.buttonContainer}>

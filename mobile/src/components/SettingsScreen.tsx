@@ -53,6 +53,7 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
 
   const editNameRoute = '/settings/edit-name';
   const editLocationsRoute = '/settings/edit-location';
+  const faqRoute = '/settings/faq'; // student FAQs (hidden from tab bar)
 
   if (isLoading) {
     return (
@@ -124,6 +125,22 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
         </View>
         <NotificationsToggle showLabel={false} />
       </View>
+
+      {/* Student-only FAQ redirect (route exists at app/(student)/settings/faq.tsx). Not in tab bar. */}
+      {role === 'student' && (
+        <Pressable
+          style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}
+          onPress={() => router.push(faqRoute as any)}
+        >
+          <View style={styles.settingContent}>
+            <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Student FAQs</Text>
+            <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+              Common questions about using the app
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+        </Pressable>
+      )}
 
       <Pressable
         style={[styles.signOutButton, { backgroundColor: colors.error }]}
