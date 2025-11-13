@@ -7,24 +7,64 @@ import { useOpenEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
 import React from 'react';
 import SortDropdown, { SortOption } from '../../src/components/SortDropdown';
+import LocationFilterDropdown, { LocationFilterOption } from '../../src/components/LocationFilterDropdown';
 import { getExpiryMs } from '../../src/lib/time';
+import { PRESET_LOCATIONS } from '../../src/lib/constants';
 
 export default function StudentHomeScreen() {
   const { user } = useUser();
   const { colors } = useTheme();
   const { events, loading, refresh } = useOpenEvents();
   const [sort, setSort] = React.useState<SortOption>('expiry-asc');
+  const [selectedLocations, setSelectedLocations] = React.useState<Set<LocationFilterOption>>(new Set());
 
-  const sortedEvents = React.useMemo(() => {
-    const withExpiry = events.map(e => ({ e, expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }) }));
-    const filtered = withExpiry.filter(x => typeof x.expiry === 'number' && x.expiry !== null);
-    filtered.sort((a, b) => {
+  // Get preset location names for matching
+  const presetLocationNames = React.useMemo(
+    () => new Set(PRESET_LOCATIONS.map((p) => p.name)),
+    []
+  );
+
+  const filteredAndSortedEvents = React.useMemo(() => {
+    // First, filter by location if any locations are selected
+    let filtered = events;
+    if (selectedLocations.size > 0) {
+      filtered = events.filter((event) => {
+        const eventLocationName = event.Location?.name || '';
+        const isPresetLocation = presetLocationNames.has(eventLocationName);
+
+        // Check if event matches any selected location
+        for (const selectedLocation of selectedLocations) {
+          if (selectedLocation === 'other') {
+            // Match "other" if location doesn't match any preset
+            if (!isPresetLocation) {
+              return true;
+            }
+          } else {
+            // Match preset location by exact name match
+            if (eventLocationName === selectedLocation) {
+              return true;
+            }
+          }
+        }
+        return false;
+      });
+    }
+
+    // Then sort by expiry
+    const withExpiry = filtered.map((e) => ({
+      e,
+      expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }),
+    }));
+    const expiryFiltered = withExpiry.filter(
+      (x) => typeof x.expiry === 'number' && x.expiry !== null
+    );
+    expiryFiltered.sort((a, b) => {
       if (sort === 'expiry-asc') return (a.expiry as number) - (b.expiry as number);
       return (b.expiry as number) - (a.expiry as number);
     });
-    const missing = withExpiry.filter(x => x.expiry === null);
-    return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
-  }, [events, sort]);
+    const missing = withExpiry.filter((x) => x.expiry === null);
+    return [...expiryFiltered.map((x) => x.e), ...missing.map((x) => x.e)];
+  }, [events, sort, selectedLocations, presetLocationNames]);
 
   const styles = React.useMemo(() => StyleSheet.create({
     container: {
@@ -51,7 +91,12 @@ export default function StudentHomeScreen() {
       paddingHorizontal: spacing.lg,
       paddingTop: spacing.sm,
       paddingBottom: spacing.xs,
-      alignItems: 'flex-end',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    },
+    filterButton: {
+      marginRight: spacing.sm,
     },
     listContent: {
       padding: spacing.lg,
@@ -86,14 +131,20 @@ export default function StudentHomeScreen() {
         </View>
       </View>
 
-      {/* Sort control under header */}
+      {/* Sort and Filter controls under header */}
       <View style={styles.sortRow}>
+        <View style={styles.filterButton}>
+          <LocationFilterDropdown
+            selectedLocations={selectedLocations}
+            onLocationChange={setSelectedLocations}
+          />
+        </View>
         <SortDropdown currentSort={sort} onSortChange={setSort} />
       </View>
 
       {/* Events List */}
       <FlatList
-        data={sortedEvents}
+        data={filteredAndSortedEvents}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <EventCard event={item} />}
         contentContainerStyle={styles.listContent}
