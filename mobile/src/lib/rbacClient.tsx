@@ -227,9 +227,18 @@ export function useRbac() {
 
     listeners.add(listener);
 
-    // Trigger initial load once when signed in
-    if (isSignedIn && !rbacData && !rbacLoading) {
-      fetchRbacInternal(getToken);
+    // Always (re)load once per signed-in session, even if rbacData is already set
+    if (isSignedIn && !rbacLoading) {
+      fetchRbacInternal(getToken, true);
+    }
+
+    // Clear stale cache on sign-out so a future sign-in doesn't reuse it
+    if (!isSignedIn) {
+      rbacData = null;
+      rbacUserId = null;
+      rbacError = null;
+      rbacLoading = false;
+      inFlightPromise = null;
     }
 
     return () => {

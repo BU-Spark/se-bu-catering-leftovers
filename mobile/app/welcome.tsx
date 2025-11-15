@@ -92,6 +92,7 @@ export default function WelcomeScreen() {
         }
       } catch (error) {
         console.error('🔥 Failed to check onboarding status:', error);
+        setShouldRedirect({ path: '/(student)', ready: true });
       }
     };
 

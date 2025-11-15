@@ -66,7 +66,7 @@ export default function AdminLayout() {
   const userRole = user?.publicMetadata?.role as string | undefined;
   const userStatus = (user?.publicMetadata as any)?.status as string | undefined;
 
-  const isAdmin = userRole === 'admin' && userStatus === 'active';
+  const isAdmin = userRole === 'admin' && (userStatus === 'active' || userStatus == null);
   const isActiveStaff = userRole === 'staff' && userStatus === 'active';
 
   // Only admins and *active* staff can stay in the (admin) stack
