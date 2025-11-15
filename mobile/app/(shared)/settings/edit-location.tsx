@@ -58,8 +58,8 @@ export default function EditLocationScreen() {
         locPref: selectedLocations,
       });
       
-      const role = user.publicMetadata?.role as string;
-      if (role === 'admin') {
+      const role = user.publicMetadata?.role as string | undefined;
+      if (role === 'admin' || role === 'staff') {
         router.replace('/(admin)/settings/page');
       } else {
         router.replace('/(student)/settings/page');
@@ -72,8 +72,8 @@ export default function EditLocationScreen() {
   };
 
   const handleBack = useCallback(() => {
-    const role = user?.publicMetadata?.role as string;
-    if (role === 'admin') {
+    const role = user?.publicMetadata?.role as string | undefined;
+    if (role === 'admin' || role === 'staff') {
       router.replace('/(admin)/settings/page');
     } else {
       router.replace('/(student)/settings/page');
