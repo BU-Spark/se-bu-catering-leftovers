@@ -18,6 +18,8 @@ type TabType = 'open' | 'previous';
 
 export default function AdminHomeScreen() {
   const { user } = useUser();
+  const userRole = (user?.publicMetadata as any)?.role as string | undefined;
+  const badgeLabel = userRole === 'staff' ? 'STAFF' : 'ADMIN';
   const { colors } = useTheme();
   const { events, loading, refresh } = useAllEvents();
   const [activeTab, setActiveTab] = useState<TabType>('open');
@@ -197,9 +199,11 @@ export default function AdminHomeScreen() {
             <Text style={styles.greeting}>
               Welcome, {user?.firstName || 'Admin'}
             </Text>
-            <View style={styles.adminBadge}>
-              <Text style={styles.adminBadgeText}>ADMIN</Text>
-            </View>
+            {userRole === 'admin' || userRole === 'staff' ? (
+              <View style={styles.adminBadge}>
+                <Text style={styles.adminBadgeText}>{badgeLabel}</Text>
+              </View>
+            ) : null}
           </View>
           <Text style={styles.subtitle}>Manage all events</Text>
         </View>
