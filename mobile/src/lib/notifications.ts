@@ -40,7 +40,10 @@ if (Platform.OS === 'android') {
 }
 
 /** Ask perms, get Expo token, save it */
-export async function registerForPushNotificationsAsync(uid: string, email?: string) {
+export async function registerForPushNotificationsAsync(
+  uid: string,
+  email?: string,
+) {
   if (!Device.isDevice) {
     console.log('🏗️ Push requires a physical device.');
     return null;
@@ -63,7 +66,8 @@ export async function registerForPushNotificationsAsync(uid: string, email?: str
     (Constants.expoConfig as any)?.extra?.eas?.projectId ||
     process.env.EXPO_PUBLIC_EAS_PROJECT_ID ||
     '';
-  if (!projectId) throw new Error('Missing Expo projectId in extra.eas.projectId');
+  if (!projectId)
+    throw new Error('Missing Expo projectId in extra.eas.projectId');
 
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
   await setPushToken(uid, token, Platform.OS);
@@ -75,7 +79,7 @@ export async function sendPush(
   tokens: string[],
   title: string,
   body: string,
-  data?: Record<string, any>
+  data?: Record<string, any>,
 ) {
   if (!tokens.length) return;
   const endpoint = 'https://exp.host/--/api/v2/push/send';
@@ -108,11 +112,19 @@ export async function sendPush(
 }
 
 /** Role helpers */
-export async function notifyAdmins(title: string, body: string, data?: Record<string, any>) {
+export async function notifyAdmins(
+  title: string,
+  body: string,
+  data?: Record<string, any>,
+) {
   const tokens = await getPushTokensByRole('Admin');
   await sendPush(tokens, title, body, data);
 }
-export async function notifyStudents(title: string, body: string, data?: Record<string, any>) {
+export async function notifyStudents(
+  title: string,
+  body: string,
+  data?: Record<string, any>,
+) {
   const tokens = await getPushTokensByRole('User');
   await sendPush(tokens, title, body, data);
 }

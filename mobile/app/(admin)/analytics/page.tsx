@@ -36,7 +36,7 @@ export default function AnalyticsScreen() {
           marginTop: spacing.lg,
         },
       }),
-    [colors]
+    [colors],
   );
 
   const role =

@@ -1,6 +1,13 @@
 // app/(shared)/settings/edit-location.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -24,11 +31,11 @@ export default function EditLocationScreen() {
 
   const loadCurrentLocations = async () => {
     if (!user) return;
-    
+
     try {
       const userRef = doc(firestore, 'Users', user.id);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data();
         setSelectedLocations(userData.locPref || []);
@@ -41,10 +48,10 @@ export default function EditLocationScreen() {
   };
 
   const toggleLocation = (location: string) => {
-    setSelectedLocations(prev =>
+    setSelectedLocations((prev) =>
       prev.includes(location)
-        ? prev.filter(l => l !== location)
-        : [...prev, location]
+        ? prev.filter((l) => l !== location)
+        : [...prev, location],
     );
   };
 
@@ -57,7 +64,7 @@ export default function EditLocationScreen() {
       await updateDoc(userRef, {
         locPref: selectedLocations,
       });
-      
+
       const role = user.publicMetadata?.role as string | undefined;
       if (role === 'admin' || role === 'staff') {
         router.replace('/(admin)/settings/page');
@@ -82,47 +89,56 @@ export default function EditLocationScreen() {
 
   return (
     <>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           title: 'Campus Preferences',
           headerBackVisible: true,
           headerLeft: () => (
-            <Pressable
-              onPress={handleBack}
-              style={{ marginLeft: -4 }}
-            >
-              <Ionicons name="chevron-back" size={28} color={colors.text.primary} />
+            <Pressable onPress={handleBack} style={{ marginLeft: -4 }}>
+              <Ionicons
+                name="chevron-back"
+                size={28}
+                color={colors.text.primary}
+              />
             </Pressable>
           ),
         }}
       />
-      <ScrollView 
+      <ScrollView
         style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.content}
       >
         <Text style={[styles.description, { color: colors.text.secondary }]}>
-          Select your preferred campus sections to get relevant event notifications
+          Select your preferred campus sections to get relevant event
+          notifications
         </Text>
-        
+
         <View style={styles.chipsContainer}>
           {CAMPUS_SECTIONS.map((section) => (
             <Pressable
               key={section}
               style={[
                 styles.chip,
-                { borderColor: colors.border.default, backgroundColor: colors.surface },
-                selectedLocations.includes(section) && { 
-                  backgroundColor: colors.primary, 
-                  borderColor: colors.primary 
-                }
+                {
+                  borderColor: colors.border.default,
+                  backgroundColor: colors.surface,
+                },
+                selectedLocations.includes(section) && {
+                  backgroundColor: colors.primary,
+                  borderColor: colors.primary,
+                },
               ]}
               onPress={() => toggleLocation(section)}
             >
-              <Text style={[
-                styles.chipText,
-                { color: colors.text.primary },
-                selectedLocations.includes(section) && { color: colors.text.onPrimary }
-              ]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  { color: colors.text.primary },
+                  selectedLocations.includes(section) && {
+                    color: colors.text.onPrimary,
+                  },
+                ]}
+              >
                 {section}
               </Text>
             </Pressable>
@@ -134,7 +150,9 @@ export default function EditLocationScreen() {
           onPress={handleSave}
           disabled={isSaving}
         >
-          <Text style={[styles.saveButtonText, { color: colors.text.onPrimary }]}>
+          <Text
+            style={[styles.saveButtonText, { color: colors.text.onPrimary }]}
+          >
             {isSaving ? 'Saving...' : 'Save'}
           </Text>
         </Pressable>

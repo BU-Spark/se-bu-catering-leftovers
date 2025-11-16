@@ -137,16 +137,16 @@ export default function SignUpScreen() {
 
   const handleResendCode = async () => {
     if (!isLoaded) return;
-    
+
     try {
       await signUp.prepareVerification({ strategy: 'email_code' });
       clearErrors('code');
       // Show success feedback
-      setError('code', { 
+      setError('code', {
         message: '✓ New code sent! Check your email.',
-        type: 'success' as any
+        type: 'success' as any,
       });
-      
+
       // Clear the success message after 3 seconds
       setTimeout(() => {
         clearErrors('code');
@@ -163,7 +163,7 @@ export default function SignUpScreen() {
       style={styles.container}
     >
       {/* Back Button */}
-      <Pressable 
+      <Pressable
         style={styles.backButton}
         onPress={() => router.push('/welcome')}
       >
@@ -184,18 +184,18 @@ export default function SignUpScreen() {
           <>
             <CustomInput
               control={control}
-              name='email'
-              placeholder='Email'
+              name="email"
+              placeholder="Email"
               autoFocus
-              autoCapitalize='none'
-              keyboardType='email-address'
-              autoComplete='email'
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
             />
 
             <CustomInput
               control={control}
-              name='password'
-              placeholder='Password'
+              name="password"
+              placeholder="Password"
               secureTextEntry
             />
           </>
@@ -217,14 +217,14 @@ export default function SignUpScreen() {
           >
             <CustomInput
               control={control}
-              name='code'
-              placeholder='123456'
+              name="code"
+              placeholder="123456"
               autoFocus
-              autoCapitalize='none'
-              keyboardType='number-pad'
-              autoComplete='one-time-code'
+              autoCapitalize="none"
+              keyboardType="number-pad"
+              autoComplete="one-time-code"
             />
-            
+
             {/* Resend Code Link */}
             <Text style={styles.resendContainer}>
               Didn't receive a code?{' '}
@@ -247,7 +247,7 @@ export default function SignUpScreen() {
 
       {!pendingVerification && (
         <>
-          <Link href='/sign-in' style={styles.link}>
+          <Link href="/sign-in" style={styles.link}>
             Already have an account? Sign in
           </Link>
 
@@ -258,16 +258,13 @@ export default function SignUpScreen() {
           </View>
 
           <View style={styles.socialContainer}>
-            <SignInWith strategy='oauth_google' />
+            <SignInWith strategy="oauth_google" />
           </View>
         </>
       )}
 
       {pendingVerification && (
-        <Link 
-          href='/sign-in' 
-          style={[styles.link, { marginTop: spacing.md }]}
-        >
+        <Link href="/sign-in" style={[styles.link, { marginTop: spacing.md }]}>
           Back to sign in
         </Link>
       )}

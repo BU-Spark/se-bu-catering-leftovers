@@ -30,7 +30,7 @@ export default function AdminLayout() {
 
         const userData = userSnap.data();
         console.log('Admin: agreedToTerms =', userData.agreedToTerms);
-        
+
         if (userData.agreedToTerms !== true) {
           console.log('Admin: Needs to complete onboarding');
           setNeedsOnboarding(true);
@@ -49,24 +49,34 @@ export default function AdminLayout() {
 
   if (!authLoaded || !userLoaded || needsOnboarding === null) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
 
   if (!isSignedIn) {
-    return <Redirect href='/sign-in' />;
+    return <Redirect href="/sign-in" />;
   }
 
   if (needsOnboarding) {
-    return <Redirect href='/(onboarding)/onboarding' />;
+    return <Redirect href="/(onboarding)/onboarding" />;
   }
 
   const userRole = user?.publicMetadata?.role as string | undefined;
-  const userStatus = (user?.publicMetadata as any)?.status as string | undefined;
+  const userStatus = (user?.publicMetadata as any)?.status as
+    | string
+    | undefined;
 
-  const isAdmin = userRole === 'admin' && (userStatus === 'active' || userStatus == null);
+  const isAdmin =
+    userRole === 'admin' && (userStatus === 'active' || userStatus == null);
   const isActiveStaff = userRole === 'staff' && userStatus === 'active';
 
   // Only admins and *active* staff can stay in the (admin) stack
@@ -74,9 +84,9 @@ export default function AdminLayout() {
     console.log(
       'Admin layout - Redirecting to student route, role/status was:',
       userRole,
-      userStatus
+      userStatus,
     );
-    return <Redirect href='/(student)' />;
+    return <Redirect href="/(student)" />;
   }
 
   return (
@@ -86,8 +96,8 @@ export default function AdminLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.text.secondary,
         tabBarStyle: {
-          backgroundColor: colors.surface, 
-          borderTopColor: colors.border.default, 
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border.default,
           height: 70,
           paddingBottom: 8,
           paddingTop: 8,

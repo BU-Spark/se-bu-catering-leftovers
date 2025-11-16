@@ -11,14 +11,14 @@ export function useCountdown(targetMs: number | null, tickMs = 1000) {
       setNow(Date.now());
       return;
     }
-    
+
     // Update immediately when targetMs changes
     setNow(Date.now());
-    
+
     const id = setInterval(() => {
       setNow(Date.now());
     }, tickMs);
-    
+
     return () => clearInterval(id);
   }, [targetMs, tickMs]);
 

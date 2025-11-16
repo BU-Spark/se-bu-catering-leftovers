@@ -35,7 +35,7 @@ export default function CreateEventScreen() {
             token,
             'Catering Leftovers',
             `${eventData.name ?? 'Event'} created at ${loc}`,
-            { eventId }
+            { eventId },
           );
         }
       }
@@ -44,7 +44,7 @@ export default function CreateEventScreen() {
         await notifyStudents(
           'Catering Leftovers',
           `${eventData.name ?? 'An event'} • ${loc} • Tap for details.`,
-          { eventId }
+          { eventId },
         );
       }
 
@@ -55,60 +55,64 @@ export default function CreateEventScreen() {
     }
   };
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-      padding: spacing.lg,
-      paddingTop: spacing.xxl + 20,
-    },
-    title: {
-      ...typography.h3,
-      color: colors.text.primary,
-      marginBottom: spacing.sm,
-    },
-    subtitle: {
-      ...typography.body,
-      color: colors.text.secondary,
-      marginBottom: spacing.xl,
-    },
-    content: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: spacing.xl,
-    },
-    instructionBox: {
-      backgroundColor: colors.surface,
-      padding: spacing.lg,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border.light,
-      maxWidth: 300,
-    },
-    instructionText: {
-      ...typography.body,
-      color: colors.text.secondary,
-      textAlign: 'center',
-      lineHeight: 22,
-    },
-    createButton: {
-      backgroundColor: colors.primary,
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.md,
-      borderRadius: 12,
-      elevation: 2,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-    },
-    createButtonText: {
-      ...typography.h5,
-      color: colors.text.onPrimary,
-      fontWeight: '600',
-    },
-  }), [colors]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: colors.background,
+          padding: spacing.lg,
+          paddingTop: spacing.xxl + 20,
+        },
+        title: {
+          ...typography.h3,
+          color: colors.text.primary,
+          marginBottom: spacing.sm,
+        },
+        subtitle: {
+          ...typography.body,
+          color: colors.text.secondary,
+          marginBottom: spacing.xl,
+        },
+        content: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: spacing.xl,
+        },
+        instructionBox: {
+          backgroundColor: colors.surface,
+          padding: spacing.lg,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: colors.border.light,
+          maxWidth: 300,
+        },
+        instructionText: {
+          ...typography.body,
+          color: colors.text.secondary,
+          textAlign: 'center',
+          lineHeight: 22,
+        },
+        createButton: {
+          backgroundColor: colors.primary,
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.md,
+          borderRadius: 12,
+          elevation: 2,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+        },
+        createButtonText: {
+          ...typography.h5,
+          color: colors.text.onPrimary,
+          fontWeight: '600',
+        },
+      }),
+    [colors],
+  );
 
   return (
     <View style={styles.container}>
@@ -117,10 +121,14 @@ export default function CreateEventScreen() {
       <View style={styles.content}>
         <View style={styles.instructionBox}>
           <Text style={styles.instructionText}>
-            Tap the button below to create a new event with all the details like location, food items, and timing.
+            Tap the button below to create a new event with all the details like
+            location, food items, and timing.
           </Text>
         </View>
-        <Pressable style={styles.createButton} onPress={() => setShowModal(true)}>
+        <Pressable
+          style={styles.createButton}
+          onPress={() => setShowModal(true)}
+        >
           <Text style={styles.createButtonText}>+ Create New Event</Text>
         </Pressable>
       </View>

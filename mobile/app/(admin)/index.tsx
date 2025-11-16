@@ -1,6 +1,14 @@
 // app/(admin)/index.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, RefreshControl, Pressable, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  Pressable,
+  Alert,
+} from 'react-native';
 import { useUser } from '@clerk/clerk-expo';
 import { useTheme } from '../../src/lib/ThemeProvider';
 import { typography, spacing, borderRadius } from '../../src/lib/theme';
@@ -35,7 +43,7 @@ export default function AdminHomeScreen() {
   const handleSave = async (updates: Partial<Event>) => {
     if (!editingEvent?.id) return;
     const prevStatus = editingEvent.status;
-    const nextStatus = (updates.status ?? editingEvent.status);
+    const nextStatus = updates.status ?? editingEvent.status;
     const becameOpen = prevStatus !== 'open' && nextStatus === 'open';
 
     try {
@@ -49,7 +57,9 @@ export default function AdminHomeScreen() {
           updates.locationDetails ?? editingEvent.locationDetails,
         ].filter(Boolean) as string[];
         const loc = locBits.join(' • ') || 'BU Campus';
-        await notifyStudents('New food available', `${name} • ${loc}`, { eventId: editingEvent.id });
+        await notifyStudents('New food available', `${name} • ${loc}`, {
+          eventId: editingEvent.id,
+        });
       }
 
       Alert.alert('Success', 'Event updated successfully');
@@ -66,130 +76,147 @@ export default function AdminHomeScreen() {
     if (activeTab === 'open') {
       return event.status === 'open';
     } else {
-      return event.status === 'closed' || event.status === 'drafted' || event.status === 'saved';
+      return (
+        event.status === 'closed' ||
+        event.status === 'drafted' ||
+        event.status === 'saved'
+      );
     }
   });
 
   const filteredEvents = React.useMemo(() => {
     if (!selectedSort) return filteredEventsBase;
-    const withExpiry = filteredEventsBase.map(e => ({ e, expiry: getExpiryMs({ foodAvailable: e.foodAvailable, duration: e.duration }) }));
-    const filtered = withExpiry.filter(x => typeof x.expiry === 'number' && x.expiry !== null);
+    const withExpiry = filteredEventsBase.map((e) => ({
+      e,
+      expiry: getExpiryMs({
+        foodAvailable: e.foodAvailable,
+        duration: e.duration,
+      }),
+    }));
+    const filtered = withExpiry.filter(
+      (x) => typeof x.expiry === 'number' && x.expiry !== null,
+    );
     filtered.sort((a, b) => {
-      if (selectedSort === 'expiry-asc') return (a.expiry as number) - (b.expiry as number);
+      if (selectedSort === 'expiry-asc')
+        return (a.expiry as number) - (b.expiry as number);
       return (b.expiry as number) - (a.expiry as number);
     });
-    const missing = withExpiry.filter(x => x.expiry === null);
-    return [...filtered.map(x => x.e), ...missing.map(x => x.e)];
+    const missing = withExpiry.filter((x) => x.expiry === null);
+    return [...filtered.map((x) => x.e), ...missing.map((x) => x.e)];
   }, [filteredEventsBase, selectedSort]);
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-  header: {
-    padding: spacing.lg,
-    paddingTop: spacing.xxl + 20,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    greeting: {
-      ...typography.h4,
-      color: colors.text.primary,
-    },
-    adminBadge: {
-      backgroundColor: colors.primary,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 2,
-      borderRadius: 4,
-    },
-    adminBadgeText: {
-      ...typography.caption,
-      color: colors.text.onPrimary,
-      fontWeight: '700',
-    },
-    subtitle: {
-      ...typography.bodySmall,
-      color: colors.text.secondary,
-      marginTop: spacing.xs,
-    },
-    tabContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      backgroundColor: colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border.light,
-      paddingRight: spacing.lg,
-    },
-    tabsLeft: {
-      flexDirection: 'row',
-      flex: 1,
-    },
-    tab: {
-      flex: 1,
-      paddingVertical: spacing.md,
-      alignItems: 'center',
-      borderBottomWidth: 2,
-      borderBottomColor: 'transparent',
-    },
-    sortRight: {
-      paddingLeft: spacing.md,
-    },
-    activeTab: {
-      borderBottomColor: colors.primary,
-    },
-    tabText: {
-      ...typography.body,
-      color: colors.text.secondary,
-      fontWeight: '600',
-    },
-    activeTabText: {
-      color: colors.primary,
-    },
-    listContent: {
-      padding: spacing.lg,
-    },
-    emptyState: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: spacing.xxl * 2,
-    },
-    emptyText: {
-      ...typography.h5,
-      color: colors.text.secondary,
-      textAlign: 'center',
-    },
-    emptySubtext: {
-      ...typography.body,
-      color: colors.text.secondary,
-      textAlign: 'center',
-      marginTop: spacing.sm,
-    },
-    adminCardWrapper: {
-      position: 'relative',
-    },
-    statusBadge: {
-      position: 'absolute',
-      top: spacing.sm,
-      right: spacing.sm,
-      zIndex: 10,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 4,
-      borderRadius: borderRadius.sm,
-    },
-    statusBadgeText: {
-      ...typography.caption,
-      color: colors.text.onPrimary,
-      fontWeight: '700',
-    },
-  }), [colors]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: colors.background,
+        },
+        header: {
+          padding: spacing.lg,
+          paddingTop: spacing.xxl + 20,
+          backgroundColor: colors.surface,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border.light,
+        },
+        titleRow: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.sm,
+        },
+        greeting: {
+          ...typography.h4,
+          color: colors.text.primary,
+        },
+        adminBadge: {
+          backgroundColor: colors.primary,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: 2,
+          borderRadius: 4,
+        },
+        adminBadgeText: {
+          ...typography.caption,
+          color: colors.text.onPrimary,
+          fontWeight: '700',
+        },
+        subtitle: {
+          ...typography.bodySmall,
+          color: colors.text.secondary,
+          marginTop: spacing.xs,
+        },
+        tabContainer: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: colors.surface,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border.light,
+          paddingRight: spacing.lg,
+        },
+        tabsLeft: {
+          flexDirection: 'row',
+          flex: 1,
+        },
+        tab: {
+          flex: 1,
+          paddingVertical: spacing.md,
+          alignItems: 'center',
+          borderBottomWidth: 2,
+          borderBottomColor: 'transparent',
+        },
+        sortRight: {
+          paddingLeft: spacing.md,
+        },
+        activeTab: {
+          borderBottomColor: colors.primary,
+        },
+        tabText: {
+          ...typography.body,
+          color: colors.text.secondary,
+          fontWeight: '600',
+        },
+        activeTabText: {
+          color: colors.primary,
+        },
+        listContent: {
+          padding: spacing.lg,
+        },
+        emptyState: {
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingVertical: spacing.xxl * 2,
+        },
+        emptyText: {
+          ...typography.h5,
+          color: colors.text.secondary,
+          textAlign: 'center',
+        },
+        emptySubtext: {
+          ...typography.body,
+          color: colors.text.secondary,
+          textAlign: 'center',
+          marginTop: spacing.sm,
+        },
+        adminCardWrapper: {
+          position: 'relative',
+        },
+        statusBadge: {
+          position: 'absolute',
+          top: spacing.sm,
+          right: spacing.sm,
+          zIndex: 10,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: 4,
+          borderRadius: borderRadius.sm,
+        },
+        statusBadgeText: {
+          ...typography.caption,
+          color: colors.text.onPrimary,
+          fontWeight: '700',
+        },
+      }),
+    [colors],
+  );
 
   return (
     <View style={styles.container}>
@@ -268,8 +295,8 @@ export default function AdminHomeScreen() {
               {loading
                 ? 'Loading events...'
                 : activeTab === 'open'
-                ? 'No open events'
-                : 'No previous events'}
+                  ? 'No open events'
+                  : 'No previous events'}
             </Text>
             <Text style={styles.emptySubtext}>Pull down to refresh</Text>
           </View>
@@ -289,36 +316,46 @@ export default function AdminHomeScreen() {
   );
 }
 
-function AdminEventCard({ event, onEdit }: { event: Event; onEdit: (event: Event) => void }) {
+function AdminEventCard({
+  event,
+  onEdit,
+}: {
+  event: Event;
+  onEdit: (event: Event) => void;
+}) {
   const { colors } = useTheme();
   const statusColor =
     event.status === 'open'
       ? colors.success
       : event.status === 'closed'
-      ? colors.text.secondary
-      : event.status === 'drafted'
-      ? colors.warning
-      : colors.primary;
+        ? colors.text.secondary
+        : event.status === 'drafted'
+          ? colors.warning
+          : colors.primary;
 
-  const styles = React.useMemo(() => StyleSheet.create({
-    adminCardWrapper: {
-      position: 'relative',
-    },
-    statusBadge: {
-      position: 'absolute',
-      top: spacing.sm,
-      right: spacing.sm,
-      zIndex: 10,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 4,
-      borderRadius: borderRadius.sm,
-    },
-    statusBadgeText: {
-      ...typography.caption,
-      color: colors.text.onPrimary,
-      fontWeight: '700',
-    },
-  }), [colors]);
+  const styles = React.useMemo(
+    () =>
+      StyleSheet.create({
+        adminCardWrapper: {
+          position: 'relative',
+        },
+        statusBadge: {
+          position: 'absolute',
+          top: spacing.sm,
+          right: spacing.sm,
+          zIndex: 10,
+          paddingHorizontal: spacing.sm,
+          paddingVertical: 4,
+          borderRadius: borderRadius.sm,
+        },
+        statusBadgeText: {
+          ...typography.caption,
+          color: colors.text.onPrimary,
+          fontWeight: '700',
+        },
+      }),
+    [colors],
+  );
 
   return (
     <View style={styles.adminCardWrapper}>

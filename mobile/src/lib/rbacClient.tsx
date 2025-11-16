@@ -26,7 +26,7 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 if (!API_BASE_URL) {
   console.warn(
-    '[rbacClient] EXPO_PUBLIC_BACKEND_URL is not set. RBAC calls will fail.'
+    '[rbacClient] EXPO_PUBLIC_BACKEND_URL is not set. RBAC calls will fail.',
   );
 }
 
@@ -36,7 +36,7 @@ if (!API_BASE_URL) {
 async function backendFetch<T>(
   path: string,
   getToken: () => Promise<string | null>,
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<T> {
   if (!API_BASE_URL) {
     throw new Error('EXPO_PUBLIC_BACKEND_URL is not set');
@@ -90,13 +90,11 @@ export async function fetchMe(getToken: () => Promise<string | null>) {
  * Allows a student to request staff access.
  * Returns { ok: true, status: "pending" }
  */
-export async function requestStaffRole(
-  getToken: () => Promise<string | null>
-) {
+export async function requestStaffRole(getToken: () => Promise<string | null>) {
   return backendFetch<{ ok: boolean; status: Status }>(
     '/api/request-role',
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -105,25 +103,17 @@ export async function requestStaffRole(
  * Returns { pending: RbacUser[] }
  */
 export async function fetchPendingStaff(
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
-  return backendFetch<{ pending: RbacUser[] }>(
-    '/api/admin/pending',
-    getToken
-  );
+  return backendFetch<{ pending: RbacUser[] }>('/api/admin/pending', getToken);
 }
 
 /**
  * GET /api/admin/staff
  * Returns { staff: RbacUser[] } (active staff)
  */
-export async function fetchActiveStaff(
-  getToken: () => Promise<string | null>
-) {
-  return backendFetch<{ staff: RbacUser[] }>(
-    '/api/admin/staff',
-    getToken
-  );
+export async function fetchActiveStaff(getToken: () => Promise<string | null>) {
+  return backendFetch<{ staff: RbacUser[] }>('/api/admin/staff', getToken);
 }
 
 /**
@@ -132,13 +122,13 @@ export async function fetchActiveStaff(
  */
 export async function approveStaff(
   uid: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
   if (!uid) throw new Error('Missing user id');
   return backendFetch<{ ok: boolean; userId: string }>(
     `/api/admin/approve/${uid}`,
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -149,13 +139,13 @@ export async function approveStaff(
  */
 export async function revokeStaff(
   uid: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
   if (!uid) throw new Error('Missing user id');
   return backendFetch<{ ok: boolean; userId: string }>(
     `/api/admin/revoke/${uid}`,
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -180,7 +170,7 @@ function notifyListeners() {
 
 async function fetchRbacInternal(
   getToken: () => Promise<string | null>,
-  force = false
+  force = false,
 ): Promise<void> {
   // Reuse in-flight request if not forcing
   if (inFlightPromise && !force) {

@@ -11,7 +11,7 @@ export default function PushTokenRegistrar() {
     if (!isSignedIn || !isLoaded || !user?.id) return;
     registerForPushNotificationsAsync(
       user.id,
-      user.primaryEmailAddress?.emailAddress ?? undefined
+      user.primaryEmailAddress?.emailAddress ?? undefined,
     ).catch(() => {});
   }, [isSignedIn, isLoaded, user?.id]);
 

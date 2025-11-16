@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,23 +7,23 @@ import {
   Image,
   ActivityIndicator,
   Pressable,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   collection,
   query,
   orderBy,
   getDocs,
   onSnapshot,
-} from "firebase/firestore";
-import { firestore } from "../../../src/lib/firebase/config";
+} from 'firebase/firestore';
+import { firestore } from '../../../src/lib/firebase/config';
 import {
   colors,
   typography,
   spacing,
   borderRadius,
-} from "../../../src/lib/theme";
+} from '../../../src/lib/theme';
 
 interface Review {
   id?: string;
@@ -43,30 +43,39 @@ const StarRating = ({ rating }: { rating: number }) => {
     stars.push(
       <View key={i} style={styles.starContainer}>
         <Text style={styles.starEmpty}>★</Text>
-        <View style={[styles.starFillContainer, { width: `${fillPercentage * 100}%` }]}>
+        <View
+          style={[
+            styles.starFillContainer,
+            { width: `${fillPercentage * 100}%` },
+          ]}
+        >
           <Text style={styles.starFilled}>★</Text>
         </View>
-      </View>
+      </View>,
     );
   }
   return <View style={styles.starsRow}>{stars}</View>;
 };
 
 export default function AdminEventReviewsPage() {
-  const { eventId, eventName } = useLocalSearchParams<{ eventId: string; eventName?: string }>();
+  const { eventId, eventName } = useLocalSearchParams<{
+    eventId: string;
+    eventName?: string;
+  }>();
   const router = useRouter();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
-    : 0;
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+      : 0;
 
   const fetchReviews = useCallback(async () => {
     if (!eventId) return;
     try {
-      const reviewsRef = collection(firestore, "Reviews", eventId, "Reviews");
-      const q = query(reviewsRef, orderBy("date", "desc"));
+      const reviewsRef = collection(firestore, 'Reviews', eventId, 'Reviews');
+      const q = query(reviewsRef, orderBy('date', 'desc'));
       const snapshot = await getDocs(q);
       const list = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -75,7 +84,7 @@ export default function AdminEventReviewsPage() {
       setReviews(list);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching reviews:", err);
+      console.error('Error fetching reviews:', err);
       setLoading(false);
     }
   }, [eventId]);
@@ -83,14 +92,14 @@ export default function AdminEventReviewsPage() {
   useEffect(() => {
     if (!eventId) return;
     const unsub = onSnapshot(
-      collection(firestore, "Reviews", eventId, "Reviews"),
-      () => fetchReviews()
+      collection(firestore, 'Reviews', eventId, 'Reviews'),
+      () => fetchReviews(),
     );
     return () => unsub();
   }, [eventId, fetchReviews]);
 
   const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
+    if (!timestamp) return '';
     const date = new Date(timestamp.seconds * 1000);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -98,20 +107,20 @@ export default function AdminEventReviewsPage() {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
+    if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString("en-US", { 
-      month: "short", 
-      day: "numeric",
-      year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined 
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
     });
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
@@ -122,11 +131,13 @@ export default function AdminEventReviewsPage() {
             <Text style={styles.headerTitle}>Feedback</Text>
           </View>
           {eventName && (
-            <Text style={styles.eventName} numberOfLines={1}>{eventName}</Text>
+            <Text style={styles.eventName} numberOfLines={1}>
+              {eventName}
+            </Text>
           )}
           <View style={styles.headerSubtitleRow}>
             <Text style={styles.headerSubtitle}>
-              {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+              {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
             </Text>
             {reviews.length > 0 && (
               <>
@@ -170,13 +181,15 @@ export default function AdminEventReviewsPage() {
                   <Text style={styles.avatarText}>
                     {review.shareContact && review.email
                       ? review.email.charAt(0).toUpperCase()
-                      : "?"}
+                      : '?'}
                   </Text>
                 </View>
                 <View style={styles.reviewHeaderText}>
                   {review.shareContact ? (
                     <>
-                      {review.name && <Text style={styles.reviewerName}>{review.name}</Text>}
+                      {review.name && (
+                        <Text style={styles.reviewerName}>{review.name}</Text>
+                      )}
                       <Text style={styles.reviewerEmail}>{review.email}</Text>
                     </>
                   ) : (
@@ -212,9 +225,9 @@ export default function AdminEventReviewsPage() {
                   contentContainerStyle={styles.imageScrollContent}
                 >
                   {review.images.map((url, i) => (
-                    <Image 
-                      key={i} 
-                      source={{ uri: url }} 
+                    <Image
+                      key={i}
+                      source={{ uri: url }}
                       style={styles.image}
                       resizeMode="cover"
                     />
@@ -237,8 +250,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     backgroundColor: colors.surface,
@@ -252,19 +265,19 @@ const styles = StyleSheet.create({
   backArrow: {
     fontSize: 28,
     color: colors.primary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   headerContent: {
     flex: 1,
   },
   titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerTitle: {
     ...typography.h3,
     color: colors.text.primary,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   eventName: {
     ...typography.body,
@@ -277,8 +290,8 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   headerSubtitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
   },
   headerDot: {
@@ -287,14 +300,14 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xs,
   },
   headerRatingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.xs,
   },
   headerRatingText: {
     ...typography.bodySmall,
     color: colors.text.primary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   container: {
     flex: 1,
@@ -306,12 +319,12 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingVertical: spacing.xl * 3,
   },
   emptyState: {
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: spacing.xl * 3,
     paddingHorizontal: spacing.xl,
   },
@@ -322,13 +335,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.h4,
     color: colors.text.primary,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: spacing.sm,
   },
   emptyText: {
     ...typography.body,
     color: colors.text.secondary,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 22,
   },
   reviewCard: {
@@ -336,15 +349,15 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
   reviewHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing.md,
   },
   avatarContainer: {
@@ -352,14 +365,14 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.sm,
   },
   avatarText: {
     ...typography.body,
     color: colors.text.onPrimary,
-    fontWeight: "700",
+    fontWeight: '700',
     fontSize: 18,
   },
   reviewHeaderText: {
@@ -368,7 +381,7 @@ const styles = StyleSheet.create({
   reviewerName: {
     ...typography.body,
     color: colors.text.primary,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   reviewerEmail: {
     ...typography.bodySmall,
@@ -388,49 +401,49 @@ const styles = StyleSheet.create({
   noComment: {
     ...typography.body,
     color: colors.text.secondary,
-    fontStyle: "italic",
+    fontStyle: 'italic',
     lineHeight: 22,
     marginBottom: spacing.sm,
   },
   reviewRatingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.xs,
     marginBottom: spacing.sm,
   },
   reviewRatingText: {
     ...typography.bodySmall,
     color: colors.text.primary,
-    fontWeight: "600",
+    fontWeight: '600',
     marginLeft: spacing.xs,
   },
   starsRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 2,
   },
   starContainer: {
-    position: "relative",
+    position: 'relative',
     width: 16,
     height: 16,
   },
   starEmpty: {
     fontSize: 16,
     color: colors.border.light,
-    position: "absolute",
+    position: 'absolute',
   },
   starFillContainer: {
-    overflow: "hidden",
-    position: "absolute",
+    overflow: 'hidden',
+    position: 'absolute',
     height: 16,
   },
   starFilled: {
     fontSize: 16,
-    color: "#FFB800",
+    color: '#FFB800',
   },
   noPhotos: {
     ...typography.bodySmall,
     color: colors.text.secondary,
-    fontStyle: "italic",
+    fontStyle: 'italic',
     marginTop: spacing.xs,
   },
   imageScroll: {

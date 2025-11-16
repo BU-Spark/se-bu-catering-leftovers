@@ -11,7 +11,9 @@ interface NotificationsToggleProps {
   showLabel?: boolean;
 }
 
-export default function NotificationsToggle({ showLabel = true }: NotificationsToggleProps) {
+export default function NotificationsToggle({
+  showLabel = true,
+}: NotificationsToggleProps) {
   const { user, isLoaded } = useUser();
   const { colors } = useTheme();
   const [enabled, setEnabled] = useState(true);
@@ -37,15 +39,19 @@ export default function NotificationsToggle({ showLabel = true }: NotificationsT
     if (value) {
       await registerForPushNotificationsAsync(
         uid,
-        user?.primaryEmailAddress?.emailAddress ?? undefined
+        user?.primaryEmailAddress?.emailAddress ?? undefined,
       );
     }
   };
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+    <View
+      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+    >
       {showLabel && (
-        <Text style={[typography.body, { color: colors.text.primary }]}>Notifications</Text>
+        <Text style={[typography.body, { color: colors.text.primary }]}>
+          Notifications
+        </Text>
       )}
       {loading ? (
         <ActivityIndicator color={colors.primary} />

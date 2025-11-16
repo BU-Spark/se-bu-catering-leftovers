@@ -2,7 +2,14 @@
 import { useEffect, useState } from 'react';
 import { firestore } from '../src/lib/firebase/config';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { Text, StyleSheet, View, ActivityIndicator, Pressable, Image } from 'react-native';
+import {
+  Text,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Pressable,
+  Image,
+} from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors, typography, spacing } from '../src/lib/theme';
@@ -50,7 +57,7 @@ export default function WelcomeScreen() {
         }
 
         const userData = userSnap.data();
-        console.log(userData.agreedToTerms)
+        console.log(userData.agreedToTerms);
         if (userData.agreedToTerms !== true) {
           console.log('📋 User needs to complete onboarding');
           setShouldRedirect({ path: '/(onboarding)/onboarding', ready: true });
@@ -87,7 +94,10 @@ export default function WelcomeScreen() {
           // Default: student experience
           setShouldRedirect({ path: '/(student)', ready: true });
         } catch (err) {
-          console.error('Failed to load RBAC info, falling back to student route:', err);
+          console.error(
+            'Failed to load RBAC info, falling back to student route:',
+            err,
+          );
           setShouldRedirect({ path: '/(student)', ready: true });
         }
       } catch (error) {
@@ -129,7 +139,9 @@ export default function WelcomeScreen() {
         />
 
         <Text style={styles.title}>Welcome to FreeBites</Text>
-        <Text style={styles.subtitle}>Connect with your community through food</Text>
+        <Text style={styles.subtitle}>
+          Connect with your community through food
+        </Text>
 
         <View style={styles.buttonContainer}>
           <Pressable
@@ -143,7 +155,9 @@ export default function WelcomeScreen() {
             style={[styles.loginButton, styles.signupButton]}
             onPress={() => router.push('/sign-up')}
           >
-            <Text style={[styles.buttonText, styles.signupButtonText]}>Sign Up</Text>
+            <Text style={[styles.buttonText, styles.signupButtonText]}>
+              Sign Up
+            </Text>
           </Pressable>
         </View>
       </View>

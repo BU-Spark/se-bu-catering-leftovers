@@ -96,7 +96,7 @@ export const borderRadius = {
   full: 9999,
 };
 
-// Elevation 
+// Elevation
 export const elevation = {
   sm: 1,
   md: 2,

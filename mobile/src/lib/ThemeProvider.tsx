@@ -1,5 +1,11 @@
 // Theme management provider and hook
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors } from './theme';
 
@@ -56,7 +62,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ themeMode, colors, toggleTheme, setThemeMode }}>
+    <ThemeContext.Provider
+      value={{ themeMode, colors, toggleTheme, setThemeMode }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -69,4 +77,3 @@ export function useTheme() {
   }
   return context;
 }
-

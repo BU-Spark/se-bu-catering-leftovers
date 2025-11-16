@@ -3,14 +3,13 @@ import { Timestamp } from 'firebase/firestore';
 
 export function formatTimestamp(timestamp: any): string {
   if (!timestamp) return 'N/A';
-  
+
   try {
-    const date = timestamp instanceof Timestamp 
-      ? timestamp.toDate() 
-      : new Date(timestamp);
-    
+    const date =
+      timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
+
     if (isNaN(date.getTime())) return 'Invalid date';
-    
+
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',

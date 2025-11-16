@@ -52,4 +52,3 @@ export const PRESET_LOCATIONS: Array<{
     campus_section: 'West',
   },
 ];
-

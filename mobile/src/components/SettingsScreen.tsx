@@ -1,6 +1,15 @@
 // src/components/SettingsScreen.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Switch,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
@@ -25,7 +34,7 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   const { signOut, getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const { colors, themeMode, toggleTheme } = useTheme();
-  
+
   const [name, setName] = useState('');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,11 +53,11 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
 
   const loadUserPreferences = async () => {
     if (!user) return;
-    
+
     try {
       const userRef = doc(firestore, 'Users', user.id);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data();
         setName(userData.name || '');
@@ -97,7 +106,6 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
     }
   }, [role, isSignedIn, loadAdminLists]);
 
-
   const handleApprove = async (uid: string) => {
     try {
       await approveStaff(uid, getToken);
@@ -112,7 +120,10 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   const handleRevoke = async (uid: string) => {
     try {
       await revokeStaff(uid, getToken);
-      Alert.alert('Updated', 'Staff access has been revoked / request rejected.');
+      Alert.alert(
+        'Updated',
+        'Staff access has been revoked / request rejected.',
+      );
       await loadAdminLists();
     } catch (err: any) {
       console.error('Failed to revoke staff:', err);
@@ -130,58 +141,104 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   const faqRoute = '/settings/faq'; // student FAQs (hidden from tab bar)
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.contentContainer}
     >
-      <Text style={[styles.title, { color: colors.text.primary }]}>Settings</Text>
+      <Text style={[styles.title, { color: colors.text.primary }]}>
+        Settings
+      </Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
         {role === 'admin'
           ? 'Manage admin settings and staff access'
           : role === 'staff'
-          ? 'Manage your staff settings and preferences'
-          : 'Manage your settings and preferences'}
+            ? 'Manage your staff settings and preferences'
+            : 'Manage your settings and preferences'}
       </Text>
 
       {/* Profile */}
-      <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Profile</Text>
+      <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
+        Profile
+      </Text>
 
-      <Pressable 
-        style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}
+      <Pressable
+        style={[
+          styles.settingItem,
+          { backgroundColor: colors.surface, borderColor: colors.border.light },
+        ]}
         onPress={() => router.push(editNameRoute as any)}
       >
         <View style={styles.settingContent}>
-          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Display Name</Text>
-          <Text style={[styles.settingValue, { color: colors.text.secondary }]}>{name || 'Not set'}</Text>
+          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+            Display Name
+          </Text>
+          <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+            {name || 'Not set'}
+          </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colors.text.secondary}
+        />
       </Pressable>
 
-      <Pressable 
-        style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}
+      <Pressable
+        style={[
+          styles.settingItem,
+          { backgroundColor: colors.surface, borderColor: colors.border.light },
+        ]}
         onPress={() => router.push(editLocationsRoute as any)}
       >
         <View style={styles.settingContent}>
-          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Campus Preferences</Text>
+          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+            Campus Preferences
+          </Text>
           <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
-            {selectedLocations.length > 0 ? selectedLocations.join(', ') : 'None selected'}
+            {selectedLocations.length > 0
+              ? selectedLocations.join(', ')
+              : 'None selected'}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colors.text.secondary}
+        />
       </Pressable>
 
       {/* Admin-only staff management */}
       {role === 'admin' && (
         <>
-          <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.xl }]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: colors.text.primary, marginTop: spacing.xl },
+            ]}
+          >
             Staff access requests
           </Text>
 
-          <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light, flexDirection: 'column', alignItems: 'stretch' }]}>
+          <View
+            style={[
+              styles.settingItem,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border.light,
+                flexDirection: 'column',
+                alignItems: 'stretch',
+              },
+            ]}
+          >
             {loadingAdminLists && pendingStaff.length === 0 ? (
               <View style={styles.centerRow}>
                 <ActivityIndicator color={colors.primary} />
-                <Text style={[styles.smallText, { color: colors.text.secondary, marginLeft: spacing.sm }]}>
+                <Text
+                  style={[
+                    styles.smallText,
+                    { color: colors.text.secondary, marginLeft: spacing.sm },
+                  ]}
+                >
                   Loading requests...
                 </Text>
               </View>
@@ -190,41 +247,77 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
                 <Text style={[styles.settingLabel, { color: colors.error }]}>
                   {pendingError}
                 </Text>
-                <Pressable onPress={loadAdminLists} style={[styles.pillButton, { marginTop: spacing.sm }]}>
-                  <Text style={[styles.pillButtonText, { color: colors.primary }]}>Retry</Text>
+                <Pressable
+                  onPress={loadAdminLists}
+                  style={[styles.pillButton, { marginTop: spacing.sm }]}
+                >
+                  <Text
+                    style={[styles.pillButtonText, { color: colors.primary }]}
+                  >
+                    Retry
+                  </Text>
                 </Pressable>
               </View>
             ) : pendingStaff.length === 0 ? (
-              <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+              <Text
+                style={[styles.settingValue, { color: colors.text.secondary }]}
+              >
                 No pending staff requests.
               </Text>
             ) : (
               <View style={{ gap: spacing.sm }}>
                 {pendingStaff.map((u) => (
-                  <View
-                    key={u.userId}
-                    style={styles.pendingRow}
-                  >
+                  <View key={u.userId} style={styles.pendingRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+                      <Text
+                        style={[
+                          styles.settingLabel,
+                          { color: colors.text.primary },
+                        ]}
+                      >
                         {u.email || u.userId}
                       </Text>
-                      <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                      <Text
+                        style={[
+                          styles.settingValue,
+                          { color: colors.text.secondary },
+                        ]}
+                      >
                         Role: {u.role} • Status: {u.status}
                       </Text>
                     </View>
                     <View style={styles.pendingActions}>
                       <Pressable
-                        style={[styles.pillButton, { borderColor: colors.success }]}
+                        style={[
+                          styles.pillButton,
+                          { borderColor: colors.success },
+                        ]}
                         onPress={() => handleApprove(u.userId)}
                       >
-                        <Text style={[styles.pillButtonText, { color: colors.success }]}>Approve</Text>
+                        <Text
+                          style={[
+                            styles.pillButtonText,
+                            { color: colors.success },
+                          ]}
+                        >
+                          Approve
+                        </Text>
                       </Pressable>
                       <Pressable
-                        style={[styles.pillButton, { borderColor: colors.error }]}
+                        style={[
+                          styles.pillButton,
+                          { borderColor: colors.error },
+                        ]}
                         onPress={() => handleRevoke(u.userId)}
                       >
-                        <Text style={[styles.pillButtonText, { color: colors.error }]}>Revoke</Text>
+                        <Text
+                          style={[
+                            styles.pillButtonText,
+                            { color: colors.error },
+                          ]}
+                        >
+                          Revoke
+                        </Text>
                       </Pressable>
                     </View>
                   </View>
@@ -233,15 +326,35 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
             )}
           </View>
 
-          <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.lg }]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: colors.text.primary, marginTop: spacing.lg },
+            ]}
+          >
             Existing staff
           </Text>
 
-          <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light, flexDirection: 'column', alignItems: 'stretch' }]}>
+          <View
+            style={[
+              styles.settingItem,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border.light,
+                flexDirection: 'column',
+                alignItems: 'stretch',
+              },
+            ]}
+          >
             {loadingAdminLists && activeStaff.length === 0 ? (
               <View style={styles.centerRow}>
                 <ActivityIndicator color={colors.primary} />
-                <Text style={[styles.smallText, { color: colors.text.secondary, marginLeft: spacing.sm }]}>
+                <Text
+                  style={[
+                    styles.smallText,
+                    { color: colors.text.secondary, marginLeft: spacing.sm },
+                  ]}
+                >
                   Loading staff...
                 </Text>
               </View>
@@ -250,35 +363,61 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
                 <Text style={[styles.settingLabel, { color: colors.error }]}>
                   {staffError}
                 </Text>
-                <Pressable onPress={loadAdminLists} style={[styles.pillButton, { marginTop: spacing.sm }]}>
-                  <Text style={[styles.pillButtonText, { color: colors.primary }]}>Retry</Text>
+                <Pressable
+                  onPress={loadAdminLists}
+                  style={[styles.pillButton, { marginTop: spacing.sm }]}
+                >
+                  <Text
+                    style={[styles.pillButtonText, { color: colors.primary }]}
+                  >
+                    Retry
+                  </Text>
                 </Pressable>
               </View>
             ) : activeStaff.length === 0 ? (
-              <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+              <Text
+                style={[styles.settingValue, { color: colors.text.secondary }]}
+              >
                 No active staff members yet.
               </Text>
             ) : (
               <View style={{ gap: spacing.sm }}>
                 {activeStaff.map((u) => (
-                  <View
-                    key={u.userId}
-                    style={styles.pendingRow}
-                  >
+                  <View key={u.userId} style={styles.pendingRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+                      <Text
+                        style={[
+                          styles.settingLabel,
+                          { color: colors.text.primary },
+                        ]}
+                      >
                         {u.email || u.userId}
                       </Text>
-                      <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                      <Text
+                        style={[
+                          styles.settingValue,
+                          { color: colors.text.secondary },
+                        ]}
+                      >
                         Role: {u.role} • Status: {u.status}
                       </Text>
                     </View>
                     <View style={styles.pendingActions}>
                       <Pressable
-                        style={[styles.pillButton, { borderColor: colors.error }]}
+                        style={[
+                          styles.pillButton,
+                          { borderColor: colors.error },
+                        ]}
                         onPress={() => handleRevoke(u.userId)}
                       >
-                        <Text style={[styles.pillButtonText, { color: colors.error }]}>Revoke</Text>
+                        <Text
+                          style={[
+                            styles.pillButtonText,
+                            { color: colors.error },
+                          ]}
+                        >
+                          Revoke
+                        </Text>
                       </Pressable>
                     </View>
                   </View>
@@ -290,11 +429,25 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
       )}
 
       {/* App Settings */}
-      <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.xl }]}>App Settings</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: colors.text.primary, marginTop: spacing.xl },
+        ]}
+      >
+        App Settings
+      </Text>
 
-      <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}>
+      <View
+        style={[
+          styles.settingItem,
+          { backgroundColor: colors.surface, borderColor: colors.border.light },
+        ]}
+      >
         <View style={styles.settingContent}>
-          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Theme</Text>
+          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+            Theme
+          </Text>
           <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
             {themeMode === 'dark' ? 'Dark mode' : 'Light mode'}
           </Text>
@@ -307,9 +460,16 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
         />
       </View>
 
-      <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}>
+      <View
+        style={[
+          styles.settingItem,
+          { backgroundColor: colors.surface, borderColor: colors.border.light },
+        ]}
+      >
         <View style={styles.settingContent}>
-          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Notifications</Text>
+          <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+            Notifications
+          </Text>
           <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
             Receive event updates
           </Text>
@@ -320,16 +480,30 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
       {/* Student-only FAQ redirect */}
       {role === 'student' && (
         <Pressable
-          style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}
+          style={[
+            styles.settingItem,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border.light,
+            },
+          ]}
           onPress={() => router.push(faqRoute as any)}
         >
           <View style={styles.settingContent}>
-            <Text style={[styles.settingLabel, { color: colors.text.primary }]}>Student FAQs</Text>
-            <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+            <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+              Student FAQs
+            </Text>
+            <Text
+              style={[styles.settingValue, { color: colors.text.secondary }]}
+            >
               Common questions about using the app
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={colors.text.secondary}
+          />
         </Pressable>
       )}
 
@@ -337,7 +511,9 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
         style={[styles.signOutButton, { backgroundColor: colors.error }]}
         onPress={handleSignOut}
       >
-        <Text style={[styles.signOutText, { color: colors.text.onPrimary }]}>Sign Out</Text>
+        <Text style={[styles.signOutText, { color: colors.text.onPrimary }]}>
+          Sign Out
+        </Text>
       </Pressable>
     </ScrollView>
   );

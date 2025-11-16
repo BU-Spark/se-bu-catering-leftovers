@@ -10,7 +10,14 @@ export default function AuthLayout() {
 
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator color={colors.primary} />
       </View>
     );
@@ -23,12 +30,12 @@ export default function AuthLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name='sign-in'
+        name="sign-in"
         options={{ headerShown: false, title: 'Sign in' }}
       />
-      <Stack.Screen 
-        name='sign-up' 
-        options={{ headerShown: false, title: 'Sign up' }} 
+      <Stack.Screen
+        name="sign-up"
+        options={{ headerShown: false, title: 'Sign up' }}
       />
       {/* verify.tsx is no longer needed - merged into sign-up */}
     </Stack>

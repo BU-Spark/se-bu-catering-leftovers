@@ -16,19 +16,20 @@ export function useOpenEvents() {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const { events: fetchedEvents } = await fetchOpenEventsPage({ pageSize: 50 });
-      
+      const { events: fetchedEvents } = await fetchOpenEventsPage({
+        pageSize: 50,
+      });
+
       // Sort by expiry time (soonest first)
       const sorted = fetchedEvents.sort((a, b) => {
         const expiryA = getEventExpiryTime(a);
         const expiryB = getEventExpiryTime(b);
         return expiryA - expiryB;
       });
-      
+
       setEvents(sorted);
       setError(null);
     } catch (err) {
-
       setError('Failed to load events');
     } finally {
       setLoading(false);
@@ -54,15 +55,14 @@ export function useAllEvents() {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const { events: fetchedEvents } = await fetchEventsPage({ 
+      const { events: fetchedEvents } = await fetchEventsPage({
         pageSize: 100,
         order: 'foodAvailable',
-        direction: 'desc'
+        direction: 'desc',
       });
       setEvents(fetchedEvents);
       setError(null);
     } catch (err) {
-
       setError('Failed to load events');
     } finally {
       setLoading(false);
@@ -83,17 +83,19 @@ function getEventExpiryTime(event: Event): number {
     if (event.foodAvailable) {
       if (event.foodAvailable instanceof Timestamp) {
         startMs = event.foodAvailable.toMillis();
-      } else if (typeof event.foodAvailable === 'object' && 'toDate' in event.foodAvailable) {
+      } else if (
+        typeof event.foodAvailable === 'object' &&
+        'toDate' in event.foodAvailable
+      ) {
         startMs = event.foodAvailable.toDate().getTime();
       } else if (typeof event.foodAvailable === 'number') {
         startMs = event.foodAvailable;
       }
     }
-    
+
     const durationMs = (event.duration ?? 30) * 60 * 1000;
     return startMs + durationMs;
   } catch (error) {
-
     return Date.now() + 30 * 60 * 1000; // Default to 30 minutes from now
   }
 }
