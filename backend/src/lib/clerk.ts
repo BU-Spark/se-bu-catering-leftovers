@@ -23,7 +23,8 @@ export async function requireUserFromHeaders(headers: Record<string, string | st
     if (!session?.sub) return { ok: false as const, error: "Invalid session" };
     const user = await clerk.users.getUser(session.sub);
     return { ok: true as const, user, userId: session.sub };
-  } catch {
+  } catch(err) {
+    console.error("verifyToken error:", err);
     return { ok: false as const, error: "Token verification failed" };
   }
 }

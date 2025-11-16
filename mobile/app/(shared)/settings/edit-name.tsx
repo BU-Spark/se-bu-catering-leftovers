@@ -51,8 +51,8 @@ export default function EditNameScreen() {
         name: name.trim(),
       });
       
-      const role = user.publicMetadata?.role as string;
-      if (role === 'admin') {
+      const role = user.publicMetadata?.role as string | undefined;
+      if (role === 'admin' || role === 'staff') {
         router.replace('/(admin)/settings/page');
       } else {
         router.replace('/(student)/settings/page');
@@ -65,8 +65,8 @@ export default function EditNameScreen() {
   };
 
   const handleBack = useCallback(() => {
-    const role = user?.publicMetadata?.role as string;
-    if (role === 'admin') {
+    const role = user?.publicMetadata?.role as string | undefined;
+    if (role === 'admin' || role === 'staff') {
       router.replace('/(admin)/settings/page');
     } else {
       router.replace('/(student)/settings/page');

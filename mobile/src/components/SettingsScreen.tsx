@@ -1,6 +1,6 @@
-//src/components/SettingsScreen.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
+// src/components/SettingsScreen.tsx
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch, ActivityIndicator, Alert } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { router } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
@@ -9,19 +9,34 @@ import { useTheme } from '../lib/ThemeProvider';
 import { typography, spacing, borderRadius } from '../lib/theme';
 import { Ionicons } from '@expo/vector-icons';
 import NotificationsToggle from './NotificationsToggle';
+import {
+  fetchPendingStaff,
+  fetchActiveStaff,
+  approveStaff,
+  revokeStaff,
+  RbacUser,
+} from '../lib/rbacClient';
 
 type SettingsScreenProps = {
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'staff';
 };
 
 export default function SettingsScreen({ role }: SettingsScreenProps) {
-  const { signOut } = useAuth();
+  const { signOut, getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const { colors, themeMode, toggleTheme } = useTheme();
   
   const [name, setName] = useState('');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Admin-only RBAC state
+  const [pendingStaff, setPendingStaff] = useState<RbacUser[]>([]);
+  const [activeStaff, setActiveStaff] = useState<RbacUser[]>([]);
+  const [loadingAdminLists, setLoadingAdminLists] = useState(false);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [staffError, setStaffError] = useState<string | null>(null);
+  const hasLoadedAdminLists = useRef(false);
 
   useEffect(() => {
     loadUserPreferences();
@@ -46,6 +61,65 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
     }
   };
 
+  const loadAdminLists = useCallback(async () => {
+    if (role !== 'admin') return;
+
+    setLoadingAdminLists(true);
+    setPendingError(null);
+    setStaffError(null);
+
+    try {
+      const [pendingRes, staffRes] = await Promise.all([
+        fetchPendingStaff(getToken).catch((err: any) => {
+          console.error('Failed to load pending staff:', err);
+          setPendingError(err?.message ?? 'Failed to load staff requests');
+          return { pending: [] as RbacUser[] };
+        }),
+        fetchActiveStaff(getToken).catch((err: any) => {
+          console.error('Failed to load active staff:', err);
+          setStaffError(err?.message ?? 'Failed to load active staff');
+          return { staff: [] as RbacUser[] };
+        }),
+      ]);
+
+      setPendingStaff(pendingRes.pending);
+      setActiveStaff(staffRes.staff);
+    } finally {
+      setLoadingAdminLists(false);
+    }
+  }, [role, getToken]);
+
+  useEffect(() => {
+    // Fire-and-forget: admin lists load in the background once per mount
+    if (role === 'admin' && isSignedIn && !hasLoadedAdminLists.current) {
+      hasLoadedAdminLists.current = true;
+      loadAdminLists();
+    }
+  }, [role, isSignedIn, loadAdminLists]);
+
+
+  const handleApprove = async (uid: string) => {
+    try {
+      await approveStaff(uid, getToken);
+      Alert.alert('Approved', 'Staff access has been approved.');
+      await loadAdminLists();
+    } catch (err: any) {
+      console.error('Failed to approve staff:', err);
+      Alert.alert('Error', err?.message ?? 'Failed to approve staff');
+    }
+  };
+
+  const handleRevoke = async (uid: string) => {
+    try {
+      await revokeStaff(uid, getToken);
+      Alert.alert('Updated', 'Staff access has been revoked / request rejected.');
+      await loadAdminLists();
+    } catch (err: any) {
+      console.error('Failed to revoke staff:', err);
+      Alert.alert('Error', err?.message ?? 'Failed to revoke staff');
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     router.replace('/sign-in');
@@ -55,14 +129,6 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   const editLocationsRoute = '/settings/edit-location';
   const faqRoute = '/settings/faq'; // student FAQs (hidden from tab bar)
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.loadingText, { color: colors.text.secondary }]}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -70,9 +136,14 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
     >
       <Text style={[styles.title, { color: colors.text.primary }]}>Settings</Text>
       <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-        {role === 'admin' ? 'Manage admin settings and preferences' : 'Manage your settings and preferences'}
+        {role === 'admin'
+          ? 'Manage admin settings and staff access'
+          : role === 'staff'
+          ? 'Manage your staff settings and preferences'
+          : 'Manage your settings and preferences'}
       </Text>
 
+      {/* Profile */}
       <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Profile</Text>
 
       <Pressable 
@@ -99,6 +170,126 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
         <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
       </Pressable>
 
+      {/* Admin-only staff management */}
+      {role === 'admin' && (
+        <>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.xl }]}>
+            Staff access requests
+          </Text>
+
+          <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light, flexDirection: 'column', alignItems: 'stretch' }]}>
+            {loadingAdminLists && pendingStaff.length === 0 ? (
+              <View style={styles.centerRow}>
+                <ActivityIndicator color={colors.primary} />
+                <Text style={[styles.smallText, { color: colors.text.secondary, marginLeft: spacing.sm }]}>
+                  Loading requests...
+                </Text>
+              </View>
+            ) : pendingError ? (
+              <View>
+                <Text style={[styles.settingLabel, { color: colors.error }]}>
+                  {pendingError}
+                </Text>
+                <Pressable onPress={loadAdminLists} style={[styles.pillButton, { marginTop: spacing.sm }]}>
+                  <Text style={[styles.pillButtonText, { color: colors.primary }]}>Retry</Text>
+                </Pressable>
+              </View>
+            ) : pendingStaff.length === 0 ? (
+              <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                No pending staff requests.
+              </Text>
+            ) : (
+              <View style={{ gap: spacing.sm }}>
+                {pendingStaff.map((u) => (
+                  <View
+                    key={u.userId}
+                    style={styles.pendingRow}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+                        {u.email || u.userId}
+                      </Text>
+                      <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                        Role: {u.role} • Status: {u.status}
+                      </Text>
+                    </View>
+                    <View style={styles.pendingActions}>
+                      <Pressable
+                        style={[styles.pillButton, { borderColor: colors.success }]}
+                        onPress={() => handleApprove(u.userId)}
+                      >
+                        <Text style={[styles.pillButtonText, { color: colors.success }]}>Approve</Text>
+                      </Pressable>
+                      <Pressable
+                        style={[styles.pillButton, { borderColor: colors.error }]}
+                        onPress={() => handleRevoke(u.userId)}
+                      >
+                        <Text style={[styles.pillButtonText, { color: colors.error }]}>Revoke</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.lg }]}>
+            Existing staff
+          </Text>
+
+          <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light, flexDirection: 'column', alignItems: 'stretch' }]}>
+            {loadingAdminLists && activeStaff.length === 0 ? (
+              <View style={styles.centerRow}>
+                <ActivityIndicator color={colors.primary} />
+                <Text style={[styles.smallText, { color: colors.text.secondary, marginLeft: spacing.sm }]}>
+                  Loading staff...
+                </Text>
+              </View>
+            ) : staffError ? (
+              <View>
+                <Text style={[styles.settingLabel, { color: colors.error }]}>
+                  {staffError}
+                </Text>
+                <Pressable onPress={loadAdminLists} style={[styles.pillButton, { marginTop: spacing.sm }]}>
+                  <Text style={[styles.pillButtonText, { color: colors.primary }]}>Retry</Text>
+                </Pressable>
+              </View>
+            ) : activeStaff.length === 0 ? (
+              <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                No active staff members yet.
+              </Text>
+            ) : (
+              <View style={{ gap: spacing.sm }}>
+                {activeStaff.map((u) => (
+                  <View
+                    key={u.userId}
+                    style={styles.pendingRow}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.settingLabel, { color: colors.text.primary }]}>
+                        {u.email || u.userId}
+                      </Text>
+                      <Text style={[styles.settingValue, { color: colors.text.secondary }]}>
+                        Role: {u.role} • Status: {u.status}
+                      </Text>
+                    </View>
+                    <View style={styles.pendingActions}>
+                      <Pressable
+                        style={[styles.pillButton, { borderColor: colors.error }]}
+                        onPress={() => handleRevoke(u.userId)}
+                      >
+                        <Text style={[styles.pillButtonText, { color: colors.error }]}>Revoke</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </>
+      )}
+
+      {/* App Settings */}
       <Text style={[styles.sectionTitle, { color: colors.text.primary, marginTop: spacing.xl }]}>App Settings</Text>
 
       <View style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}>
@@ -126,7 +317,7 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
         <NotificationsToggle showLabel={false} />
       </View>
 
-      {/* Student-only FAQ redirect (route exists at app/(student)/settings/faq.tsx). Not in tab bar. */}
+      {/* Student-only FAQ redirect */}
       {role === 'student' && (
         <Pressable
           style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border.light }]}
@@ -209,6 +400,32 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     ...typography.body,
+    fontWeight: '600',
+  },
+  centerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  smallText: {
+    ...typography.bodySmall,
+  },
+  pendingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  pendingActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  pillButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+  },
+  pillButtonText: {
+    ...typography.bodySmall,
     fontWeight: '600',
   },
 });

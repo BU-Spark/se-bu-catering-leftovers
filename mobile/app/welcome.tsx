@@ -6,9 +6,10 @@ import { Text, StyleSheet, View, ActivityIndicator, Pressable, Image } from 'rea
 import { Redirect, router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors, typography, spacing } from '../src/lib/theme';
+import { fetchMe } from '../src/lib/rbacClient';
 
 export default function WelcomeScreen() {
-  const { isSignedIn, isLoaded: authLoaded } = useAuth();
+  const { isSignedIn, isLoaded: authLoaded, getToken } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const [shouldRedirect, setShouldRedirect] = useState<{
     path: string;
@@ -17,9 +18,16 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
-      if (!userLoaded || !isSignedIn || !user) return;
+      if (!authLoaded || !userLoaded) return;
+
+      // Not signed in: stay on welcome screen
+      if (!isSignedIn || !user) {
+        setShouldRedirect({ path: '', ready: false });
+        return;
+      }
 
       try {
+        // 1) Ensure Firestore user doc exists
         const userRef = doc(firestore, 'Users', user.id);
         const userSnap = await getDoc(userRef);
 
@@ -49,21 +57,47 @@ export default function WelcomeScreen() {
           return;
         }
 
-        const userRole = user.publicMetadata?.role as string | undefined;
-        if (userRole === 'admin') {
-          console.log('✅ Redirecting to admin route');
-          setShouldRedirect({ path: '/(admin)', ready: true });
-        } else {
-          console.log('✅ Redirecting to student route');
+        // 2) User is onboarding, use RBAC backend to decide where to go
+        try {
+          const me = await fetchMe(getToken);
+          const rbac = me.rbac;
+
+          if (!rbac) {
+            console.log('RBAC missing, falling back to student route');
+            setShouldRedirect({ path: '/(student)', ready: true });
+            return;
+          }
+
+          const { role, status } = rbac;
+
+          console.log('RBAC from /api/me:', role, status);
+
+          if (status === 'pending') {
+            // Staff request pending, move to pending screen
+            setShouldRedirect({ path: '/(onboarding)/pending', ready: true });
+            return;
+          }
+
+          if (role === 'admin' || role === 'staff') {
+            // Staff + admin share the (admin) stack; staff UI will hide admin-only bits
+            setShouldRedirect({ path: '/(admin)', ready: true });
+            return;
+          }
+
+          // Default: student experience
+          setShouldRedirect({ path: '/(student)', ready: true });
+        } catch (err) {
+          console.error('Failed to load RBAC info, falling back to student route:', err);
           setShouldRedirect({ path: '/(student)', ready: true });
         }
       } catch (error) {
         console.error('🔥 Failed to check onboarding status:', error);
+        setShouldRedirect({ path: '/(student)', ready: true });
       }
     };
 
     checkOnboardingStatus();
-  }, [isSignedIn, userLoaded, user]);
+  }, [authLoaded, isSignedIn, userLoaded, user, getToken]);
 
   if (!authLoaded || !userLoaded) {
     return (

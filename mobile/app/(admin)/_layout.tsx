@@ -64,9 +64,18 @@ export default function AdminLayout() {
   }
 
   const userRole = user?.publicMetadata?.role as string | undefined;
+  const userStatus = (user?.publicMetadata as any)?.status as string | undefined;
 
-  if (userRole !== 'admin') {
-    console.log('Admin layout - Redirecting to student route, role was:', userRole);
+  const isAdmin = userRole === 'admin' && (userStatus === 'active' || userStatus == null);
+  const isActiveStaff = userRole === 'staff' && userStatus === 'active';
+
+  // Only admins and *active* staff can stay in the (admin) stack
+  if (!isAdmin && !isActiveStaff) {
+    console.log(
+      'Admin layout - Redirecting to student route, role/status was:',
+      userRole,
+      userStatus
+    );
     return <Redirect href='/(student)' />;
   }
 
