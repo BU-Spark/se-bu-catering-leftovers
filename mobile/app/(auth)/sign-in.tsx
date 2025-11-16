@@ -129,7 +129,7 @@ export default function SignInScreen() {
       <CustomButton text="Sign in" onPress={handleSubmit(onSignIn)} />
 
       <Link href="/sign-up" style={styles.link}>
-        Don't have an account? Sign up
+        {"Don't have an account? Sign up"}
       </Link>
 
       <View style={styles.divider}>

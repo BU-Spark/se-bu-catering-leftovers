@@ -22,14 +22,10 @@ export default function EditNameScreen() {
   const { user } = useUser();
   const { colors } = useTheme();
   const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadCurrentName();
-  }, [user]);
-
-  const loadCurrentName = async () => {
+  const loadCurrentName = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -45,7 +41,11 @@ export default function EditNameScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadCurrentName();
+  }, [loadCurrentName]);
 
   const handleSave = async () => {
     if (!user || !name.trim()) {

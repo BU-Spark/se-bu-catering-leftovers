@@ -35,7 +35,7 @@ export function tsToMs(ts?: any): number | null {
     const date = ts instanceof Date ? ts : new Date(ts);
     const time = date.getTime();
     return isNaN(time) ? null : time;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

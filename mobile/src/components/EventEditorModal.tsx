@@ -1,6 +1,6 @@
 // src/components/EventEditorModal.tsx
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import React, { useState, useEffect } from 'react';
 import { storage } from '../lib/firebase/config';
 import {
@@ -203,7 +203,7 @@ export function EventEditorModal({
       }
 
       onClose();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save event');
     } finally {
       setSaving(false);

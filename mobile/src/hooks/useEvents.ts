@@ -29,7 +29,7 @@ export function useOpenEvents() {
 
       setEvents(sorted);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load events');
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export function useAllEvents() {
       });
       setEvents(fetchedEvents);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load events');
     } finally {
       setLoading(false);
@@ -95,7 +95,7 @@ function getEventExpiryTime(event: Event): number {
 
     const durationMs = (event.duration ?? 30) * 60 * 1000;
     return startMs + durationMs;
-  } catch (error) {
+  } catch {
     return Date.now() + 30 * 60 * 1000; // Default to 30 minutes from now
   }
 }

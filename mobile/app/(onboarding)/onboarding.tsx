@@ -141,10 +141,10 @@ export default function OnboardingScreen() {
           <View style={styles.content}>
             <Text style={styles.emoji}>👋</Text>
             <Text style={styles.title}>Welcome to BU Catering</Text>
-            <Text style={styles.subtitle}>Let's get to know you</Text>
+            <Text style={styles.subtitle}>Let&apos;s get to know you</Text>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>What's your name?</Text>
+              <Text style={styles.label}>What&apos;s your name?</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -163,7 +163,7 @@ export default function OnboardingScreen() {
             <Text style={styles.emoji}>🎓</Text>
             <Text style={styles.title}>How are you using FreeBites?</Text>
             <Text style={styles.subtitle}>
-              Choose whether you're signing up as a student or as staff.
+              Choose whether you&apos;re signing up as a student or as staff.
             </Text>
 
             <View style={styles.roleContainer}>

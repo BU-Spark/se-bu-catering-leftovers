@@ -50,7 +50,7 @@ export default function CreateEventScreen() {
 
       Alert.alert('Success', 'Event created successfully!');
       setShowModal(false);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to create event');
     }
   };

@@ -22,14 +22,10 @@ export default function EditLocationScreen() {
   const { user } = useUser();
   const { colors } = useTheme();
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadCurrentLocations();
-  }, [user]);
-
-  const loadCurrentLocations = async () => {
+  const loadCurrentLocations = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -45,7 +41,11 @@ export default function EditLocationScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadCurrentLocations();
+  }, [loadCurrentLocations]);
 
   const toggleLocation = (location: string) => {
     setSelectedLocations((prev) =>

@@ -37,7 +37,7 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
 
   const [name, setName] = useState('');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   // Admin-only RBAC state
   const [pendingStaff, setPendingStaff] = useState<RbacUser[]>([]);
@@ -47,11 +47,7 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   const [staffError, setStaffError] = useState<string | null>(null);
   const hasLoadedAdminLists = useRef(false);
 
-  useEffect(() => {
-    loadUserPreferences();
-  }, [user]);
-
-  const loadUserPreferences = async () => {
+  const loadUserPreferences = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -68,7 +64,11 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadUserPreferences();
+  }, [loadUserPreferences]);
 
   const loadAdminLists = useCallback(async () => {
     if (role !== 'admin') return;

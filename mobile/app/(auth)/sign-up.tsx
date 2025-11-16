@@ -78,7 +78,7 @@ export default function SignUpScreen() {
     } else {
       slideAnim.setValue(0);
     }
-  }, [pendingVerification]);
+  }, [pendingVerification, slideAnim]);
 
   const onSignUp = async (data: SignUpFields) => {
     if (!isLoaded) return;
@@ -227,7 +227,7 @@ export default function SignUpScreen() {
 
             {/* Resend Code Link */}
             <Text style={styles.resendContainer}>
-              Didn't receive a code?{' '}
+              {"Didn't receive a code? "}
               <Text style={styles.resendLink} onPress={handleResendCode}>
                 Resend
               </Text>

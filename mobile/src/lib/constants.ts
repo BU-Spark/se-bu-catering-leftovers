@@ -1,12 +1,12 @@
 // src/lib/constants.ts
 // Shared constants used across the app
 
-export const PRESET_LOCATIONS: Array<{
+export const PRESET_LOCATIONS: {
   label: string;
   name: string;
   address: string;
   campus_section: string;
-}> = [
+}[] = [
   // Verified: BU School of Law, 765 Commonwealth Ave, 02215
   {
     label: 'BU School of Law (LAW Tower)',

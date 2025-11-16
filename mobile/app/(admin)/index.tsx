@@ -15,7 +15,6 @@ import { typography, spacing, borderRadius } from '../../src/lib/theme';
 import { useAllEvents } from '../../src/hooks/useEvents';
 import { EventCard } from '../../src/components/EventCard';
 import { EventEditorModal } from '../../src/components/EventEditorModal';
-import { router } from 'expo-router';
 import type { Event } from '../../src/types';
 import { updateEvent } from '../../src/lib/firebase/events';
 import { notifyStudents } from '../../src/lib/notifications';
