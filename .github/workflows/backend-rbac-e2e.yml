@@ -2,7 +2,7 @@ name: Backend RBAC E2E
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, feat/ci-and-tests]
   workflow_dispatch:
 
 jobs:
