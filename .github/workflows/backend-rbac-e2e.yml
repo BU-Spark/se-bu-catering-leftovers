@@ -29,8 +29,8 @@ jobs:
 
       - name: Run RBAC E2E Jest tests
         env:
+          BASE: ${{ secrets.BASE }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-          BASE: ${{ secrets.BACKEND_BASE_URL }}
-          STUDENT_ID: ${{ secrets.RBAC_STUDENT_ID }}
-          ADMIN_ID: ${{ secrets.RBAC_ADMIN_ID }}
+          STUDENT_ID: ${{ secrets.STUDENT_ID }}
+          ADMIN_ID: ${{ secrets.ADMIN_ID }}
         run: npm test
