@@ -7,6 +7,10 @@ const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY!;
 const STUDENT_ID = process.env.STUDENT_ID!;
 const ADMIN_ID = process.env.ADMIN_ID!;
 
+if (!BASE_URL || !CLERK_SECRET_KEY || !STUDENT_ID || !ADMIN_ID) {
+  throw new Error('Missing required env vars: BASE, CLERK_SECRET_KEY, STUDENT_ID, ADMIN_ID');
+}
+
 let studentToken: string;
 let adminToken: string;
 
@@ -24,6 +28,13 @@ async function clerkApi(method: string, path: string, body?: any) {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(
+      `Clerk API request failed: ${method} ${path} - ${res.status} ${res.statusText}\n${errorText}`
+    );
+  }
 
   return res.json();
 }
