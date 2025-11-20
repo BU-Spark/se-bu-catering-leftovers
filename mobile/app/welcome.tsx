@@ -1,5 +1,5 @@
 // app/welcome.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { firestore } from '../src/lib/firebase/config';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import {
@@ -15,6 +15,15 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors, typography, spacing } from '../src/lib/theme';
 import { fetchMe } from '../src/lib/rbacClient';
 
+const log = (msg: string, data?: any) => {
+  const timestamp = new Date().toISOString();
+  if (data) {
+    console.log(`[${timestamp}] [welcome.tsx] ${msg}`, data);
+  } else {
+    console.log(`[${timestamp}] [welcome.tsx] ${msg}`);
+  }
+};
+
 export default function WelcomeScreen() {
   const { isSignedIn, isLoaded: authLoaded, getToken } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
@@ -23,22 +32,44 @@ export default function WelcomeScreen() {
     ready: boolean;
   }>({ path: '', ready: false });
 
+  // Use a ref to track if we've already run the check
+  const hasChecked = useRef(false);
+
+  log('Render', { isSignedIn, authLoaded, userLoaded });
+
   useEffect(() => {
+    // Only run once when auth is loaded
+    if (!authLoaded || !userLoaded || hasChecked.current) {
+      return;
+    }
+
+    hasChecked.current = true;
+
     const checkOnboardingStatus = async () => {
-      if (!authLoaded || !userLoaded) return;
+      log('checkOnboardingStatus START', {
+        authLoaded,
+        userLoaded,
+        isSignedIn,
+      });
 
       // Not signed in: stay on welcome screen
       if (!isSignedIn || !user) {
+        log('User not signed in, staying on welcome');
         setShouldRedirect({ path: '', ready: false });
         return;
       }
 
       try {
+        log('User signed in, checking onboarding status', { userId: user.id });
+
         // 1) Ensure Firestore user doc exists
+        log('Fetching Firestore user doc...');
         const userRef = doc(firestore, 'Users', user.id);
         const userSnap = await getDoc(userRef);
+        log('Firestore fetch complete', { exists: userSnap.exists() });
 
         if (!userSnap.exists()) {
+          log('Creating new user document...');
           await setDoc(userRef, {
             uid: user.id,
             email: user.primaryEmailAddress?.emailAddress || '',
@@ -51,65 +82,71 @@ export default function WelcomeScreen() {
             timePref: [],
             foodPref: [],
           });
-          console.log('✅ New user document created');
+          log('✅ New user document created');
           setShouldRedirect({ path: '/(onboarding)/onboarding', ready: true });
           return;
         }
 
         const userData = userSnap.data();
-        console.log(userData.agreedToTerms);
+        log('User data loaded', { agreedToTerms: userData.agreedToTerms });
+
         if (userData.agreedToTerms !== true) {
-          console.log('📋 User needs to complete onboarding');
+          log('User needs to complete onboarding');
           setShouldRedirect({ path: '/(onboarding)/onboarding', ready: true });
           return;
         }
 
-        // 2) User is onboarding, use RBAC backend to decide where to go
+        // 2) User is onboarded, use RBAC backend to decide where to go
+        log('User is onboarded, calling fetchMe...');
         try {
+          log('Calling fetchMe with getToken');
           const me = await fetchMe(getToken);
+          log('fetchMe succeeded', me);
           const rbac = me.rbac;
 
           if (!rbac) {
-            console.log('RBAC missing, falling back to student route');
+            log('RBAC missing, falling back to student route');
             setShouldRedirect({ path: '/(student)', ready: true });
             return;
           }
 
           const { role, status } = rbac;
-
-          console.log('RBAC from /api/me:', role, status);
+          log('RBAC loaded', { role, status });
 
           if (status === 'pending') {
-            // Staff request pending, move to pending screen
+            log('Status is pending, redirecting to pending screen');
             setShouldRedirect({ path: '/(onboarding)/pending', ready: true });
             return;
           }
 
           if (role === 'admin' || role === 'staff') {
-            // Staff + admin share the (admin) stack; staff UI will hide admin-only bits
+            log('Role is admin/staff, redirecting to admin');
             setShouldRedirect({ path: '/(admin)', ready: true });
             return;
           }
 
           // Default: student experience
+          log('Role is student, redirecting to student');
           setShouldRedirect({ path: '/(student)', ready: true });
         } catch (err) {
-          console.error(
-            'Failed to load RBAC info, falling back to student route:',
-            err,
-          );
+          log('❌ fetchMe failed', err);
+          console.error('Failed to load RBAC info:', err);
+          log('Falling back to student route');
           setShouldRedirect({ path: '/(student)', ready: true });
         }
       } catch (error) {
-        console.error('🔥 Failed to check onboarding status:', error);
+        log('❌ checkOnboardingStatus error', error);
+        console.error('Failed to check onboarding status:', error);
         setShouldRedirect({ path: '/(student)', ready: true });
       }
     };
 
     checkOnboardingStatus();
-  }, [authLoaded, isSignedIn, userLoaded, user, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoaded, userLoaded]);
 
   if (!authLoaded || !userLoaded) {
+    log('Still loading auth/user');
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -118,10 +155,12 @@ export default function WelcomeScreen() {
   }
 
   if (shouldRedirect.ready && shouldRedirect.path) {
+    log('Redirecting to', shouldRedirect.path);
     return <Redirect href={shouldRedirect.path as any} />;
   }
 
   if (isSignedIn) {
+    log('Signed in but no redirect yet (still processing)');
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -129,6 +168,7 @@ export default function WelcomeScreen() {
     );
   }
 
+  log('Showing welcome screen');
   return (
     <View style={styles.container}>
       <View style={styles.content}>
