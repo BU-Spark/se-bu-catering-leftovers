@@ -4,7 +4,7 @@ import { useTheme } from '../../../src/lib/ThemeProvider';
 
 export default function SettingsLayout() {
   const { colors } = useTheme();
-  
+
   return (
     <Stack
       screenOptions={{

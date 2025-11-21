@@ -1,6 +1,14 @@
 // app/(onboarding)/onboarding.tsx
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Dimensions,
+} from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
@@ -23,7 +31,9 @@ export default function OnboardingScreen() {
   const [name, setName] = useState(user?.fullName || '');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'student' | 'staff'>('student');
+  const [selectedRole, setSelectedRole] = useState<'student' | 'staff'>(
+    'student',
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const styles = createStyles(colors);
@@ -51,10 +61,10 @@ export default function OnboardingScreen() {
   };
 
   const toggleLocation = (location: string) => {
-    setSelectedLocations(prev =>
+    setSelectedLocations((prev) =>
       prev.includes(location)
-        ? prev.filter(l => l !== location)
-        : [...prev, location]
+        ? prev.filter((l) => l !== location)
+        : [...prev, location],
     );
   };
 
@@ -72,7 +82,7 @@ export default function OnboardingScreen() {
           locPref: selectedLocations,
           agreedToTerms: true,
         },
-        { merge: true }
+        { merge: true },
       );
 
       const userRole = user.publicMetadata?.role as string | undefined;
@@ -106,9 +116,9 @@ export default function OnboardingScreen() {
 
   const canProceedFromPage = (page: number) => {
     if (page === 0) return name.trim().length > 0; // Name
-    if (page === 1) return true;                   // Role (default is student)
-    if (page === 2) return true;                   // Campus prefs
-    if (page === 3) return agreedToTerms;          // Terms
+    if (page === 1) return true; // Role (default is student)
+    if (page === 2) return true; // Campus prefs
+    if (page === 3) return agreedToTerms; // Terms
     return false;
   };
 
@@ -131,10 +141,10 @@ export default function OnboardingScreen() {
           <View style={styles.content}>
             <Text style={styles.emoji}>👋</Text>
             <Text style={styles.title}>Welcome to BU Catering</Text>
-            <Text style={styles.subtitle}>Let's get to know you</Text>
-            
+            <Text style={styles.subtitle}>Let&apos;s get to know you</Text>
+
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>What's your name?</Text>
+              <Text style={styles.label}>What&apos;s your name?</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -153,7 +163,7 @@ export default function OnboardingScreen() {
             <Text style={styles.emoji}>🎓</Text>
             <Text style={styles.title}>How are you using FreeBites?</Text>
             <Text style={styles.subtitle}>
-              Choose whether you're signing up as a student or as staff.
+              Choose whether you&apos;re signing up as a student or as staff.
             </Text>
 
             <View style={styles.roleContainer}>
@@ -175,7 +185,8 @@ export default function OnboardingScreen() {
                 <Text
                   style={[
                     styles.roleDescription,
-                    selectedRole === 'student' && styles.roleDescriptionSelected,
+                    selectedRole === 'student' &&
+                      styles.roleDescriptionSelected,
                   ]}
                 >
                   Browse and claim leftover catering events on campus.
@@ -223,28 +234,36 @@ export default function OnboardingScreen() {
           <View style={styles.content}>
             <Text style={styles.emoji}>📍</Text>
             <Text style={styles.title}>Campus Preferences</Text>
-            <Text style={styles.subtitle}>Select your preferred campus sections to get relevant event notifications</Text>
-            
+            <Text style={styles.subtitle}>
+              Select your preferred campus sections to get relevant event
+              notifications
+            </Text>
+
             <View style={styles.chipsContainer}>
               {CAMPUS_SECTIONS.map((section) => (
                 <Pressable
                   key={section}
                   style={[
                     styles.chip,
-                    selectedLocations.includes(section) && styles.chipSelected
+                    selectedLocations.includes(section) && styles.chipSelected,
                   ]}
                   onPress={() => toggleLocation(section)}
                 >
-                  <Text style={[
-                    styles.chipText,
-                    selectedLocations.includes(section) && styles.chipTextSelected
-                  ]}>
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedLocations.includes(section) &&
+                        styles.chipTextSelected,
+                    ]}
+                  >
                     {section}
                   </Text>
                 </Pressable>
               ))}
             </View>
-            <Text style={styles.hint}>You can change this later in settings</Text>
+            <Text style={styles.hint}>
+              You can change this later in settings
+            </Text>
           </View>
         </View>
 
@@ -253,21 +272,29 @@ export default function OnboardingScreen() {
           <View style={styles.content}>
             <Text style={styles.emoji}>📜</Text>
             <Text style={styles.title}>Terms & Conditions</Text>
-            
-            <ScrollView style={styles.termsScroll} showsVerticalScrollIndicator={true}>
-              <Text style={styles.termsText}>
-                {TERMS_AND_CONDITIONS}
-              </Text>
+
+            <ScrollView
+              style={styles.termsScroll}
+              showsVerticalScrollIndicator={true}
+            >
+              <Text style={styles.termsText}>{TERMS_AND_CONDITIONS}</Text>
             </ScrollView>
 
             <Pressable
               style={styles.checkboxContainer}
               onPress={() => setAgreedToTerms(!agreedToTerms)}
             >
-              <View style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}>
+              <View
+                style={[
+                  styles.checkbox,
+                  agreedToTerms && styles.checkboxChecked,
+                ]}
+              >
                 {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
               </View>
-              <Text style={styles.checkboxLabel}>I agree to the Terms & Conditions</Text>
+              <Text style={styles.checkboxLabel}>
+                I agree to the Terms & Conditions
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -277,7 +304,9 @@ export default function OnboardingScreen() {
         <View style={styles.navigation}>
           {currentPage > 0 && (
             <Pressable style={styles.backButton} onPress={handleBack}>
-              <Text style={[styles.backText, { color: colors.text.secondary }]}>Back</Text>
+              <Text style={[styles.backText, { color: colors.text.secondary }]}>
+                Back
+              </Text>
             </Pressable>
           )}
 
@@ -285,10 +314,7 @@ export default function OnboardingScreen() {
             {[0, 1, 2, 3].map((index) => (
               <View
                 key={index}
-                style={[
-                  styles.dot,
-                  currentPage === index && styles.dotActive
-                ]}
+                style={[styles.dot, currentPage === index && styles.dotActive]}
               />
             ))}
           </View>
@@ -300,7 +326,7 @@ export default function OnboardingScreen() {
           <Pressable
             style={[
               styles.nextButton,
-              !canProceedFromPage(currentPage) && styles.buttonDisabled
+              !canProceedFromPage(currentPage) && styles.buttonDisabled,
             ]}
             onPress={handleNext}
             disabled={!canProceedFromPage(currentPage)}
@@ -311,7 +337,7 @@ export default function OnboardingScreen() {
           <Pressable
             style={[
               styles.nextButton,
-              (!agreedToTerms || isSubmitting) && styles.buttonDisabled
+              (!agreedToTerms || isSubmitting) && styles.buttonDisabled,
             ]}
             onPress={handleGetStarted}
             disabled={!agreedToTerms || isSubmitting}

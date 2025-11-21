@@ -246,7 +246,7 @@ export async function createEvent(
     batch.set(
       userRef,
       { uid: validated.creatorUid, events: [ref.id] },
-      { merge: true }
+      { merge: true },
     );
   }
 

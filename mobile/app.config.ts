@@ -33,7 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? '',
       },
       useEmulators: true,
-      emulatorHost: '127.0.0.1'
+      emulatorHost: '127.0.0.1',
     },
     plugins: [
       'expo-router',

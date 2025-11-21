@@ -22,13 +22,31 @@ export interface RbacUser {
   status: Status;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+let API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
+// Fallback for iOS Expo Go env var loading issues
 if (!API_BASE_URL) {
+  API_BASE_URL =
+    'https://freebites-backend-2a41n9xzn-andrewx-bus-projects.vercel.app';
   console.warn(
-    '[rbacClient] EXPO_PUBLIC_BACKEND_URL is not set. RBAC calls will fail.'
+    '[rbacClient] ⚠️  EXPO_PUBLIC_BACKEND_URL not found, using hardcoded fallback',
   );
 }
+
+const DEBUG = true; // Toggle for debugging
+
+const log = (tag: string, msg: string, data?: any) => {
+  if (DEBUG) {
+    const timestamp = new Date().toISOString();
+    if (data) {
+      console.log(`[${timestamp}] [${tag}] ${msg}`, data);
+    } else {
+      console.log(`[${timestamp}] [${tag}] ${msg}`);
+    }
+  }
+};
+
+console.log('[rbacClient] API_BASE_URL:', API_BASE_URL);
 
 /**
  * Low-level helper to call Vercel backend with a Clerk Bearer token.
@@ -36,45 +54,64 @@ if (!API_BASE_URL) {
 async function backendFetch<T>(
   path: string,
   getToken: () => Promise<string | null>,
-  init: RequestInit = {}
+  init: RequestInit = {},
 ): Promise<T> {
+  log('backendFetch', `Starting fetch: ${path}`);
+
   if (!API_BASE_URL) {
+    log('backendFetch', '❌ EXPO_PUBLIC_BACKEND_URL is not set');
     throw new Error('EXPO_PUBLIC_BACKEND_URL is not set');
   }
 
-  const token = await getToken();
-  if (!token) {
-    throw new Error('Missing auth token');
-  }
+  try {
+    log('backendFetch', 'Getting auth token...');
+    const token = await getToken();
+    log('backendFetch', `Token received: ${token ? 'Yes' : 'No'}`);
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init.headers || {}),
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const text = await res.text();
-  let json: any = {};
-  if (text) {
-    try {
-      json = JSON.parse(text);
-    } catch {
-      // ignore parse error; fall back to generic error if needed
+    if (!token) {
+      log('backendFetch', '❌ Missing auth token');
+      throw new Error('Missing auth token');
     }
-  }
 
-  if (!res.ok) {
-    const message =
-      (json && typeof json.error === 'string' && json.error) ||
-      res.statusText ||
-      'Request failed';
-    throw new Error(message);
-  }
+    const url = `${API_BASE_URL}${path}`;
+    log('backendFetch', `Fetching from: ${url}`);
 
-  return json as T;
+    const res = await fetch(url, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init.headers || {}),
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    log('backendFetch', `Response status: ${res.status}`);
+
+    const text = await res.text();
+    let json: any = {};
+    if (text) {
+      try {
+        json = JSON.parse(text);
+      } catch {
+        log('backendFetch', '⚠️  Failed to parse response JSON');
+      }
+    }
+
+    if (!res.ok) {
+      const message =
+        (json && typeof json.error === 'string' && json.error) ||
+        res.statusText ||
+        'Request failed';
+      log('backendFetch', `❌ Request failed: ${message}`);
+      throw new Error(message);
+    }
+
+    log('backendFetch', `✅ Success: ${path}`, json);
+    return json as T;
+  } catch (err) {
+    log('backendFetch', `❌ Exception in backendFetch`, err);
+    throw err;
+  }
 }
 
 /**
@@ -82,6 +119,7 @@ async function backendFetch<T>(
  * Returns { userId, rbac: { role, status } }
  */
 export async function fetchMe(getToken: () => Promise<string | null>) {
+  log('fetchMe', 'Starting fetchMe');
   return backendFetch<MeResponse>('/api/me', getToken);
 }
 
@@ -90,13 +128,12 @@ export async function fetchMe(getToken: () => Promise<string | null>) {
  * Allows a student to request staff access.
  * Returns { ok: true, status: "pending" }
  */
-export async function requestStaffRole(
-  getToken: () => Promise<string | null>
-) {
+export async function requestStaffRole(getToken: () => Promise<string | null>) {
+  log('requestStaffRole', 'Starting requestStaffRole');
   return backendFetch<{ ok: boolean; status: Status }>(
     '/api/request-role',
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -105,25 +142,19 @@ export async function requestStaffRole(
  * Returns { pending: RbacUser[] }
  */
 export async function fetchPendingStaff(
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
-  return backendFetch<{ pending: RbacUser[] }>(
-    '/api/admin/pending',
-    getToken
-  );
+  log('fetchPendingStaff', 'Starting fetchPendingStaff');
+  return backendFetch<{ pending: RbacUser[] }>('/api/admin/pending', getToken);
 }
 
 /**
  * GET /api/admin/staff
  * Returns { staff: RbacUser[] } (active staff)
  */
-export async function fetchActiveStaff(
-  getToken: () => Promise<string | null>
-) {
-  return backendFetch<{ staff: RbacUser[] }>(
-    '/api/admin/staff',
-    getToken
-  );
+export async function fetchActiveStaff(getToken: () => Promise<string | null>) {
+  log('fetchActiveStaff', 'Starting fetchActiveStaff');
+  return backendFetch<{ staff: RbacUser[] }>('/api/admin/staff', getToken);
 }
 
 /**
@@ -132,13 +163,14 @@ export async function fetchActiveStaff(
  */
 export async function approveStaff(
   uid: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
   if (!uid) throw new Error('Missing user id');
+  log('approveStaff', `Approving staff: ${uid}`);
   return backendFetch<{ ok: boolean; userId: string }>(
     `/api/admin/approve/${uid}`,
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -149,13 +181,14 @@ export async function approveStaff(
  */
 export async function revokeStaff(
   uid: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
   if (!uid) throw new Error('Missing user id');
+  log('revokeStaff', `Revoking staff: ${uid}`);
   return backendFetch<{ ok: boolean; userId: string }>(
     `/api/admin/revoke/${uid}`,
     getToken,
-    { method: 'POST' }
+    { method: 'POST' },
   );
 }
 
@@ -169,6 +202,7 @@ let inFlightPromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 
 function notifyListeners() {
+  log('rbacClient', `Notifying ${listeners.size} listeners`);
   for (const listener of listeners) {
     try {
       listener();
@@ -180,10 +214,16 @@ function notifyListeners() {
 
 async function fetchRbacInternal(
   getToken: () => Promise<string | null>,
-  force = false
+  force = false,
 ): Promise<void> {
+  log('fetchRbacInternal', `Called with force=${force}`, {
+    inFlightPromise: !!inFlightPromise,
+    rbacLoading,
+  });
+
   // Reuse in-flight request if not forcing
   if (inFlightPromise && !force) {
+    log('fetchRbacInternal', 'Reusing in-flight promise');
     return inFlightPromise;
   }
 
@@ -193,18 +233,25 @@ async function fetchRbacInternal(
 
   inFlightPromise = (async () => {
     try {
+      log('fetchRbacInternal', 'Calling backendFetch...');
       const res = await backendFetch<MeResponse>('/api/me', getToken);
       rbacUserId = res.userId ?? null;
       rbacData = res.rbac ?? null;
+      log('fetchRbacInternal', '✅ RBAC data loaded', {
+        userId: rbacUserId,
+        role: rbacData?.role,
+      });
     } catch (err: any) {
       console.error('[rbacClient] Failed to load RBAC info:', err);
       rbacError = err?.message || 'Failed to load RBAC info';
       rbacUserId = null;
       rbacData = null;
+      log('fetchRbacInternal', `❌ Error: ${rbacError}`);
     } finally {
       rbacLoading = false;
       inFlightPromise = null;
       notifyListeners();
+      log('fetchRbacInternal', 'fetchRbacInternal complete');
     }
   })();
 
@@ -220,20 +267,27 @@ export function useRbac() {
   const { isSignedIn, getToken } = useAuth();
   const [, setVersion] = useState(0);
 
+  log('useRbac', 'Hook rendered', { isSignedIn });
+
   useEffect(() => {
+    log('useRbac', 'useEffect triggered', { isSignedIn, rbacLoading });
+
     const listener = () => {
+      log('useRbac', 'State changed, re-rendering');
       setVersion((v) => v + 1);
     };
 
     listeners.add(listener);
 
-    // Always (re)load once per signed-in session, even if rbacData is already set
+    // Always (re)load once per signed-in session
     if (isSignedIn && !rbacLoading) {
+      log('useRbac', 'Initiating fetchRbacInternal...');
       fetchRbacInternal(getToken, true);
     }
 
-    // Clear stale cache on sign-out so a future sign-in doesn't reuse it
+    // Clear stale cache on sign-out
     if (!isSignedIn) {
+      log('useRbac', 'Clearing RBAC cache (signed out)');
       rbacData = null;
       rbacUserId = null;
       rbacError = null;
@@ -242,11 +296,14 @@ export function useRbac() {
     }
 
     return () => {
+      log('useRbac', 'Cleanup: removing listener');
       listeners.delete(listener);
     };
-  }, [isSignedIn, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn]);
 
   const refresh = useCallback(() => {
+    log('useRbac', 'refresh() called', { isSignedIn });
     if (!isSignedIn) return;
     fetchRbacInternal(getToken, true);
   }, [isSignedIn, getToken]);
@@ -262,6 +319,11 @@ export function useRbac() {
   }
 
   const loading = rbacLoading || (!rbacData && !rbacError);
+  log('useRbac', 'Returning state', {
+    loading,
+    error: rbacError,
+    role: rbacData?.role,
+  });
 
   return {
     loading,

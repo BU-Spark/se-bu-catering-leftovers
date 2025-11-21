@@ -106,7 +106,13 @@ export default function StudentFAQ() {
           paddingVertical: spacing.md,
           paddingHorizontal: spacing.lg,
         },
-        questionText: { ...typography.body, color: colors.text.primary, fontWeight: '600', flex: 1, paddingRight: spacing.md },
+        questionText: {
+          ...typography.body,
+          color: colors.text.primary,
+          fontWeight: '600',
+          flex: 1,
+          paddingRight: spacing.md,
+        },
         chevron: { marginLeft: spacing.sm },
         answer: {
           paddingHorizontal: spacing.lg,
@@ -114,10 +120,11 @@ export default function StudentFAQ() {
         },
         answerText: { ...typography.body, color: colors.text.secondary },
       }),
-    [colors]
+    [colors],
   );
 
-  const toggle = (id: string) => setExpandedId(prev => (prev === id ? null : id));
+  const toggle = (id: string) =>
+    setExpandedId((prev) => (prev === id ? null : id));
 
   return (
     <View style={styles.container}>
@@ -134,7 +141,7 @@ export default function StudentFAQ() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        {STUDENT_FAQS.map(item => {
+        {STUDENT_FAQS.map((item) => {
           const open = expandedId === item.id;
           return (
             <View key={item.id} style={styles.card}>

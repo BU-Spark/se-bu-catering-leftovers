@@ -1,6 +1,15 @@
 // app/(shared)/settings/edit-name.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -13,20 +22,16 @@ export default function EditNameScreen() {
   const { user } = useUser();
   const { colors } = useTheme();
   const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadCurrentName();
-  }, [user]);
-
-  const loadCurrentName = async () => {
+  const loadCurrentName = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const userRef = doc(firestore, 'Users', user.id);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data();
         setName(userData.name || '');
@@ -36,7 +41,11 @@ export default function EditNameScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadCurrentName();
+  }, [loadCurrentName]);
 
   const handleSave = async () => {
     if (!user || !name.trim()) {
@@ -50,7 +59,7 @@ export default function EditNameScreen() {
       await updateDoc(userRef, {
         name: name.trim(),
       });
-      
+
       const role = user.publicMetadata?.role as string | undefined;
       if (role === 'admin' || role === 'staff') {
         router.replace('/(admin)/settings/page');
@@ -75,21 +84,22 @@ export default function EditNameScreen() {
 
   return (
     <>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           title: 'Display Name',
           headerBackVisible: true,
           headerLeft: () => (
-            <Pressable
-              onPress={handleBack}
-              style={{ marginLeft: -4 }}
-            >
-              <Ionicons name="chevron-back" size={28} color={colors.text.primary} />
+            <Pressable onPress={handleBack} style={{ marginLeft: -4 }}>
+              <Ionicons
+                name="chevron-back"
+                size={28}
+                color={colors.text.primary}
+              />
             </Pressable>
           ),
         }}
       />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: colors.background }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -97,15 +107,20 @@ export default function EditNameScreen() {
           <Text style={[styles.description, { color: colors.text.secondary }]}>
             This is the name others will see when referring to you
           </Text>
-          
+
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text.primary }]}>Name</Text>
+            <Text style={[styles.label, { color: colors.text.primary }]}>
+              Name
+            </Text>
             <TextInput
-              style={[styles.input, { 
-                color: colors.text.primary, 
-                backgroundColor: colors.surface,
-                borderColor: colors.border.default 
-              }]}
+              style={[
+                styles.input,
+                {
+                  color: colors.text.primary,
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border.default,
+                },
+              ]}
               value={name}
               onChangeText={setName}
               placeholder="Enter your name"
@@ -119,7 +134,9 @@ export default function EditNameScreen() {
             onPress={handleSave}
             disabled={isSaving || !name.trim()}
           >
-            <Text style={[styles.saveButtonText, { color: colors.text.onPrimary }]}>
+            <Text
+              style={[styles.saveButtonText, { color: colors.text.onPrimary }]}
+            >
               {isSaving ? 'Saving...' : 'Save'}
             </Text>
           </Pressable>

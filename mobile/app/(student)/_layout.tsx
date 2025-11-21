@@ -13,14 +13,21 @@ export default function StudentLayout() {
 
   if (!isLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
 
   if (!isSignedIn) {
-    return <Redirect href='/sign-in' />;
+    return <Redirect href="/sign-in" />;
   }
 
   return (
@@ -49,10 +56,7 @@ export default function StudentLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="feedback"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="feedback" options={{ href: null }} />
 
       <Tabs.Screen
         name="settings/page"
@@ -64,10 +68,7 @@ export default function StudentLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="settings/faq"
-        options={{ href: null }}
-      />
+      <Tabs.Screen name="settings/faq" options={{ href: null }} />
     </Tabs>
   );
 }

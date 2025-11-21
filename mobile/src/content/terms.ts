@@ -18,23 +18,28 @@ export const TERMS_AND_CONDITIONS = `(DUMMY) By using BU Catering, you agree to 
 export const TERMS_SECTIONS = [
   {
     title: 'Availability',
-    content: 'Events are subject to availability and may be cancelled without notice.',
+    content:
+      'Events are subject to availability and may be cancelled without notice.',
   },
   {
     title: 'Food Safety',
-    content: 'Food allergies and dietary restrictions are your responsibility. Always verify ingredients before consuming.',
+    content:
+      'Food allergies and dietary restrictions are your responsibility. Always verify ingredients before consuming.',
   },
   {
     title: 'Service Rights',
-    content: 'Event hosts reserve the right to limit quantities and refuse service.',
+    content:
+      'Event hosts reserve the right to limit quantities and refuse service.',
   },
   {
     title: 'User Conduct',
-    content: 'You agree to provide accurate information and use the app respectfully.',
+    content:
+      'You agree to provide accurate information and use the app respectfully.',
   },
   {
     title: 'Liability',
-    content: 'BU Catering is not liable for any health issues arising from food consumption.',
+    content:
+      'BU Catering is not liable for any health issues arising from food consumption.',
   },
   {
     title: 'Data Collection',

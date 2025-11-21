@@ -1,0 +1,6 @@
+# Enforce Unix-style line endings globally
+* text=auto eol=lf
+
+# Treat TypeScript as text with LF
+*.ts text eol=lf
+*.tsx text eol=lf

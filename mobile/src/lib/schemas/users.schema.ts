@@ -27,11 +27,13 @@ export const EnsureUserSchema = z.object({
 });
 
 // Schema for updating user preferences
-export const UpdatePreferencesSchema = z.object({
-  locPref: z.array(z.string()).optional(),
-  timePref: z.array(z.string()).optional(),
-  foodPref: z.array(z.string()).optional(),
-}).partial();
+export const UpdatePreferencesSchema = z
+  .object({
+    locPref: z.array(z.string()).optional(),
+    timePref: z.array(z.string()).optional(),
+    foodPref: z.array(z.string()).optional(),
+  })
+  .partial();
 
 // Schema for event/review operations
 export const UserEventOpSchema = z.object({

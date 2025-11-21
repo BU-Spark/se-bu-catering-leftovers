@@ -1,7 +1,7 @@
 // src/lib/schemas/events.schema.ts
 import { z } from 'zod';
 
-// Location schema 
+// Location schema
 const LocationSchema = z.object({
   name: z.string().min(1),
   address: z.string().min(1),
@@ -33,7 +33,7 @@ export const EventSchema = z.object({
   locationDetails: z.string(),
   notes: z.string(),
   duration: z.number().int().positive(),
-  foodArrived: z.any(), // TODO: Timestamp Validation 
+  foodArrived: z.any(), // TODO: Timestamp Validation
   foodAvailable: z.any(), // TODO: Timestamp Validation
   foods: z.array(FoodItemSchema),
   images: z.array(z.string().url()),
@@ -41,57 +41,69 @@ export const EventSchema = z.object({
 });
 
 // Schema for creating events
-export const CreateEventSchema = z.object({
-  host: z.string().min(1).default('Unknown'),
-  name: z.string().min(1).default('Untitled'),
-  status: EventStatusSchema.default('drafted'),
-  Location: LocationSchema.optional(),
-  locationDetails: z.string().default(''),
-  notes: z.string().default(''),
-  duration: z.number().int().positive().default(30),
-  foodArrived: z.any().optional(),
-  foodAvailable: z.any().optional(),
-  foods: z.array(FoodItemSchema).default([]),
-  images: z.array(z.string().url()).default([]),
-  creatorUid: z.string().optional(),
-}).partial();
+export const CreateEventSchema = z
+  .object({
+    host: z.string().min(1).default('Unknown'),
+    name: z.string().min(1).default('Untitled'),
+    status: EventStatusSchema.default('drafted'),
+    Location: LocationSchema.optional(),
+    locationDetails: z.string().default(''),
+    notes: z.string().default(''),
+    duration: z.number().int().positive().default(30),
+    foodArrived: z.any().optional(),
+    foodAvailable: z.any().optional(),
+    foods: z.array(FoodItemSchema).default([]),
+    images: z.array(z.string().url()).default([]),
+    creatorUid: z.string().optional(),
+  })
+  .partial();
 
 // Schema for updating events
-export const UpdateEventSchema = z.object({
-  host: z.string().min(1),
-  name: z.string().min(1),
-  status: EventStatusSchema,
-  Location: LocationSchema,
-  locationDetails: z.string(),
-  notes: z.string(),
-  duration: z.number().int().positive(),
-  foodArrived: z.any(),
-  foodAvailable: z.any(),
-  foods: z.array(FoodItemSchema),
-  images: z.array(z.string().url()),
-}).partial();
+export const UpdateEventSchema = z
+  .object({
+    host: z.string().min(1),
+    name: z.string().min(1),
+    status: EventStatusSchema,
+    Location: LocationSchema,
+    locationDetails: z.string(),
+    notes: z.string(),
+    duration: z.number().int().positive(),
+    foodArrived: z.any(),
+    foodAvailable: z.any(),
+    foods: z.array(FoodItemSchema),
+    images: z.array(z.string().url()),
+  })
+  .partial();
 
 // Pagination options schema
-export const PaginationOptsSchema = z.object({
-  pageSize: z.number().int().positive().default(20),
-  after: z.any().optional().nullable(),
-  order: z.enum(['foodAvailable', 'foodArrived', 'duration']).default('foodAvailable'),
-  direction: z.enum(['asc', 'desc']).default('desc'),
-}).partial();
+export const PaginationOptsSchema = z
+  .object({
+    pageSize: z.number().int().positive().default(20),
+    after: z.any().optional().nullable(),
+    order: z
+      .enum(['foodAvailable', 'foodArrived', 'duration'])
+      .default('foodAvailable'),
+    direction: z.enum(['asc', 'desc']).default('desc'),
+  })
+  .partial();
 
 // Open events pagination schema
-export const OpenEventsPaginationSchema = z.object({
-  pageSize: z.number().int().positive().default(20),
-  after: z.any().optional().nullable(),
-}).partial();
+export const OpenEventsPaginationSchema = z
+  .object({
+    pageSize: z.number().int().positive().default(20),
+    after: z.any().optional().nullable(),
+  })
+  .partial();
 
 // Event IDs array schema
 export const EventIdsSchema = z.array(z.string().min(1));
 
 // Delete options schema
-export const DeleteOptsSchema = z.object({
-  ownerUid: z.string().optional(),
-}).optional();
+export const DeleteOptsSchema = z
+  .object({
+    ownerUid: z.string().optional(),
+  })
+  .optional();
 
 // Helper to validate and parse with defaults
 export function validateCreateEvent(data: unknown) {

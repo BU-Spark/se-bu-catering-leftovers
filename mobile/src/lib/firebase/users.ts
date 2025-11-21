@@ -94,7 +94,7 @@ export async function getUserByEmail(email: string): Promise<UserDoc | null> {
 
 export async function ensureUser(uid: string, seed: Partial<UserDoc> = {}) {
   const validated = validateEnsureUser(uid, seed);
-  
+
   const ref = userRef(uid);
   const snap = await getDoc(ref);
   if (!snap.exists()) {
@@ -143,8 +143,15 @@ export async function removeEventFromUser(uid: string, eventId: string) {
   await batch.commit();
 }
 
-export async function setPushToken(uid: string, token: string, platform?: string) {
-  await updateDoc(userRef(uid), stripUndef({ pushToken: token, devicePlatform: platform }));
+export async function setPushToken(
+  uid: string,
+  token: string,
+  platform?: string,
+) {
+  await updateDoc(
+    userRef(uid),
+    stripUndef({ pushToken: token, devicePlatform: platform }),
+  );
 }
 
 export async function setNotificationsEnabled(uid: string, enabled: boolean) {
@@ -156,13 +163,14 @@ export async function getPushTokensByRole(role: Role): Promise<string[]> {
     const qy = query(
       usersCol,
       where('role', '==', role),
-      where('notificationsEnabled', '==', true)
+      where('notificationsEnabled', '==', true),
     );
     const snap = await getDocs(qy);
     const tokens: string[] = [];
     snap.forEach((d) => {
       const t = (d.data() as any)?.pushToken;
-      if (typeof t === 'string' && t.startsWith('ExponentPushToken')) tokens.push(t);
+      if (typeof t === 'string' && t.startsWith('ExponentPushToken'))
+        tokens.push(t);
     });
     return tokens;
   } catch {
@@ -173,7 +181,8 @@ export async function getPushTokensByRole(role: Role): Promise<string[]> {
       const data = d.data() as any;
       if (data?.notificationsEnabled === false) return;
       const t = data?.pushToken;
-      if (typeof t === 'string' && t.startsWith('ExponentPushToken')) tokens.push(t);
+      if (typeof t === 'string' && t.startsWith('ExponentPushToken'))
+        tokens.push(t);
     });
     return tokens;
   }

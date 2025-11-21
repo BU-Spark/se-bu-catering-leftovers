@@ -93,7 +93,7 @@ export default function SignInScreen() {
       style={styles.container}
     >
       {/* Back Button */}
-      <Pressable 
+      <Pressable
         style={styles.backButton}
         onPress={() => router.push('/welcome')}
       >
@@ -106,18 +106,18 @@ export default function SignInScreen() {
       <View style={styles.form}>
         <CustomInput
           control={control}
-          name='email'
-          placeholder='Email'
+          name="email"
+          placeholder="Email"
           autoFocus
-          autoCapitalize='none'
-          keyboardType='email-address'
-          autoComplete='email'
+          autoCapitalize="none"
+          keyboardType="email-address"
+          autoComplete="email"
         />
 
         <CustomInput
           control={control}
-          name='password'
-          placeholder='Password'
+          name="password"
+          placeholder="Password"
           secureTextEntry
         />
 
@@ -126,10 +126,10 @@ export default function SignInScreen() {
         )}
       </View>
 
-      <CustomButton text='Sign in' onPress={handleSubmit(onSignIn)} />
+      <CustomButton text="Sign in" onPress={handleSubmit(onSignIn)} />
 
-      <Link href='/sign-up' style={styles.link}>
-        Don't have an account? Sign up
+      <Link href="/sign-up" style={styles.link}>
+        {"Don't have an account? Sign up"}
       </Link>
 
       <View style={styles.divider}>
@@ -139,7 +139,7 @@ export default function SignInScreen() {
       </View>
 
       <View style={styles.socialContainer}>
-        <SignInWith strategy='oauth_google' />
+        <SignInWith strategy="oauth_google" />
       </View>
     </KeyboardAvoidingView>
   );

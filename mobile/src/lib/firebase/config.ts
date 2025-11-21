@@ -9,7 +9,11 @@ import {
   Firestore,
 } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
-import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
+import {
+  getStorage,
+  connectStorageEmulator,
+  type FirebaseStorage,
+} from 'firebase/storage';
 import Constants from 'expo-constants';
 
 type Extra = {
@@ -18,7 +22,8 @@ type Extra = {
 };
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Extra;
-if (!extra.firebase) throw new Error('Missing firebase config in app.config.ts extra');
+if (!extra.firebase)
+  throw new Error('Missing firebase config in app.config.ts extra');
 
 console.log(
   '🔥 Firebase init',
@@ -27,7 +32,7 @@ console.log(
     isDevice: Device.isDevice,
     __DEV__,
     useEmulatorsFlag: extra.useEmulators === true,
-  })
+  }),
 );
 
 const app: FirebaseApp = getApps()[0] ?? initializeApp(extra.firebase);
@@ -51,8 +56,10 @@ if (USE_EMULATORS) {
   try {
     connectFirestoreEmulator(firestore, HOST, 8080);
     connectAuthEmulator(auth, `http://${HOST}:9099`, { disableWarnings: true });
-    connectStorageEmulator(storage, HOST, 9199); 
-    console.log(`🧪 Emulators: Firestore http://${HOST}:8080, Auth http://${HOST}:9099, Storage http://${HOST}:9199`);
+    connectStorageEmulator(storage, HOST, 9199);
+    console.log(
+      `🧪 Emulators: Firestore http://${HOST}:8080, Auth http://${HOST}:9099, Storage http://${HOST}:9199`,
+    );
   } catch (e) {
     console.warn('Emulator connection failed:', e);
   }

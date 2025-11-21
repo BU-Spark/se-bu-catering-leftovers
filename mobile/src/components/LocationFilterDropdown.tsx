@@ -106,7 +106,7 @@ export default function LocationFilterDropdown({
           zIndex: 999,
         },
       }),
-    [colors]
+    [colors],
   );
 
   return (
@@ -156,12 +156,8 @@ export default function LocationFilterDropdown({
       </View>
 
       {isOpen && (
-        <Pressable
-          style={styles.overlay}
-          onPress={() => setIsOpen(false)}
-        />
+        <Pressable style={styles.overlay} onPress={() => setIsOpen(false)} />
       )}
     </>
   );
 }
-
