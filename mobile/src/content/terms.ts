@@ -1,35 +1,35 @@
 // src/content/TERMS_AND_CONDITIONS.ts
-export const TERMS_AND_CONDITIONS = `(DUMMY) By using BU Catering, you agree to the following terms:
+export const TERMS_AND_CONDITIONS = `By using Freebites, you agree to the following terms:
 
-1. Events are subject to availability and may be cancelled without notice.
+1. Events are subject to availability and may be cancelled without notice. Food availability is first come, first serve—a live event does not guarantee food will still be available when you arrive.
 
-2. Food allergies and dietary restrictions are your responsibility. Always verify ingredients before consuming.
+2. Freebites takes no responsibility for dietary restrictions, food allergies, or ingredient verification. It is solely your responsibility to verify ingredients and ensure food is safe for your consumption before eating.
 
-3. Event hosts reserve the right to limit quantities and refuse service.
+3. Event hosts reserve the right to limit quantities and refuse service at their discretion.
 
 4. You agree to provide accurate information and use the app respectfully.
 
-5. BU Catering is not liable for any health issues arising from food consumption.
+5. Freebites is not liable for any health issues, allergic reactions, or other consequences arising from food consumption at any event.
 
 6. We may collect usage data to improve the service.
 
-7. These terms may be updated at any time.`;
+7. These terms may be updated at any time without prior notice.`;
 
 export const TERMS_SECTIONS = [
   {
-    title: 'Availability',
+    title: 'Event Availability',
     content:
-      'Events are subject to availability and may be cancelled without notice.',
+      'Events are subject to availability and may be cancelled without notice. Food availability is first come, first serve—a live event does not guarantee food will still be available when you arrive.',
   },
   {
-    title: 'Food Safety',
+    title: 'Dietary Restrictions & Food Safety',
     content:
-      'Food allergies and dietary restrictions are your responsibility. Always verify ingredients before consuming.',
+      'Freebites takes no responsibility for dietary restrictions, food allergies, or ingredient verification. It is solely your responsibility to verify ingredients and ensure food is safe for your consumption before eating.',
   },
   {
     title: 'Service Rights',
     content:
-      'Event hosts reserve the right to limit quantities and refuse service.',
+      'Event hosts reserve the right to limit quantities and refuse service at their discretion.',
   },
   {
     title: 'User Conduct',
@@ -39,7 +39,7 @@ export const TERMS_SECTIONS = [
   {
     title: 'Liability',
     content:
-      'BU Catering is not liable for any health issues arising from food consumption.',
+      'Freebites is not liable for any health issues, allergic reactions, or other consequences arising from food consumption at any event.',
   },
   {
     title: 'Data Collection',
@@ -47,6 +47,6 @@ export const TERMS_SECTIONS = [
   },
   {
     title: 'Updates',
-    content: 'These terms may be updated at any time.',
+    content: 'These terms may be updated at any time without prior notice.',
   },
 ];
