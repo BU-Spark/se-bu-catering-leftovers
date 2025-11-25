@@ -1,6 +1,6 @@
 // src/components/EventCard.tsx
 import React, { useState } from 'react';
-import { View, Image, StyleSheet, Pressable, Text } from 'react-native';
+import { View, Image, StyleSheet, Pressable, Text, Linking, Platform } from 'react-native';
 import { useTheme } from '../lib/ThemeProvider';
 import { typography, spacing, borderRadius } from '../lib/theme';
 import { formatTimestamp } from '../lib/utils';
@@ -42,6 +42,31 @@ export function EventCard({
   const toggleExpand = () => {
     setExpanded(!expanded);
     onPress?.();
+  };
+
+  const openInMaps = async (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    
+    const googleMapsApp = Platform.select({
+      ios: `comgooglemaps://?q=${encodedAddress}`,
+      android: `google.navigation:q=${encodedAddress}`,
+      default: null,
+    });
+
+    try {
+      if (googleMapsApp) {
+        const canOpen = await Linking.canOpenURL(googleMapsApp);
+        if (canOpen) {
+          await Linking.openURL(googleMapsApp);
+          return;
+        }
+      }
+      
+      const webUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+      await Linking.openURL(webUrl);
+    } catch (error) {
+      console.error('Error opening maps:', error);
+    }
   };
 
   // Calculate progress for countdown bar
@@ -150,6 +175,12 @@ export function EventCard({
       ...typography.body,
       color: colors.text.primary,
       marginTop: spacing.xs / 2,
+    },
+    infoValueLink: {
+      ...typography.body,
+      color: colors.primary,
+      marginTop: spacing.xs / 2,
+      textDecorationLine: 'underline',
     },
     foodList: {
       marginTop: spacing.md,
@@ -266,7 +297,15 @@ export function EventCard({
             <View style={styles.divider} />
 
             {event.Location?.address && (
-              <InfoRow label="Address" value={event.Location.address} />
+              <InfoRow 
+                label="Address" 
+                value={event.Location.address}
+                isLink={true}
+                onPress={() => {
+                  console.log('Address pressed:', event.Location.address);
+                  openInMaps(event.Location.address);
+                }}
+              />
             )}
             {event.locationDetails && (
               <InfoRow label="Details" value={event.locationDetails} />
@@ -343,8 +382,19 @@ export function EventCard({
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ 
+  label, 
+  value, 
+  isLink = false, 
+  onPress 
+}: { 
+  label: string; 
+  value: string; 
+  isLink?: boolean; 
+  onPress?: () => void;
+}) {
   const { colors } = useTheme();
+  
   const styles = React.useMemo(
     () =>
       StyleSheet.create({
@@ -361,6 +411,15 @@ function InfoRow({ label, value }: { label: string; value: string }) {
           color: colors.text.primary,
           marginTop: spacing.xs / 2,
         },
+        linkContainer: {
+          marginTop: spacing.xs / 2,
+        },
+        infoValueLink: {
+          ...typography.body,
+          color: '#007AFF', 
+          textDecorationLine: 'underline',
+          fontWeight: '500',
+        },
       }),
     [colors],
   );
@@ -368,7 +427,17 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}:</Text>
-      <Text style={styles.infoValue}>{value}</Text>
+      {isLink && onPress ? (
+        <Pressable 
+          onPress={onPress}
+          style={styles.linkContainer}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Text style={styles.infoValueLink}>{value}</Text>
+        </Pressable>
+      ) : (
+        <Text style={styles.infoValue}>{value}</Text>
+      )}
     </View>
   );
 }
