@@ -253,6 +253,43 @@
             font-size: 28pt;
         }
 
+        /* --- CLIENTS SECTION --- */
+        .clients-container {
+            display: flex;
+            gap: 0.5in;
+            justify-content: center;
+        }
+
+        .client-photo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .client-photo {
+            width: 1.8in;
+            height: 2.3in;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 0.15in;
+            flex-shrink: 0;
+            margin-bottom: 0.2in;
+        }
+
+        .client-name {
+            font-size: 26pt;
+            font-weight: bold;
+            color: var(--bu-red);
+            margin-bottom: 0.05in;
+        }
+
+        .client-title {
+            font-size: 20pt;
+            color: var(--bu-black);
+            line-height: 1.3;
+        }
+
         /* --- UTILITY FOR QR --- */
         .qr-code-img {
             width: 3in;
@@ -302,10 +339,25 @@
                 </div>
 
                 <div class="card">
-                    <h3>Client & Partners</h3>
-                    <p><strong>Client:</strong> BU Dining Sustainability Team</p>
-                    <p><strong>Track:</strong> Spark! GreenField (DS519)</p>
-                    <p><strong>Impact:</strong> Zero Waste Strategy & Food Security</p>
+                    <h3>Our Clients</h3>
+                    <div class="clients-container">
+                        <div class="client-photo-wrapper">
+                            <img src="assets/lawrence_alabaster.jpg" alt="Lawrence Alabaster" class="client-photo">
+                            <div class="client-name">Lawrence Alabaster</div>
+                            <div class="client-title">Director of Catering<br>@ BU Dining</div>
+                        </div>
+                        <div class="client-photo-wrapper">
+                            <img src="assets/lexie_raczka.jpg" alt="Lexie Raczka" class="client-photo">
+                            <div class="client-name">Lexie Raczka</div>
+                            <div class="client-title">Director of Sustainability<br>@ BU Dining</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Mentors</h3>
+                    <p><strong>Professor:</strong> Nagendra Mishr, Ricardo Villamil</p>
+                    <p><strong>PM & TPM:</strong> Kwabena Ampomah, Arnav Singh</p>
                 </div>
 
                 <div class="card" style="flex-grow: 0;">
