@@ -50,7 +50,7 @@ export function EventEditorModal({
   onSave,
   onCreate,
 }: EventEditorModalProps) {
-  const { colors } = useTheme();
+  const { colors, themeMode } = useTheme();
   const [name, setName] = useState('');
   const [host, setHost] = useState('');
   const [locationName, setLocationName] = useState('');
@@ -470,6 +470,12 @@ export function EventEditorModal({
           ...typography.body,
           color: colors.text.primary,
         },
+        pickerContainer: {
+          backgroundColor: themeMode === 'dark' ? '#4a4a4a' : colors.surface,
+          borderRadius: borderRadius.sm,
+          marginBottom: spacing.md,
+          overflow: 'hidden',
+        },
         doneButton: {
           backgroundColor: colors.primary,
           padding: spacing.sm,
@@ -848,15 +854,16 @@ export function EventEditorModal({
           </Pressable>
           {Platform.OS === 'ios' && showArrivedPicker && (
             <>
-              <DateTimePicker
-                value={foodArrived}
-                mode="datetime"
-                display="spinner"
-                onChange={handleArrivedDateChange}
-                minimumDate={new Date()}
-                /* Force black text on iOS pickers */
-                textColor="black"
-              />
+              <View style={styles.pickerContainer}>
+                <DateTimePicker
+                  value={foodArrived}
+                  mode="datetime"
+                  display="spinner"
+                  onChange={handleArrivedDateChange}
+                  minimumDate={new Date()}
+                  textColor={themeMode === 'dark' ? '#ffffff' : colors.text.primary}
+                />
+              </View>
               <Pressable
                 style={styles.doneButton}
                 onPress={() => setShowArrivedPicker(false)}
@@ -905,16 +912,17 @@ export function EventEditorModal({
           </Pressable>
           {Platform.OS === 'ios' && showAvailablePicker && (
             <>
-              <DateTimePicker
-                value={foodAvailable}
-                mode="datetime"
-                display="spinner"
-                onChange={handleAvailableDateChange}
-                minimumDate={foodArrived}
-                maximumDate={maxAvailableTime}
-                /* Force black text on iOS pickers */
-                textColor="black"
-              />
+              <View style={styles.pickerContainer}>
+                <DateTimePicker
+                  value={foodAvailable}
+                  mode="datetime"
+                  display="spinner"
+                  onChange={handleAvailableDateChange}
+                  minimumDate={foodArrived}
+                  maximumDate={maxAvailableTime}
+                  textColor={themeMode === 'dark' ? '#ffffff' : colors.text.primary}
+                />
+              </View>
               <Pressable
                 style={styles.doneButton}
                 onPress={() => setShowAvailablePicker(false)}
