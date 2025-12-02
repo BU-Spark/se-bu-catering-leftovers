@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeBites - BU Spark! Demo Day Poster</title>
+    <style>
+        :root {
+            --bu-red: #CC0000;
+            --bu-black: #2D2926;
+            --off-white: #f4f4f4;
+            --white: #ffffff;
+            --text-dark: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e0e0e0;
+            /* Changed to flex-start to prevent top clipping on smaller screens */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            padding: 20px;
+            overflow: auto; /* Ensure scrollbars appear */
+        }
+
+        /* The poster container matches the 16:9 aspect ratio.
+           1920px x 1080px is a standard HD resolution that scales well to the 
+           physical inches required (40.97" x 23.04") 
+        */
+        .poster-container {
+            width: 1600px;
+            /* Changed to min-height to allow expansion if content overflows */
+            min-height: 900px; 
+            height: auto; 
+            background-color: var(--white);
+            color: var(--text-dark);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            /* Removed overflow: hidden so content isn't cut off inside */
+            border: 1px solid #ccc;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--bu-red);
+            color: var(--white);
+            padding: 2rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 5px solid var(--bu-black);
+        }
+
+        .header-title h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-title h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .header-logos {
+            text-align: right;
+        }
+
+        .spark-logo {
+            font-size: 2rem;
+            font-weight: bold;
+            border: 3px solid var(--white);
+            padding: 0.5rem 1rem;
+            display: inline-block;
+        }
+
+        /* --- MAIN CONTENT GRID --- */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 2rem;
+            padding: 2rem 3rem;
+            background-color: var(--off-white);
+        }
+
+        /* --- SECTIONS --- */
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-left: 8px solid var(--bu-red);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+
+        .card h3 {
+            color: var(--bu-red);
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .card p, .card li {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+            margin-bottom: 0.8rem;
+        }
+
+        .card ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+
+        .card strong {
+            color: var(--bu-black);
+            font-weight: 700;
+        }
+
+        /* --- CENTER COLUMN (VISUALS) --- */
+        .center-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .highlight-box {
+            background-color: var(--bu-black);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .highlight-box h3 {
+            color: var(--white);
+            border-bottom: 1px solid #555;
+        }
+
+        .app-showcase {
+            flex-grow: 1;
+            background-color: #e5e5e5;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 2rem;
+            border: 2px dashed #bbb;
+        }
+
+        /* CSS Phone Mockup */
+        .phone {
+            width: 180px;
+            height: 360px;
+            background-color: #111;
+            border-radius: 25px;
+            border: 4px solid #333;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .phone-screen {
+            background-color: #fff;
+            width: 94%;
+            height: 97%;
+            margin: 3% auto;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .screen-header {
+            background-color: var(--bu-red);
+            height: 40px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .screen-content {
+            padding: 10px;
+            flex: 1;
+        }
+
+        .food-item {
+            background: #eee;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+        }
+        
+        .timer-badge {
+            background: orange;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            float: right;
+        }
+
+        .phone-label {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: var(--bu-red);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--bu-black);
+            color: #888;
+            padding: 1rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .team-list {
+            display: flex;
+            gap: 2rem;
+            color: var(--white);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* --- UTILITY FOR QR PLACEHOLDER --- */
+        .qr-placeholder {
+            width: 150px;
+            height: 150px;
+            background-color: var(--text-dark);
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="poster-container">
+        <!-- HEADER -->
+        <header>
+            <div class="header-title">
+                <h1>FreeBites</h1>
+                <h2>Catering Leftovers | BU Dining Sustainability</h2>
+            </div>
+            <div class="header-logos">
+                <div class="spark-logo">BU SPARK!</div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+
+            <!-- COLUMN 1: CONTEXT & GOALS -->
+            <div class="column">
+                <div class="card">
+                    <h3>Project Goal</h3>
+                    <p>
+                        <strong>The Problem:</strong> Massachusetts generates over 1 million tons of food waste annually. Simultaneously, food insecurity among households has risen to nearly 20%. BU Dining needs a way to distribute perfectly good catering leftovers before they expire and must be composted.
+                    </p>
+                    <p>
+                        <strong>The Solution:</strong> A native mobile app (iOS/Android) that allows BU Dining staff to instantly post leftover events and notifies students immediately, creating a seamless pipeline from event to plate.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>Client & Partners</h3>
+                    <p><strong>Client:</strong> BU Dining Sustainability Team</p>
+                    <p><strong>Track:</strong> Spark! GreenField (DS519)</p>
+                    <p><strong>Impact Area:</strong> Sustainability, Food Security, Zero Waste Strategy</p>
+                    <br>
+                    <p><em>Supporting the Commonwealth's goal to eliminate commercial organic waste.</em></p>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: SOLUTION & TECH (CENTER VISUALS) -->
+            <div class="center-column">
+                <div class="card" style="flex-grow: 0;">
+                    <h3>Tech Stack</h3>
+                    <ul style="display: flex; gap: 1rem; flex-wrap: wrap; list-style: none; padding: 0;">
+                        <li style="background: #eee; padding: 5px 10px; border-radius: 4px;"><strong>Frontend:</strong> React Native / Expo</li>
+                        <li style="background: #eee; padding: 5px 10px; border-radius: 4px;"><strong>Styling:</strong> Nativewind</li>
+                        <li style="background: #eee; padding: 5px 10px; border-radius: 4px;"><strong>Backend:</strong> Firebase</li>
+                        <li style="background: #eee; padding: 5px 10px; border-radius: 4px;"><strong>Auth:</strong> Clerk</li>
+                    </ul>
+                </div>
+
+                <div class="app-showcase">
+                    <!-- Phone 1: Student View -->
+                    <div>
+                        <div class="phone">
+                            <div class="phone-screen">
+                                <div class="screen-header">FreeBites</div>
+                                <div class="screen-content">
+                                    <div style="font-size: 1rem; font-weight: bold; margin-bottom: 10px;">Available Now</div>
+                                    <div class="food-item">
+                                        <strong>GSU Ballroom</strong>
+                                        <div style="font-size: 0.6rem">Sandwich Platter</div>
+                                        <span class="timer-badge">14:00 left</span>
+                                    </div>
+                                    <div class="food-item">
+                                        <strong>Photonics 9th Fl</strong>
+                                        <div style="font-size: 0.6rem">Pizza & Salad</div>
+                                        <span class="timer-badge">05:30 left</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="phone-label">Student View<br><small>Real-time Alerts</small></div>
+                    </div>
+
+                    <!-- Phone 2: Admin View -->
+                    <div>
+                        <div class="phone">
+                            <div class="phone-screen">
+                                <div class="screen-header" style="background:#333;">Admin Mode</div>
+                                <div class="screen-content">
+                                    <div style="text-align:center; padding: 10px; background: #eee; border-radius: 5px; margin-bottom: 10px;">
+                                        <strong>+ New Event</strong>
+                                    </div>
+                                    <div class="food-item">
+                                        <strong>Active Event</strong>
+                                        <div style="font-size: 0.6rem">Trustee Ballroom</div>
+                                        <div style="color:red; font-size: 0.6rem; margin-top:2px;">Expires in 15m</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="phone-label">Admin View<br><small>Quick Post & Manage</small></div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Key Features</h3>
+                    <div style="display: flex; justify-content: space-around; margin-top: 1rem; text-align: left; font-size: 1rem;">
+                        <div>
+                            ✓ Real-time Push Notifications<br>
+                            ✓ Live Countdown Timers
+                        </div>
+                        <div>
+                            ✓ Admin Verification Tools<br>
+                            ✓ Event Feedback System
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: PROCESS & REFLECTION -->
+            <div class="column">
+                <div class="card">
+                    <h3>Process & Methods</h3>
+                    <ul>
+                        <li><strong>Agile Development:</strong> Bi-weekly sprints to migrate web features to mobile native architecture.</li>
+                        <li><strong>UX Optimization:</strong> Streamlined the "Create Event" flow for time-sensitive catering staff.</li>
+                        <li><strong>Integration:</strong> Synchronized data between the legacy web dashboard and the new mobile app.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Reflections</h3>
+                    <p>
+                        Migrating from a web-app to React Native presented challenges in navigation routing and state management, but significantly improved the user experience for mobile-first students.
+                    </p>
+                    <p>
+                        <strong>Next Steps:</strong> Expansion to the App Store and Google Play for campus-wide adoption.
+                    </p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <h3>Scan for Demo</h3>
+                    <div class="qr-placeholder">
+                        [QR CODE HERE]
+                    </div>
+                    <p style="font-size: 0.9rem;">Link to Github / Project Site</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="team-list">
+                <span>Team: [Member Name]</span>
+                <span>[Member Name]</span>
+                <span>[Member Name]</span>
+                <span>[Member Name]</span>
+                <span>[Member Name]</span>
+            </div>
+            <div>
+                CS/DS 519 | Spring 2025
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>
