@@ -6,7 +6,10 @@ import {
   Platform,
   View,
   Pressable,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomInput from '../../src/components/CustomInput';
 import CustomButton from '../../src/components/CustomButton';
 import { Link, router } from 'expo-router';
@@ -18,6 +21,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 import SignInWith from '../../src/components/SignInWith';
 import { colors, typography, spacing } from '../../src/lib/theme';
+
+// Adjust this value to control how much the screen moves up when keyboard appears
+// Negative values reduce upward movement (more negative = less movement)
+const KEYBOARD_OFFSET = -100;
 
 const signInSchema = z.object({
   email: z
@@ -45,6 +52,7 @@ const mapClerkErrorToFormField = (error: any) => {
 };
 
 export default function SignInScreen() {
+  const insets = useSafeAreaInsets();
   const {
     control,
     handleSubmit,
@@ -88,60 +96,63 @@ export default function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      {/* Back Button */}
-      <Pressable
-        style={styles.backButton}
-        onPress={() => router.push('/welcome')}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? KEYBOARD_OFFSET - insets.top : KEYBOARD_OFFSET}
+        style={styles.container}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
-      </Pressable>
+        {/* Back Button */}
+        <Pressable
+          style={styles.backButton}
+          onPress={() => router.push('/welcome')}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </Pressable>
 
-      <Text style={styles.title}>Sign in</Text>
-      <Text style={styles.subtitle}>Sign in with your @bu.edu email</Text>
+        <Text style={styles.title}>Sign in</Text>
+        <Text style={styles.subtitle}>Sign in with your @bu.edu email</Text>
 
-      <View style={styles.form}>
-        <CustomInput
-          control={control}
-          name="email"
-          placeholder="Email"
-          autoFocus
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
+        <View style={styles.form}>
+          <CustomInput
+            control={control}
+            name="email"
+            placeholder="Email"
+            autoFocus
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+          />
 
-        <CustomInput
-          control={control}
-          name="password"
-          placeholder="Password"
-          secureTextEntry
-        />
+          <CustomInput
+            control={control}
+            name="password"
+            placeholder="Password"
+            secureTextEntry
+          />
 
-        {errors.root && (
-          <Text style={styles.errorText}>{errors.root.message}</Text>
-        )}
-      </View>
+          {errors.root && (
+            <Text style={styles.errorText}>{errors.root.message}</Text>
+          )}
+        </View>
 
-      <CustomButton text="Sign in" onPress={handleSubmit(onSignIn)} />
+        <CustomButton text="Sign in" onPress={handleSubmit(onSignIn)} />
 
-      <Link href="/sign-up" style={styles.link}>
-        {"Don't have an account? Sign up"}
-      </Link>
+        <Link href="/sign-up" style={styles.link}>
+          {"Don't have an account? Sign up"}
+        </Link>
 
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
-        <View style={styles.dividerLine} />
-      </View>
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
 
-      <View style={styles.socialContainer}>
-        <SignInWith strategy="oauth_google" />
-      </View>
-    </KeyboardAvoidingView>
+        <View style={styles.socialContainer}>
+          <SignInWith strategy="oauth_google" />
+        </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 

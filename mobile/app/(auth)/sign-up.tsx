@@ -7,7 +7,10 @@ import {
   View,
   Animated,
   Pressable,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect } from 'react';
 import CustomInput from '../../src/components/CustomInput';
 import CustomButton from '../../src/components/CustomButton';
@@ -20,6 +23,10 @@ import { Link, router } from 'expo-router';
 import { isClerkAPIResponseError, useSignUp } from '@clerk/clerk-expo';
 import SignInWith from '../../src/components/SignInWith';
 import { colors, typography, spacing } from '../../src/lib/theme';
+
+// Adjust this value to control how much the screen moves up when keyboard appears
+// Negative values reduce upward movement (more negative = less movement)
+const KEYBOARD_OFFSET = -100;
 
 const signUpSchema = z.object({
   email: z
@@ -50,6 +57,7 @@ const mapClerkErrorToFormField = (error: any) => {
 };
 
 export default function SignUpScreen() {
+  const insets = useSafeAreaInsets();
   const [pendingVerification, setPendingVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -158,117 +166,120 @@ export default function SignUpScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      {/* Back Button */}
-      <Pressable
-        style={styles.backButton}
-        onPress={() => router.push('/welcome')}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? KEYBOARD_OFFSET - insets.top : KEYBOARD_OFFSET}
+        style={styles.container}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
-      </Pressable>
+        {/* Back Button */}
+        <Pressable
+          style={styles.backButton}
+          onPress={() => router.push('/welcome')}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </Pressable>
 
-      <Text style={styles.title}>
-        {pendingVerification ? 'Verify your email' : 'Create an account'}
-      </Text>
-      <Text style={styles.subtitle}>
-        {pendingVerification
-          ? `Enter the 6-digit code sent to ${verificationEmail}`
-          : 'Sign up with your @bu.edu email'}
-      </Text>
+        <Text style={styles.title}>
+          {pendingVerification ? 'Verify your email' : 'Create an account'}
+        </Text>
+        <Text style={styles.subtitle}>
+          {pendingVerification
+            ? `Enter the 6-digit code sent to ${verificationEmail}`
+            : 'Sign up with your @bu.edu email'}
+        </Text>
 
-      <View style={styles.form}>
+        <View style={styles.form}>
+          {!pendingVerification && (
+            <>
+              <CustomInput
+                control={control}
+                name="email"
+                placeholder="Email"
+                autoFocus
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+
+              <CustomInput
+                control={control}
+                name="password"
+                placeholder="Password"
+                secureTextEntry
+              />
+            </>
+          )}
+
+          {pendingVerification && (
+            <Animated.View
+              style={{
+                opacity: slideAnim,
+                transform: [
+                  {
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-20, 0],
+                    }),
+                  },
+                ],
+              }}
+            >
+              <CustomInput
+                control={control}
+                name="code"
+                placeholder="123456"
+                autoFocus
+                autoCapitalize="none"
+                keyboardType="number-pad"
+                autoComplete="one-time-code"
+              />
+
+              {/* Resend Code Link */}
+              <Text style={styles.resendContainer}>
+                {"Didn't receive a code? "}
+                <Text style={styles.resendLink} onPress={handleResendCode}>
+                  Resend
+                </Text>
+              </Text>
+            </Animated.View>
+          )}
+
+          {errors.root && (
+            <Text style={styles.errorText}>{errors.root.message}</Text>
+          )}
+        </View>
+
+        <CustomButton
+          text={pendingVerification ? 'Verify & Sign Up' : 'Continue'}
+          onPress={handleSubmit(onSignUp)}
+        />
+
         {!pendingVerification && (
           <>
-            <CustomInput
-              control={control}
-              name="email"
-              placeholder="Email"
-              autoFocus
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-            />
+            <Link href="/sign-in" style={styles.link}>
+              Already have an account? Sign in
+            </Link>
 
-            <CustomInput
-              control={control}
-              name="password"
-              placeholder="Password"
-              secureTextEntry
-            />
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <View style={styles.socialContainer}>
+              <SignInWith strategy="oauth_google" />
+            </View>
           </>
         )}
 
         {pendingVerification && (
-          <Animated.View
-            style={{
-              opacity: slideAnim,
-              transform: [
-                {
-                  translateY: slideAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-20, 0],
-                  }),
-                },
-              ],
-            }}
-          >
-            <CustomInput
-              control={control}
-              name="code"
-              placeholder="123456"
-              autoFocus
-              autoCapitalize="none"
-              keyboardType="number-pad"
-              autoComplete="one-time-code"
-            />
-
-            {/* Resend Code Link */}
-            <Text style={styles.resendContainer}>
-              {"Didn't receive a code? "}
-              <Text style={styles.resendLink} onPress={handleResendCode}>
-                Resend
-              </Text>
-            </Text>
-          </Animated.View>
-        )}
-
-        {errors.root && (
-          <Text style={styles.errorText}>{errors.root.message}</Text>
-        )}
-      </View>
-
-      <CustomButton
-        text={pendingVerification ? 'Verify & Sign Up' : 'Continue'}
-        onPress={handleSubmit(onSignUp)}
-      />
-
-      {!pendingVerification && (
-        <>
-          <Link href="/sign-in" style={styles.link}>
-            Already have an account? Sign in
+          <Link href="/sign-in" style={[styles.link, { marginTop: spacing.md }]}>
+            Back to sign in
           </Link>
-
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <View style={styles.socialContainer}>
-            <SignInWith strategy="oauth_google" />
-          </View>
-        </>
-      )}
-
-      {pendingVerification && (
-        <Link href="/sign-in" style={[styles.link, { marginTop: spacing.md }]}>
-          Back to sign in
-        </Link>
-      )}
-    </KeyboardAvoidingView>
+        )}
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
