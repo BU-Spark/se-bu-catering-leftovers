@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeBites - BU Spark! Demo Day Poster</title>
+    <style>
+        :root {
+            --bu-red: #CC0000;
+            --bu-black: #2D2926;
+            --off-white: #f4f4f4;
+            --white: #ffffff;
+            --text-dark: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /* Recommended Font: Arial */
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #888; /* Darker background to see the poster edge clearly */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        /* STRICT DIMENSIONS 
+           40.97 inches x 23.04 inches 
+           At standard screen DPI (96), this is approx 3933px x 2211px.
+        */
+        .poster-container {
+            width: 40.97in;
+            /* Changed to min-height so it grows if text is too large, rather than cutting off */
+            min-height: 23.04in;
+            background-color: var(--white);
+            color: var(--text-dark);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            border: 1px solid #ccc;
+            /* Ensure font size scales with the inches */
+            font-size: 28pt; 
+            /* REMOVED overflow: hidden so content is never cut off */
+        }
+
+        /* --- HEADER FIXED --- */
+        header {
+            background-color: var(--bu-red);
+            color: var(--white);
+            padding: 0.6in 1.5in;
+            border-bottom: 0.2in solid var(--bu-black);
+            
+            /* GRID LAYOUT FOR PERFECT CENTERING */
+            display: grid;
+            /* Three columns: Left Logo (auto), Center Title (1fr), Right Logo (auto) */
+            grid-template-columns: 1fr auto 1fr; 
+            align-items: center;
+        }
+
+        /* Container for the left logo */
+        .logo-left {
+            justify-self: start;
+        }
+
+        /* Container for the right logo */
+        .logo-right {
+            justify-self: end;
+        }
+
+        /* The Logo Images */
+        .header-logo {
+            height: 2.5in; /* Fixed height for logos to ensure consistency */
+            width: auto;
+            object-fit: contain;
+            /* No background color */
+            border-radius: 0.1in;
+        }
+
+        /* FIX: Clip the Spark logo to a circle to hide square background corners */
+        .logo-right .header-logo {
+            border-radius: 50%;
+        }
+
+        .header-title {
+            text-align: center;
+            /* Ensures title stays in the middle grid track */
+            grid-column: 2;
+            padding: 0 1in;
+            white-space: nowrap; 
+        }
+
+        .header-title h1 {
+            font-size: 80pt; /* Large Title */
+            font-weight: 800;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.2in;
+        }
+
+        .header-title h2 {
+            font-size: 40pt;
+            font-weight: 400;
+            opacity: 0.95;
+        }
+
+        /* --- MAIN CONTENT GRID --- */
+        .content {
+            display: grid;
+            /* 3 Columns: Context (30%), Visuals/Features (40%), Details/Reflections (30%) */
+            grid-template-columns: 1fr 1.3fr 1fr;
+            /* Reduced vertical gap to fit content better */
+            gap: 0.8in;
+            padding: 0.8in 1.5in;
+            background-color: var(--off-white);
+        }
+
+        /* --- SECTIONS --- */
+        .column {
+            display: flex;
+            flex-direction: column;
+            /* Reduced gap between cards */
+            gap: 0.6in;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 0.5in;
+            border-left: 0.3in solid var(--bu-red);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            /* Ensure content fits */
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h3 {
+            color: var(--bu-red);
+            font-size: 36pt; /* Header > 28pt */
+            text-transform: uppercase;
+            margin-bottom: 0.3in;
+            border-bottom: 4px solid #eee;
+            padding-bottom: 0.2in;
+        }
+
+        .card p, .card li {
+            font-size: 28pt; /* MINIMUM FONT REQUIREMENT */
+            line-height: 1.4;
+            color: var(--text-dark);
+            margin-bottom: 0.3in;
+        }
+
+        .card ul {
+            list-style-position: inside;
+            padding-left: 0.3in;
+        }
+
+        .card strong {
+            color: var(--bu-black);
+            font-weight: 700;
+        }
+
+        /* --- CENTER COLUMN (VISUALS) --- */
+        .center-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6in;
+        }
+
+        .app-showcase {
+            flex-grow: 1;
+            background-color: #e5e5e5;
+            border-radius: 0.4in;
+            display: flex;
+            /* FIX: Use space-evenly for better horizontal gap */
+            justify-content: space-evenly; 
+            /* FIX: Align items to center vertically instead of top */
+            align-items: center; 
+            padding: 0.5in;
+            border: 4px dashed #bbb;
+        }
+
+        /* Phone Image Container */
+        .phone-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .phone-img {
+            width: 5in; 
+            height: auto; /* Keeps aspect ratio of your screenshots */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 0.3in;
+            border: 0.1in solid #333; /* Dark bezel look */
+            background-color: #ddd; /* Fallback color */
+        }
+
+        .phone-label {
+            text-align: center;
+            margin-top: 0.3in;
+            font-size: 30pt;
+            font-weight: bold;
+            color: var(--bu-red);
+        }
+
+        .highlight-box {
+            background-color: var(--bu-black);
+            color: var(--white);
+            padding: 0.6in;
+            text-align: center;
+            border-radius: 0.2in;
+        }
+
+        .highlight-box h3 {
+            color: var(--white);
+            border-bottom: 2px solid #555;
+            font-size: 36pt;
+            margin-bottom: 0.3in;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5in;
+            text-align: left;
+            font-size: 28pt;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--bu-black);
+            color: #ccc;
+            padding: 0.5in 1.5in;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24pt; /* Slightly smaller allowed for footer metadata */
+        }
+
+        .team-list {
+            display: flex;
+            gap: 1in;
+            color: var(--white);
+            font-weight: bold;
+            font-size: 28pt;
+        }
+
+        /* --- UTILITY FOR QR --- */
+        .qr-code-img {
+            width: 3in;
+            height: 3in;
+            margin: 0.5in auto;
+            display: block;
+            border: 2px solid #eee;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="poster-container">
+        <!-- HEADER -->
+        <header>
+            <!-- Left Logo Container -->
+            <div class="logo-left">
+                <img src="assets/bu_logo.svg" alt="BU Logo" class="header-logo">
+            </div>
+            
+            <!-- Center Title -->
+            <div class="header-title">
+                <h1>FreeBites</h1>
+                <h2>Catering Leftovers | BU Dining Sustainability</h2>
+            </div>
+            
+            <!-- Right Logo Container -->
+            <div class="logo-right">
+                <img src="assets/spark_logo.png" alt="BU Spark Logo" class="header-logo">
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="content">
+
+            <!-- COLUMN 1: CONTEXT & GOALS (Most Important) -->
+            <div class="column">
+                <div class="card">
+                    <h3>Project Goal</h3>
+                    <p>
+                        <strong>The Problem:</strong> Massachusetts generates over 1 million tons of food waste annually. Simultaneously, food insecurity among households has risen to nearly 20%. 
+                    </p>
+                    <p>
+                        <strong>The Solution:</strong> A native mobile app that allows BU Dining staff to instantly post leftover events and notifies students immediately. This creates a seamless pipeline from event to plate, reducing commercial organic waste.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3>Client & Partners</h3>
+                    <p><strong>Client:</strong> BU Dining Sustainability Team</p>
+                    <p><strong>Track:</strong> Spark! GreenField (DS519)</p>
+                    <p><strong>Impact:</strong> Zero Waste Strategy & Food Security</p>
+                </div>
+
+                <div class="card" style="flex-grow: 0;">
+                    <h3>Tech Stack</h3>
+                    <ul>
+                        <li><strong>Frontend:</strong> React Native / Expo</li>
+                        <li><strong>Styling:</strong> Nativewind</li>
+                        <li><strong>Backend:</strong> Firebase (Firestore)</li>
+                        <li><strong>Auth:</strong> Clerk</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: VISUALS (Centerpiece) -->
+            <div class="center-column">
+                <div class="app-showcase">
+                    <!-- Image 1: Student View -->
+                    <div class="phone-container">
+                        <img src="assets/student_view.png" alt="Student View App Screen" class="phone-img">
+                        <div class="phone-label">Student View</div>
+                    </div>
+
+                    <!-- Image 2: Admin View -->
+                    <div class="phone-container">
+                        <img src="assets/admin_view.png" alt="Admin View App Screen" class="phone-img">
+                        <div class="phone-label">Admin View</div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Key Features</h3>
+                    <div class="features-grid">
+                        <div>
+                            ✓ Real-time Push Notifications<br>
+                            ✓ Live Countdown Timers
+                        </div>
+                        <div>
+                            ✓ Admin Verification Tools<br>
+                            ✓ Event Feedback System
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: PROCESS & REFLECTION (Less Important / End) -->
+            <div class="column">
+                <div class="card">
+                    <h3>Process</h3>
+                    <ul>
+                        <li><strong>Agile:</strong> Bi-weekly sprints migrating web features to mobile.</li>
+                        <li><strong>UX Design:</strong> Optimized "Create Event" flow for speed.</li>
+                        <li><strong>Integration:</strong> Synced legacy web data with new mobile app.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Reflections</h3>
+                    <p>
+                        Migrating from a web-app to React Native presented challenges in navigation routing, but significantly improved the experience for mobile-first students.
+                    </p>
+                    <p>
+                        <strong>Next Steps:</strong> Expansion to the App Store and Google Play.
+                    </p>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <h3>Scan for Demo</h3>
+                    <!-- QR Code Image -->
+                    <img src="assets/qr_code.png" alt="Project QR Code" class="qr-code-img">
+                    <p>Link to Github / Project</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="team-list">
+                <!-- REPLACE WITH YOUR ACTUAL NAMES -->
+                <span>Team: [Name 1]</span>
+                <span>[Name 2]</span>
+                <span>[Name 3]</span>
+                <span>[Name 4]</span>
+            </div>
+            <div>
+                CS/DS 519 | Spring 2025
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>
