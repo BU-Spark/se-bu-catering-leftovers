@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +23,8 @@
         body {
             /* Recommended Font: Arial */
             font-family: Arial, Helvetica, sans-serif;
-            background-color: #888; /* Darker background to see the poster edge clearly */
+            background-color: #888;
+            /* Darker background to see the poster edge clearly */
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -43,10 +45,10 @@
             color: var(--text-dark);
             display: grid;
             grid-template-rows: auto 1fr auto;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
             border: 1px solid #ccc;
             /* Ensure font size scales with the inches */
-            font-size: 28pt; 
+            font-size: 28pt;
             /* REMOVED overflow: hidden so content is never cut off */
         }
 
@@ -56,11 +58,11 @@
             color: var(--white);
             padding: 0.6in 1.5in;
             border-bottom: 0.2in solid var(--bu-black);
-            
+
             /* GRID LAYOUT FOR PERFECT CENTERING */
             display: grid;
             /* Three columns: Left Logo (auto), Center Title (1fr), Right Logo (auto) */
-            grid-template-columns: 1fr auto 1fr; 
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
         }
 
@@ -76,7 +78,8 @@
 
         /* The Logo Images */
         .header-logo {
-            height: 2.5in; /* Fixed height for logos to ensure consistency */
+            height: 2.5in;
+            /* Fixed height for logos to ensure consistency */
             width: auto;
             object-fit: contain;
             /* No background color */
@@ -93,11 +96,12 @@
             /* Ensures title stays in the middle grid track */
             grid-column: 2;
             padding: 0 1in;
-            white-space: nowrap; 
+            white-space: nowrap;
         }
 
         .header-title h1 {
-            font-size: 80pt; /* Large Title */
+            font-size: 80pt;
+            /* Large Title */
             font-weight: 800;
             line-height: 1.1;
             text-transform: uppercase;
@@ -134,7 +138,7 @@
             background: var(--white);
             padding: 0.5in;
             border-left: 0.3in solid var(--bu-red);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             /* Ensure content fits */
             height: 100%;
             display: flex;
@@ -143,15 +147,18 @@
 
         .card h3 {
             color: var(--bu-red);
-            font-size: 36pt; /* Header > 28pt */
+            font-size: 36pt;
+            /* Header > 28pt */
             text-transform: uppercase;
             margin-bottom: 0.3in;
             border-bottom: 4px solid #eee;
             padding-bottom: 0.2in;
         }
 
-        .card p, .card li {
-            font-size: 28pt; /* MINIMUM FONT REQUIREMENT */
+        .card p,
+        .card li {
+            font-size: 28pt;
+            /* MINIMUM FONT REQUIREMENT */
             line-height: 1.4;
             color: var(--text-dark);
             margin-bottom: 0.3in;
@@ -180,9 +187,9 @@
             border-radius: 0.4in;
             display: flex;
             /* FIX: Use space-evenly for better horizontal gap */
-            justify-content: space-evenly; 
+            justify-content: space-evenly;
             /* FIX: Align items to center vertically instead of top */
-            align-items: center; 
+            align-items: center;
             padding: 0.5in;
             border: 4px dashed #bbb;
         }
@@ -195,12 +202,15 @@
         }
 
         .phone-img {
-            width: 5in; 
-            height: auto; /* Keeps aspect ratio of your screenshots */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 5in;
+            height: auto;
+            /* Keeps aspect ratio of your screenshots */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             border-radius: 0.3in;
-            border: 0.1in solid #333; /* Dark bezel look */
-            background-color: #ddd; /* Fallback color */
+            border: 0.1in solid #333;
+            /* Dark bezel look */
+            background-color: #ddd;
+            /* Fallback color */
         }
 
         .phone-label {
@@ -242,7 +252,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 24pt; /* Slightly smaller allowed for footer metadata */
+            font-size: 24pt;
+            /* Slightly smaller allowed for footer metadata */
         }
 
         .team-list {
@@ -298,9 +309,9 @@
             display: block;
             border: 2px solid #eee;
         }
-
     </style>
 </head>
+
 <body>
 
     <div class="poster-container">
@@ -310,13 +321,13 @@
             <div class="logo-left">
                 <img src="assets/bu_logo.svg" alt="BU Logo" class="header-logo">
             </div>
-            
+
             <!-- Center Title -->
             <div class="header-title">
                 <h1>FreeBites</h1>
                 <h2>Catering Leftovers | BU Dining Sustainability</h2>
             </div>
-            
+
             <!-- Right Logo Container -->
             <div class="logo-right">
                 <img src="assets/spark_logo.png" alt="BU Spark Logo" class="header-logo">
@@ -331,10 +342,14 @@
                 <div class="card">
                     <h3>Project Goal</h3>
                     <p>
-                        <strong>The Problem:</strong> Massachusetts generates over 1 million tons of food waste each year, while food insecurity continues to rise. At BU, leftover catered food is often thrown away because staff lack a fast, accessible, and real-time way to alert students.
+                        <strong>The Problem:</strong> Massachusetts generates over 1 million tons of food waste each
+                        year, while food insecurity continues to rise. At BU, leftover catered food is often thrown away
+                        because staff lack a fast, accessible, and real-time way to alert students.
                     </p>
                     <p>
-                        <strong>The Solution:</strong> Create a native mobile app that lets BU Dining staff instantly post leftover events and automatically notify students. This provides a quick, reliable, and student-friendly system that reduces waste and improves student access.
+                        <strong>The Solution:</strong> Create a native mobile app that lets BU Dining staff instantly
+                        post leftover events and automatically notify students. This provides a quick, reliable, and
+                        student-friendly system that reduces waste and improves student access.
                     </p>
                 </div>
 
@@ -364,7 +379,6 @@
                     <h3>Tech Stack</h3>
                     <ul>
                         <li><strong>Frontend:</strong> React Native / Expo</li>
-                        <li><strong>Styling:</strong> Nativewind</li>
                         <li><strong>Backend:</strong> Firebase (Firestore)</li>
                         <li><strong>Auth:</strong> Clerk</li>
                     </ul>
@@ -405,30 +419,48 @@
             <!-- COLUMN 3: PROCESS & REFLECTION (Less Important / End) -->
             <div class="column">
                 <div class="card">
-                    <h3>Process</h3>
+                    <h3>Final Deliverables</h3>
                     <ul>
-                        <li><strong>Agile:</strong> Bi-weekly sprints migrating web features to mobile.</li>
-                        <li><strong>UX Design:</strong> Optimized "Create Event" flow for speed.</li>
-                        <li><strong>Integration:</strong> Synced legacy web data with new mobile app.</li>
+                        <li>Rebuilt and migrated the leftover alert system from the legacy web app to a mobile React
+                            Native app</li>
+                        <li>Designed a streamlined “Create Event” flow for fast staff posting</li>
+                        <li>Implemented RBAC to verify authorized dining staff</li>
+                        <li>Built real-time push notification delivery</li>
+                        <li>Developed Firestore-backed event management backend</li>
+                        <li>Added new mobile-only features such as countdown timers</li>
                     </ul>
                 </div>
 
                 <div class="card">
                     <h3>Reflections</h3>
                     <p>
-                        Migrating from a web-app to React Native presented challenges in navigation routing, but significantly improved the experience for mobile-first students.
+                        Building a production-ready system pushed us beyond UI into deeper backend work. Our biggest
+                        challenge was setting up RBAC, implementing push notifications, and making sure real-time
+                        updates worked smoothly for staff.
                     </p>
                     <p>
-                        <strong>Next Steps:</strong> Expansion to the App Store and Google Play.
+                        Client feedback drove several iterations of the event flow and notifications, showing us how
+                        operational constraints shape design and how small usability changes can greatly improve staff
+                        efficiency.
+                    </p>
+
+
+                    <strong>Next Steps:</strong> Deploy to App Store and Google Play.
                     </p>
                 </div>
 
-                <div class="card" style="text-align: center;">
-                    <h3>Scan for Demo</h3>
-                    <!-- QR Code Image -->
-                    <img src="assets/qr_code.png" alt="Project QR Code" class="qr-code-img">
-                    <p>Link to Github / Project</p>
+                <div class="card">
+                    <h3>Future Impact</h3>
+                    <p>
+                        This system lays the foundation for a campus-wide leftover recovery network. With mobile-first
+                        workflows,
+                        verified staff access, and real-time student reach, FreeBites can scale across BU Dining to
+                        significantly reduce food waste.
+                    </p>
                 </div>
+
+
+
             </div>
         </div>
 
@@ -447,4 +479,5 @@
     </div>
 
 </body>
+
 </html>
