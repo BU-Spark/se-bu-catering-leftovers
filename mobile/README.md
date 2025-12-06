@@ -76,6 +76,41 @@ npx expo start
 ✅ This opens Expo development server
 ✅ Scan QR code with Expo Go app on your phone
 
+### Optional: Share a Preview Build (Works While Your Laptop Is Offline)
+
+1. Make sure you're in the `mobile/` folder and are signed in to Expo in your terminal (`npx expo login`).
+2. Run the preview script:
+
+```bash
+npm run eas:update:preview
+```
+
+3. Expo uploads a static JS bundle and prints a shareable link + QR. Send that to testers—they can open it in Expo Go and keep using it even while you're offline (backend services must still be reachable).
+4. Prefer running commands from the repo root? `npm run eas:update:preview` works there too; it proxies to the mobile app script.
+
+### How We Set Up EAS Preview Publishing
+
+Quick recap of the one-time setup we just performed so you can repeat it when spinning up another Expo project:
+
+1. **Create + link an Expo project**
+   - On [expo.dev](https://expo.dev) create a project (e.g., “Free Bites”) and copy the Project ID.
+   - Add `EXPO_PUBLIC_EAS_PROJECT_ID=<the-id>` to `.env.local` (root or `mobile/.env.local`; the config reads either).
+   - Link your local app: `cd mobile && npx eas init --id <the-id>`. During this step we also set `owner`, `name`, `slug`, `updates.url`, and `runtimeVersion` in `app.config.ts`.
+
+2. **Install Expo’s required modules**
+   - `cd mobile && npx expo install expo-updates expo-auth-session` so EAS Update and AuthSession APIs bundle correctly.
+
+3. **Push env vars to Expo**
+   - Upload `.env.local` to each environment you care about (at least `preview`) so cloud builds have identical secrets:
+     ```bash
+     cd mobile
+     npx eas env:push --environment preview --path ../.env.local
+     ```
+     Repeat with `--environment development` or `production` if you use those too.
+
+4. **Publish previews on demand**
+   - From repo root (or `mobile/`): `npm run eas:update:preview`. This runs `npx eas update --branch preview --message "Preview update"` and outputs the shareable Expo link/QR testers can use even when your laptop is offline.
+
 ## Development Commands
 
 ### Format Code
