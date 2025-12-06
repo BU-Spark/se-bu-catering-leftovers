@@ -9,7 +9,6 @@ import {
   TextInput,
   Dimensions,
 } from 'react-native';
-import PagerView from 'react-native-pager-view';
 import { router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { doc, setDoc } from 'firebase/firestore';
@@ -18,6 +17,9 @@ import { useTheme } from '../../src/lib/ThemeProvider';
 import { spacing, typography, borderRadius } from '../../src/lib/theme';
 import { TERMS_AND_CONDITIONS } from '../../src/content/terms';
 import { requestStaffRole } from '../../src/lib/rbacClient';
+import PagerView, {
+  PagerViewHandle,
+} from '../../src/components/PagerViewAdapter';
 
 const CAMPUS_SECTIONS = ['East', 'Central', 'West', 'South'];
 
@@ -25,7 +27,7 @@ export default function OnboardingScreen() {
   const { user } = useUser();
   const { getToken } = useAuth();
   const { colors } = useTheme();
-  const pagerRef = useRef<PagerView>(null);
+  const pagerRef = useRef<PagerViewHandle | null>(null);
 
   const [currentPage, setCurrentPage] = useState(0);
   const [name, setName] = useState(user?.fullName || '');

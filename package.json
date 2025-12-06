@@ -9,7 +9,9 @@
     "lint": "next lint",
     "emulators": "firebase emulators:start --only firestore,ui --import=.firebase-data --export-on-exit",
     "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 tsx tools/seed.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "eas:update:preview": "npm --prefix mobile run eas:update:preview",
+    "eas:build:android-apk": "npm --prefix mobile run eas:build:android-apk"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",

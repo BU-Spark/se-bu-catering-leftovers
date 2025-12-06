@@ -1,9 +1,21 @@
 // mobile/app.config.ts
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import * as dotenv from 'dotenv';
+import { existsSync } from 'fs';
+import path from 'path';
 
 // Local-only fallback. On EAS, set Secrets instead of committing .env.local.
-dotenv.config({ path: '.env.local' });
+const envFiles = [
+  path.resolve(__dirname, '.env.local'),
+  path.resolve(__dirname, '../.env.local'),
+];
+
+for (const envFile of envFiles) {
+  if (existsSync(envFile)) {
+    dotenv.config({ path: envFile });
+    break;
+  }
+}
 
 const required = (key: string) => {
   const v = process.env[key];
@@ -13,9 +25,16 @@ const required = (key: string) => {
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   return {
-    name: config.name ?? 'mobile',
-    slug: config.slug ?? 'mobile',
+    name: 'Free Bites',
+    slug: 'free-bites',
     scheme: 'leftovers',
+    owner: 'arnav2x',
+    updates: {
+      url: 'https://u.expo.dev/0f554bb2-0d16-4841-b48d-f931a8917edd',
+    },
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
     extra: {
       firebase: {
         apiKey: required('NEXT_PUBLIC_FIREBASE_API_KEY'),
