@@ -4,6 +4,7 @@ import React, { useCallback } from 'react';
 import { Pressable, Text, StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSSO, useUser, useAuth } from '@clerk/clerk-expo';
+import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -14,9 +15,19 @@ export type SignInWithProps = {
 export default function SignInWith({ strategy }: SignInWithProps) {
   const { startSSOFlow } = useSSO();
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, isSignedIn, isLoaded } = useAuth();
 
   const onPress = useCallback(async () => {
+    // Check if already signed in
+    if (!isLoaded) return;
+    
+    if (isSignedIn) {
+      // Already signed in, redirect to welcome which will route appropriately
+      console.log('Already signed in, redirecting to welcome');
+      router.replace('/welcome');
+      return;
+    }
+
     try {
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy,
@@ -32,10 +43,35 @@ export default function SignInWith({ strategy }: SignInWithProps) {
           return;
         }
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('SSO error:', err);
+      
+      // If the error is "already signed in", force sign out first
+      if (err?.errors?.[0]?.message?.includes('already signed in') || 
+          err?.message?.includes('already signed in')) {
+        console.log('Detected "already signed in" error, forcing sign out...');
+        try {
+          // Force sign out to clear any stale session
+          await signOut();
+          // Wait for sign out to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('Sign out completed, redirecting to welcome');
+        } catch (signOutErr) {
+          console.error('Error during forced sign out:', signOutErr);
+        }
+        router.replace('/welcome');
+        return;
+      }
+      
+      // For other errors, try to sign out and redirect
+      try {
+        await signOut();
+      } catch (signOutErr) {
+        console.error('Sign out error:', signOutErr);
+      }
+      router.replace('/welcome');
     }
-  }, [startSSOFlow, strategy, user, signOut]);
+  }, [startSSOFlow, strategy, user, signOut, isSignedIn, isLoaded]);
 
   return (
     <Pressable style={styles.button} onPress={onPress}>
