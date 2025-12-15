@@ -1,101 +1,100 @@
-# BU Catering Mobile App Setup Guide
+# BU Catering Mobile App (Freebites)
+Mobile app for the Freebites project (iOS and Android). Built with Expo + React Native.
 
-Mobile app for the BU Catering Leftovers project. Built with Expo + React Native.
+This app helps Boston University catering staff reduce food waste by posting leftover catering events so students can pickup free food and leave feedback.
+
+## Project Overview
+
+Freebites is a mobile-first platform that connects catering staff and students to efficiently distribute leftover food from campus events.
+
+#### What the app does
+- Students browse available events and leave reviews
+- Staff post leftover food events and see student reviews
+- Admins manage staff access and permissions
+- Push notifications alert users when new events are posted
+
+## User Roles & Permissions
+### Students
+- View available leftover events
+- See event details (location, time, quantity)
+- Submit reviews after events
+
+### Staff
+- Create and update leftover food events
+- View reviews from students
+
+###  Admin
+- Manage staff accounts (Approve or revoke staff access)
+- Can do anything staff can do
+
+## Technical Architecture
+![Technical Architecture Diagram](../poster/assets/technical.png)
+### High-Level Flow
+1. Users (Staff, Students, Admins) interact with the React Native mobile app
+2. The mobile app communicates with:
+    - An Authentication Backend (serverless, hosted on Vercel), uses Clerk for roles & authentication
+    - A Backend API (Node.js + TypeScript)
+3. Data is stored and retrieved from Firebase Firestore. All reads and writes are validated using Zod
+4. Expo Push Notifications deliver real-time alerts to users
+
+### Core Components
+1. Mobile App
+    - Found in `mobile/app`
+    - Built with Expo + React Native
+    - Handles UI, navigation, and client-side logic
+    - Sends authenticated requests to backend services
+2. Auth Backend (Serverless)
+    - Found in `backend/`
+    - Hosted on Vercel
+    - Uses Clerk for authentication
+    - Clerk metadata is the source of truth for RBAC (student / staff / admin)
+    - Issues auth context consumed by the mobile app
+3. Node.js + TypeScript
+    - Found in `mobile/src/lib/`
+    - Reads and writes Firestore data (`lib/firebase/`)
+    - Uses schema validation with Zod to ensure data integrity (`lib/schemas/`)
+4. Firestore Database
+    - Stores core application data: `users`, `events`, `reviews`
+    - Used both in production and via the local emulator
+5. Push Notifications
+    - Found in `mobile/src/lib/`
+    - Powered by Expo Push Notification Service
+    - Notifies users when:
+        - New leftover events are posted
+        - Relevant updates occur
 
 ## Prerequisites
-
-- Node 18+ and npm
-- Expo CLI (npx expo)
-- Firebase CLI (npm i -g firebase-tools)
+1. Node 18+ and npm
+2. Expo CLI (`npx expo`)
+3. Firebase CLI (`npm i -g firebase-tools`)
 
 ## Setup Instructions
-
-### Step 1: Install Dependencies
-
-**Location:** Run from repo root (se-bu-catering-leftovers/)
-
-```bash
+1. Install Dependencies (run from repo root)
+```
 npm install --legacy-peer-deps
 cd mobile
 npm install
-cd ..  # Go back to repo root
 ```
-
-### Step 2: Environment Variables
-
-**Location:** Create file in mobile/ folder
-
-```bash
-# Create the file
-touch mobile/.env.local
+2. Environment Variables (in `mobile/`)
 ```
-
-**File content:** Copy these keys (same as web app):
-
-```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain_here
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id_here
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket_here
-NEXT_PUBLIC_FIREBASE_DATABASE_URL=your_database_url_here
+vim mobile/.env.local
 ```
-
-⚠️ **Do not commit real values to Git**
-
-### Step 3: Start Firestore Emulator
-
-**Location:** Run from repo root (se-bu-catering-leftovers/)
-
-```bash
+- Ask BU Spark! for the .env format
+3. Start Firestore Emulator (from root)
+```
 npm run emulators
 ```
-
-✅ Keep this terminal open - emulator must stay running
-
-### Step 4: Seed Sample Data (First Time Only)
-
-**Location:** Run from repo root (se-bu-catering-leftovers/) in a NEW terminal
-
-```bash
+4. Seed Sample Data (if desired. from root)
+```
 npm run seed
 ```
-
-✅ This creates sample Users, Events, and Reviews
-✅ Data persists in .firebase-data/ folder
-✅ Only run once unless you want fresh data
-
-### Step 5: Run the Mobile App
-
-**Location:** Run from mobile/ folder in a NEW terminal
-
-```bash
+- This creates sample Events and Reviews if you want to see quickly see dummy data. Data persists locally in `.firebase-data/`.
+5. Run the Mobile App
+```
 cd mobile
 npx expo start
 ```
 
-✅ This opens Expo development server
-✅ Scan QR code with Expo Go app on your phone
-
-## Development Commands
-
-### Format Code
-
-**Location:** Run from repo root (se-bu-catering-leftovers/)
-
-```bash
-npm run format
-```
-
-## Terminal Setup Summary
-
-You'll need 3 terminals open:
-
-1. **Terminal 1:** `npm run emulators` (from repo root)
-2. **Terminal 2:** `npm run seed` (from repo root, one-time only)
-3. **Terminal 3:** `cd mobile && npx expo start` (from mobile folder)
-
-## Troubleshooting
-
-- If emulator fails: Make sure Firebase CLI is installed globally
-- If mobile app fails: Make sure .env.local exists in mobile/ folder
-- If data missing: Run `npm run seed` again
+### Notes
+- Usually you have one terminal running `npm run emulators`, a second one to `npm run seed`, and a third one to `cd mobile && npx expo start`.
+- `npm run format` within `mobile/` to format with Prettier
