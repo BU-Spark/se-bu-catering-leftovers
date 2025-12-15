@@ -99,7 +99,9 @@ export default function SignInScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? KEYBOARD_OFFSET - insets.top : KEYBOARD_OFFSET}
+        keyboardVerticalOffset={
+          Platform.OS === 'ios' ? KEYBOARD_OFFSET - insets.top : KEYBOARD_OFFSET
+        }
         style={styles.container}
       >
         {/* Back Button */}

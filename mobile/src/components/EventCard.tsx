@@ -1,6 +1,14 @@
 // src/components/EventCard.tsx
 import React, { useState } from 'react';
-import { View, Image, StyleSheet, Pressable, Text, Linking, Platform } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  Pressable,
+  Text,
+  Linking,
+  Platform,
+} from 'react-native';
 import { useTheme } from '../lib/ThemeProvider';
 import { typography, spacing, borderRadius } from '../lib/theme';
 import { formatTimestamp } from '../lib/utils';
@@ -46,7 +54,7 @@ export function EventCard({
 
   const openInMaps = async (address: string) => {
     const encodedAddress = encodeURIComponent(address);
-    
+
     const googleMapsApp = Platform.select({
       ios: `comgooglemaps://?q=${encodedAddress}`,
       android: `google.navigation:q=${encodedAddress}`,
@@ -61,7 +69,7 @@ export function EventCard({
           return;
         }
       }
-      
+
       const webUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
       await Linking.openURL(webUrl);
     } catch (error) {
@@ -297,8 +305,8 @@ export function EventCard({
             <View style={styles.divider} />
 
             {event.Location?.address && (
-              <InfoRow 
-                label="Address" 
+              <InfoRow
+                label="Address"
                 value={event.Location.address}
                 isLink={true}
                 onPress={() => {
@@ -382,19 +390,19 @@ export function EventCard({
   );
 }
 
-function InfoRow({ 
-  label, 
-  value, 
-  isLink = false, 
-  onPress 
-}: { 
-  label: string; 
-  value: string; 
-  isLink?: boolean; 
+function InfoRow({
+  label,
+  value,
+  isLink = false,
+  onPress,
+}: {
+  label: string;
+  value: string;
+  isLink?: boolean;
   onPress?: () => void;
 }) {
   const { colors } = useTheme();
-  
+
   const styles = React.useMemo(
     () =>
       StyleSheet.create({
@@ -416,7 +424,7 @@ function InfoRow({
         },
         infoValueLink: {
           ...typography.body,
-          color: '#007AFF', 
+          color: '#007AFF',
           textDecorationLine: 'underline',
           fontWeight: '500',
         },
@@ -428,7 +436,7 @@ function InfoRow({
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}:</Text>
       {isLink && onPress ? (
-        <Pressable 
+        <Pressable
           onPress={onPress}
           style={styles.linkContainer}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

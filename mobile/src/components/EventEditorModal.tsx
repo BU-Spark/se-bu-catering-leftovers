@@ -861,7 +861,9 @@ export function EventEditorModal({
                   display="spinner"
                   onChange={handleArrivedDateChange}
                   minimumDate={new Date()}
-                  textColor={themeMode === 'dark' ? '#ffffff' : colors.text.primary}
+                  textColor={
+                    themeMode === 'dark' ? '#ffffff' : colors.text.primary
+                  }
                 />
               </View>
               <Pressable
@@ -920,7 +922,9 @@ export function EventEditorModal({
                   onChange={handleAvailableDateChange}
                   minimumDate={foodArrived}
                   maximumDate={maxAvailableTime}
-                  textColor={themeMode === 'dark' ? '#ffffff' : colors.text.primary}
+                  textColor={
+                    themeMode === 'dark' ? '#ffffff' : colors.text.primary
+                  }
                 />
               </View>
               <Pressable
