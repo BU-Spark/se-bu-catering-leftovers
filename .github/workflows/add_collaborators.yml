@@ -1,7 +1,7 @@
-# Author: Rishab 
+# Author: Rishab
 name: Add Collaborators v1.1
 
-on: 
+on:
   push:
     branches:
       - master
@@ -48,4 +48,3 @@ jobs:
 
               }
             });
-

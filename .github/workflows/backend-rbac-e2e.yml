@@ -1,0 +1,36 @@
+name: Backend RBAC E2E
+
+on:
+  push:
+    branches: [main, dev, feat/ci-and-tests]
+  workflow_dispatch:
+
+jobs:
+  rbac-e2e:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run RBAC E2E Jest tests
+        env:
+          BASE: ${{ secrets.BASE }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          STUDENT_ID: ${{ secrets.STUDENT_ID }}
+          ADMIN_ID: ${{ secrets.ADMIN_ID }}
+        run: npm test

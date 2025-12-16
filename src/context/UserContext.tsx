@@ -13,11 +13,12 @@ interface UserContextProps {
 
 const UserContext = createContext<UserContextProps | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-   
   // Update and store any user changes
   useEffect(() => {
     const unsubscribeFromAuth = onAuthStateChanged(auth, async (authUser) => {
@@ -28,7 +29,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const userRef = doc(db, 'Users', authUser.uid);
-      
+
       // Listen to real-time updates from Firestore
       const unsubscribeFromUser = onSnapshot(userRef, (userDoc) => {
         if (userDoc.exists()) {

@@ -6,7 +6,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import '@/styles/globals.css';
 import { useAuthRedirect } from '/hooks/useAuthRedirect';
-import {UserProvider, useUser} from '../context/UserContext';
+import { UserProvider, useUser } from '../context/UserContext';
 import Navbar from '../components/Navbar';
 
 const GlobalStyle = createGlobalStyle`
@@ -18,48 +18,48 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const theme = createTheme({
-    palette: {
-        primary: {
-            main: "#ab0101",
-        },
+  palette: {
+    primary: {
+      main: '#ab0101',
     },
+  },
 });
 
 function MyApp({ Component, pageProps }) {
-    useAuthRedirect();
+  useAuthRedirect();
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            isSupported().then((supported) => {
-                if (supported) {
-                    getAnalytics(firebaseApp);
-                    console.log('Firebase Analytics initialized');
-                } else {
-                    console.log("Firebase Analytics not supported");
-                }
-            });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      isSupported().then((supported) => {
+        if (supported) {
+          getAnalytics(firebaseApp);
+          console.log('Firebase Analytics initialized');
+        } else {
+          console.log('Firebase Analytics not supported');
         }
-    }, []);
+      });
+    }
+  }, []);
 
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <GlobalStyle />
-            <UserProvider>
-                <PageWithNavbar Component={Component} pageProps={pageProps} />
-            </UserProvider>
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GlobalStyle />
+      <UserProvider>
+        <PageWithNavbar Component={Component} pageProps={pageProps} />
+      </UserProvider>
+    </ThemeProvider>
+  );
 }
 
 function PageWithNavbar({ Component, pageProps }) {
-    const { user, agreedToTerms } = useUser();
-    return (
-        <>
-            <Navbar user={user} agreedToTerms={agreedToTerms} />
-            <Component {...pageProps} />
-        </>
-    );
+  const { user, agreedToTerms } = useUser();
+  return (
+    <>
+      <Navbar user={user} agreedToTerms={agreedToTerms} />
+      <Component {...pageProps} />
+    </>
+  );
 }
 
 export default MyApp;
