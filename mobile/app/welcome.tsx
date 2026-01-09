@@ -59,6 +59,7 @@ export default function WelcomeScreen() {
         return;
       }
 
+      // User is signed in, check onboarding status
       try {
         log('User signed in, checking onboarding status', { userId: user.id });
 
@@ -143,7 +144,7 @@ export default function WelcomeScreen() {
 
     checkOnboardingStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authLoaded, userLoaded]);
+  }, [authLoaded, userLoaded, isSignedIn, user]);
 
   if (!authLoaded || !userLoaded) {
     log('Still loading auth/user');

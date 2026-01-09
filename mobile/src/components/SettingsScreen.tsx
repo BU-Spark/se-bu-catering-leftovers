@@ -132,8 +132,27 @@ export default function SettingsScreen({ role }: SettingsScreenProps) {
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    router.replace('/sign-in');
+    try {
+      console.log('Starting sign out...');
+      
+      // Sign out - await to ensure it completes
+      await signOut();
+      console.log('Sign out completed');
+      
+      // Wait longer to ensure Clerk has fully cleared the session and token cache
+      // This is important for Expo/React Native where state updates can be delayed
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Redirect directly to sign-in page
+      // The auth layout will handle checking if still signed in and redirect appropriately
+      console.log('Redirecting to sign-in...');
+      router.replace('/(auth)/sign-in');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Even on error, try to redirect - the auth system will handle it
+      await new Promise(resolve => setTimeout(resolve, 500));
+      router.replace('/(auth)/sign-in');
+    }
   };
 
   const editNameRoute = '/settings/edit-name';

@@ -18,7 +18,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
+import { isClerkAPIResponseError, useSignIn, useAuth } from '@clerk/clerk-expo';
 import SignInWith from '../../src/components/SignInWith';
 import { colors, typography, spacing } from '../../src/lib/theme';
 
@@ -63,9 +63,16 @@ export default function SignInScreen() {
   });
 
   const { signIn, isLoaded, setActive } = useSignIn();
+  const { isSignedIn, isLoaded: authLoaded } = useAuth();
 
   const onSignIn = async (data: SignInFields) => {
-    if (!isLoaded) return;
+    if (!isLoaded || !authLoaded) return;
+
+    // Check if already signed in
+    if (isSignedIn) {
+      router.replace('/welcome');
+      return;
+    }
 
     try {
       const signInAttempt = await signIn.create({
