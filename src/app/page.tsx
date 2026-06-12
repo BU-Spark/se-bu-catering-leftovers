@@ -169,27 +169,13 @@ const Home = (): JSX.Element => {
     return () => unsubscribe();
   }, [router]); // Add 'router' to the dependency array
 
-  // Admin Token
+  // TODO: Admin role promotion must be handled server-side (Firebase Admin SDK
+  // or Cloud Function with ADMIN_PROMOTION_TOKEN env var). Never embed admin
+  // tokens in client code. Promote admins manually in Firebase Console until
+  // a server-side promotion endpoint is implemented.
   const handleAdminSignUp = () => {
-    const adminToken = prompt("Enter administrator token or press 'cancel' to register as a student:");
-
-    // Immediately attempt to sign up to see if it circumvents the popup blocker.
-    if (adminToken === "Terriers2024!") {
-      console.log("Admin token correct, attempting to sign up as admin...");
-      localStorage.setItem('userRole', 'Admin');
-      signInWithPopup(auth, provider)
-          .then((result) => {
-            // Success, handle the result
-            console.log("Admin signed in successfully.");
-          })
-          .catch((error) => {
-            console.error("Failed to sign up as admin:", error);
-          });
-    } else {
-      // Handle other cases similarly directly
-      console.log("Handling non-admin sign up or cancellation...");
-      handleSignUp();
-    }
+    console.log("Admin signup requires server-side promotion; registering as User.");
+    handleSignUp();
   };
 
 
